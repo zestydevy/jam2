@@ -1,0 +1,9 @@
+extern Lights1 floor_f3d_material_lights;
+extern u64 floor_floor_ci4[];
+extern u64 floor_floor_ci4_pal_rgba16[];
+extern Vtx floor_Plane_mesh_vtx_cull[8];
+extern Vtx floor_Plane_mesh_vtx_0[4];
+extern Gfx floor_Plane_mesh_tri_0[];
+extern Gfx mat_floor_f3d_material[];
+extern Gfx mat_revert_floor_f3d_material[];
+extern Gfx floor_Plane_mesh[];
