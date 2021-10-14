@@ -2,6 +2,14 @@
 
 #include <nusys.h>
 
+class TException
+{
+    public:
+    static void fault(char const *);
+    static bool isMessageValid();
+    static char * getMessage();
+};
+
 struct reg_desc {
     u32 mask;
     u32 value;
@@ -11,7 +19,6 @@ struct reg_desc {
 extern const reg_desc causeDesc[];
 extern const reg_desc srDesc[];
 extern const reg_desc fpcsrDesc[];
-
 
 void debug_draw_char(u16* buffer, u32 x, u32 y, char c);
 void debug_draw_string(u16* buffer, u32 x, u32 y, char* string);

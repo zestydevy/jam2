@@ -14,17 +14,24 @@
 #include "math.hpp"
 #include "game.hpp"
 #include "title.hpp"
+#include "emitter.hpp"
+#include "joint.hpp"
 
 #include "../scene/object_info.h"
 #include "../models/ovl/sprites/sp_logo1.h"
 #include "../models/ovl/sprites/sp_logo2.h"
 #include "../models/static/floor/model_floor.h"
+#include "../models/static/ptcl00/sprite_ptcl00.h"
+#include "../models/static/yoshi/model_yoshi.h"
+#include "../data/ptcl_test.h"
 
 // -------------------------------------------------------------------------- //
 
 extern Gfx rdpinit_spr_dl[];
 extern Gfx rdpinit_dl[];
 extern Gfx rspinit_dl[];
+
+TJoint * sYoshiJoint;
 
 // -------------------------------------------------------------------------- //
 
@@ -49,6 +56,7 @@ Gfx letters_setup_dl[] = {
 };
 
 TVec3F const sTestPos{0.0f,0.0f,0.0f};
+TEmitter * sTestEmitter;
 
 // -------------------------------------------------------------------------- //
 
@@ -135,6 +143,12 @@ void TLogoScene::init()
 
     mLogoSpr = new TSprite;
     mLogoNinSpr = new TSprite;
+
+    sTestEmitter = new TEmitter(sTestPos, reinterpret_cast<TEmitConfig const &>(sTestPtcl00), mDynList);
+    mEmitterList.setHeap(THeap::getCurrentHeap());
+    mEmitterList.push(sTestEmitter);
+
+    sYoshiJoint = new TJoint(2);
 }
 
 // -------------------------------------------------------------------------- //
@@ -148,9 +162,17 @@ void TLogoScene::update()
         runFadeLogo1();
     }
     mTestPad->read();
+
+    for (int i = 0; i < mEmitterList.capacity(); ++i) {
+        mEmitterList[i]->emit();
+    }
+
+    mTestCamera->update();
 }
 
 // -------------------------------------------------------------------------- //
+
+float sTestPitch = 49.0f;
 
 void TLogoScene::draw()
 {
@@ -162,8 +184,22 @@ void TLogoScene::draw()
 
     mTestCamera->render();
 
-    gSPDisplayList(mDynList->pushDL(), floor_Plane_mesh);
+    //gSPDisplayList(mDynList->pushDL(), mario_yoshi_mesh);
+    sYoshiJoint->setDl(mDynList);
+    sYoshiJoint->attachJoint("body", mario_Bone_mesh_layer_1, TVec3F{0.0f,0.0f,0.0f});
+        gSPDisplayList(mDynList->pushDL(), mario_Bone_001_skinned_mesh_layer_1);
+        sYoshiJoint->attachJoint("head", mario_Bone_001_mesh_layer_1, TVec3F{0.0f,sTestPitch,0.0f});
+        sTestPitch += 0.04f;
+        gSPPopMatrix(mDynList->pushDL(), G_MTX_MODELVIEW);
+    gSPPopMatrix(mDynList->pushDL(), G_MTX_MODELVIEW);
+    sYoshiJoint->reset();
+    //gDPSetPrimColor(mDynList->pushDL(), 0, 0, 254, 254, 254, 255)
+    //gSPDisplayList(mDynList->pushDL(), ptcl00_Plane_mesh);
     //gSPDisplayList(mDynList->pushDL(), distant_Distant_mesh);
+
+    for (int i = 0; i < mEmitterList.capacity(); ++i) {
+        mEmitterList[i]->draw();
+    }
 }
 
 void TLogoScene::draw2D()

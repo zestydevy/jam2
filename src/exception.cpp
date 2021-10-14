@@ -3,6 +3,8 @@
 
 #include "exception.hpp"
 
+char * sErrorMessage;
+
 const u8 debug_font_width = 6;
 const u8 debug_font_height = 8;
 const u8 debug_font_char_per_line = 16;
@@ -148,6 +150,23 @@ const reg_desc fpcsrDesc[] = {
     {FPCSR_RM_MASK, FPCSR_RM_RM, const_cast<char *>("RM")},
     {0,             0,           const_cast<char *>("")}
 };
+
+void TException::fault(char const * str)
+{
+    sErrorMessage = const_cast<char *>(str);
+    u32 * nullPtr = NULL;
+    *nullPtr = 0xDEADBEEF;
+}
+
+bool TException::isMessageValid()
+{
+    return (sErrorMessage != NULL);
+}
+
+char * TException::getMessage()
+{
+    return sErrorMessage;
+}
 
 void debug_draw_char(u16* buffer, u32 x, u32 y, char c) {
     u8 index = (u8)c - 32;

@@ -117,6 +117,7 @@ void TCamera::update()
         mPosition.set(x, y, z);
     }
 
+    /*
     //Don't let the camera clip in the ground
     mGroundFace = TCollision::findGroundBelow(mOldPos, 50.0f);
     if (mGroundFace != nullptr){
@@ -124,6 +125,7 @@ void TCamera::update()
         if (mOldPos.y() < y)
             mOldPos.y() = y;
     }
+    */
 
     mOldPos.lerpTime({x, y, z}, 0.0667f, kInterval);
     mViewMtx.lookAt(mOldPos * 0.1f, mTarget->xyz() * 0.1f, {0.0f,1.0f,0.0f});

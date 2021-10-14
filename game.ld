@@ -81,6 +81,7 @@ SECTIONS
 
       /* rodata */
       build/codesegment.o(.rodata*);
+      build/obj/ptcl_test.o(.rodata*);
    }
    END_SEG(code)
 

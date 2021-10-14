@@ -1,0 +1,16 @@
+extern Lights1 mario_yoshi_body_f3d_lights;
+extern Lights1 mario_yoshi_eyes_f3d_lights;
+extern u64 mario_yoshi_body_rgba16[];
+extern u64 mario_yoshi_eyes_ci4[];
+extern u64 mario_yoshi_eyes_ci4_pal_rgba16[];
+extern Vtx mario_yoshi_mesh_vtx_cull[8];
+extern Vtx mario_yoshi_mesh_vtx_0[349];
+extern Gfx mario_yoshi_mesh_tri_0[];
+extern Vtx mario_yoshi_mesh_vtx_1[13];
+extern Gfx mario_yoshi_mesh_tri_1[];
+extern Gfx mat_mario_yoshi_body_f3d[];
+extern Gfx mat_mario_yoshi_eyes_f3d[];
+extern Gfx mat_revert_mario_yoshi_eyes_f3d[];
+extern Gfx mario_Bone_mesh_layer_1[];
+extern Gfx mario_Bone_001_skinned_mesh_layer_1[];
+extern Gfx mario_Bone_001_mesh_layer_1[];

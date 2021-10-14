@@ -108,7 +108,7 @@ void TGame::init()
 }
 
 // -------------------------------------------------------------------------- //
-
+int sParticleCnt;
 void TGame::update()
 {   
     mDynList->reset();
@@ -164,10 +164,13 @@ void TGame::update()
         (s32)(mDynList->fetchCmdIndex()) * sizeof (Gfx),
 	    NU_GFX_UCODE_F3DEX, NU_SC_NOSWAPBUFFER);
 
-    char conbuff[64];
+    char conbuff[128];
     nuDebConTextColor(0, NU_DEB_CON_TEXT_RED);
     nuDebConTextPos(0,3,3);
-    sprintf(conbuff,"sample %d\n\tcoarse %d", mCurrentSample, mCoarseList[mCurrentSample]);
+    sprintf(conbuff,"%s", __FILE__);
+    nuDebConCPuts(0, conbuff);
+    nuDebConTextPos(0,3,4);
+    sprintf(conbuff,"Ptcls: %d", sParticleCnt);
     nuDebConCPuts(0, conbuff);
     nuDebConDisp(NU_SC_SWAPBUFFER);
 
@@ -349,8 +352,6 @@ void TGame::testRender(u32 taskNum)
 
     game->update();
     game->draw();
-
-    nuGfxRetraceWait(2);
 }
 
 // -------------------------------------------------------------------------- //

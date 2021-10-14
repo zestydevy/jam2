@@ -35,6 +35,7 @@ void CApp::init()
     
     TPad::init();
     TSine::startup(10);
+    TMath<u32>::setSeed(0xDEADBEEF);
     
     // instantiate main game
     mGame = new TGame;
@@ -140,7 +141,13 @@ void CApp::appError(void * arg)
             sprintf(str, "pc    | %08x", (u32)context->pc);
             debug_draw_string(buffer, 5, 15, str);
 
-            debug_printreg(buffer, 5, 25, (u8)context->cause, const_cast<char *>("cause"), const_cast<reg_desc *>(causeDesc));
+            if (TException::isMessageValid()) {
+                sprintf(str, TException::getMessage());
+                debug_draw_string(buffer, 5, 25, str);
+            } else {
+                debug_printreg(buffer, 5, 25, (u8)context->cause, const_cast<char *>("cause"), const_cast<reg_desc *>(causeDesc));
+            }
+
             debug_printreg(buffer, 5, 35, (u32)context->sr, const_cast<char *>("sr   "), const_cast<reg_desc *>(srDesc));
 
             sprintf(str, "badvaddr | %08x", (u32)context->badvaddr);

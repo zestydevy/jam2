@@ -4,6 +4,7 @@ PROJECT = game
 
 NUSYSINCDIR  = /usr/include/n64/nusys
 NUSTDINCDIR  = /usr/include/n64/nustd
+NUSTDLIBDIR  = /usr/include/n64
 NUSYSLIBDIR  = /usr/lib/n64/nusys
 
 LIB = $(ROOT)/usr/lib
@@ -70,7 +71,7 @@ LCINCS =	-I. -I$(NUSYSINCDIR) -I$(ROOT)/usr/include/PR
 LCOPTS =	-G 0
 LDIRT  =	$(APP) $(TARGETS)
 
-LDFLAGS =	-L$(LIB) -L$(NUSYSLIBDIR) $(NUAUDIOLIB) -lnusys -lultra_rom -L$(N64_LIBGCCDIR) -lgcc  -lnustd
+LDFLAGS =	-L$(LIB) -L$(NUSYSLIBDIR) -L$(NUSTDLIBDIR) $(NUAUDIOLIB) -lnusys -lnustd -lultra_rom -L$(N64_LIBGCCDIR) -lgcc
 
 .SUFFIXES: .nrel
 
@@ -130,7 +131,7 @@ $(TARGETS) $(APP): $(CP_LD_SCRIPT) $(OBJECTS)
 	@echo "\e[35mLinking ROM $<...\e[0m"
 	@$(LD) -L. -T $(CP_LD_SCRIPT) -Map $(MAP) -o $(ELF) 
 	@echo "\e[35mConverting ROM $<...\e[0m"
-	@$(OBJCOPY) --pad-to=0x2000000 --gap-fill=0xFF $(ELF) $(TARGETS) -O binary
+	@$(OBJCOPY) --pad-to=0x200000 --gap-fill=0xFF $(ELF) $(TARGETS) -O binary
 	@makemask $(TARGETS)
 	@echo "\e[32mDone! ./build/$(PROJECT).z64\e[0m"
 

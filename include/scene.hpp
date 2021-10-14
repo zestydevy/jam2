@@ -8,6 +8,7 @@
 #include "dynlist.hpp"
 #include "sprite.hpp"
 #include "pad.hpp"
+#include "emitter.hpp"
 #include "scenedata.h"
 #include "staticobj.hpp"
 
@@ -85,6 +86,7 @@ class TLogoScene final
     TTimer * mFadeTimer{nullptr};
     TCamera * mTestCamera{nullptr};
     TPad * mTestPad{nullptr};
+    TArray<TEmitter *> mEmitterList;
     s32 mLogoX{0};
     s32 mLogoY{0};
     s16 mAlpha{0};

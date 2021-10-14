@@ -3,9 +3,16 @@
 #define INCLUDE_MATH_HPP
 
 #include <ultra64.h>
+#include <nusys.h>
+#include <math.h>
 
 #include "heap.hpp"
 #include "util.hpp"
+
+constexpr s32 kRandMax = 32767;
+
+extern "C" int rand (void);
+extern "C" void srand (u32 seed);
 
 // -------------------------------------------------------------------------- //
 
@@ -30,6 +37,13 @@ class TMath {
   static inline T clamp(T x, T a, T b) {
     return min(max(x, a), b);
   }
+
+  static T lerp(T p0, T p1, float mu) {
+    return (T)((float)p0 * (1.0F - mu) + (float)p1 * mu);
+  }
+
+  static void setSeed(u32 seed) {srand(seed);}
+  static s32 random(s32 min, s32 max) {return min + rand() % (max + 1 - min);}
 
 };
 
@@ -58,6 +72,8 @@ class TMath<float> {
   static inline float clamp(float x, float a, float b) {
     return min(max(x, a), b);
   }
+
+  static float frand(float min, float max) {return static_cast <float> (rand()) / static_cast <float> (kRandMax) * max + min;}
 
 };
 
