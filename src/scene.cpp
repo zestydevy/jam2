@@ -172,8 +172,6 @@ void TLogoScene::update()
 
 // -------------------------------------------------------------------------- //
 
-float sTestPitch = 49.0f;
-
 void TLogoScene::draw()
 {
     gSPDisplayList(mDynList->pushDL(), letters_setup_dl);
@@ -184,15 +182,16 @@ void TLogoScene::draw()
 
     mTestCamera->render();
 
-    //gSPDisplayList(mDynList->pushDL(), mario_yoshi_mesh);
+    //gSPDisplayList(mDynList->pushDL(), yoshi_wrist_r1_001_mesh);
+    
     sYoshiJoint->setDl(mDynList);
     sYoshiJoint->attachJoint("body", mario_Bone_mesh_layer_1, TVec3F{0.0f,0.0f,0.0f});
         gSPDisplayList(mDynList->pushDL(), mario_Bone_001_skinned_mesh_layer_1);
-        sYoshiJoint->attachJoint("head", mario_Bone_001_mesh_layer_1, TVec3F{0.0f,sTestPitch,0.0f});
-        sTestPitch += 0.04f;
-        gSPPopMatrix(mDynList->pushDL(), G_MTX_MODELVIEW);
-    gSPPopMatrix(mDynList->pushDL(), G_MTX_MODELVIEW);
+        sYoshiJoint->attachJoint("head", mario_Bone_001_mesh_layer_1, TVec3F{0.0f,49.0f,0.0f});
+        sYoshiJoint->detach();
+    sYoshiJoint->detach();
     sYoshiJoint->reset();
+    
     //gDPSetPrimColor(mDynList->pushDL(), 0, 0, 254, 254, 254, 255)
     //gSPDisplayList(mDynList->pushDL(), ptcl00_Plane_mesh);
     //gSPDisplayList(mDynList->pushDL(), distant_Distant_mesh);

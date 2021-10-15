@@ -29,9 +29,25 @@ TJoint::TJoint(s32 jointCount)
 
 // -------------------------------------------------------------------------- //
 
-void TJoint::attachJoint(char * const name, Gfx * dl, TVec3F const & offset)
+TJoint::~TJoint()
 {
-    mNames[mJointIdx] = name;
+    for (s32 i = 0; i < mJointCount; ++i) {
+        delete mMtxList[i];
+        delete mMtxFList[i];
+    }
+    
+    mMtxList.clear();
+    mMtxFList.clear();
+    mPosList.clear();
+
+    delete[] mNames;
+}
+
+// -------------------------------------------------------------------------- //
+
+void TJoint::attachJoint(char const * name, Gfx * dl, TVec3F const & offset)
+{
+    mNames[mJointIdx] = const_cast<char *>(name);
     mPosList[mJointIdx] = offset;
 
     TMtx44 temp1, temp2, temp3, mPosMtx, mScaleMtx, mRotMtx;
@@ -58,9 +74,14 @@ void TJoint::attachJoint(char * const name, Gfx * dl, TVec3F const & offset)
     ++mJointIdx;
 }
 
+void TJoint::detach()
+{
+    gSPPopMatrix(mDl->pushDL(), G_MTX_MODELVIEW);
+}
+
 // -------------------------------------------------------------------------- //
 
-TMtx44 & TJoint::getJoint(char * const name)
+TMtx44 & TJoint::getJoint(char const * name)
 {
     for (s32 i = 0; i < mJointCount; ++i) {
         if (mNames[i] == name) {
@@ -74,7 +95,7 @@ TMtx44 & TJoint::getJoint(char * const name)
 
 // -------------------------------------------------------------------------- //
 
-TVec3F & TJoint::getJointPosition(char * const name)
+TVec3F & TJoint::getJointPosition(char const * name)
 {
     for (s32 i = 0; i < mJointCount; ++i) {
         if (mNames[i] == name) {
@@ -84,6 +105,13 @@ TVec3F & TJoint::getJointPosition(char * const name)
 
     // just return the first joint position if not found
     return mPosList[0];
+}
+
+// -------------------------------------------------------------------------- //
+
+TVec3F & TJoint::getJointPosition(s32 const index)
+{
+    return mPosList[index];
 }
 
 // -------------------------------------------------------------------------- //
