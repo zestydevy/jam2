@@ -1,1 +1,0 @@
-extern u8 mario_yoshi_body_rgba16[16384];

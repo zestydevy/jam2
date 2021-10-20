@@ -42,7 +42,7 @@ public:
         }
     }
 
-    TValue operator[](const TKey& key) {
+    TValue operator[](const TKey * key) {
         return get(key);
     }
 

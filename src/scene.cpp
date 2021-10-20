@@ -16,14 +16,17 @@
 #include "title.hpp"
 #include "emitter.hpp"
 #include "joint.hpp"
+#include "exception.hpp"
+#include "hashmap.hpp"
 
 #include "../scene/object_info.h"
 #include "../models/ovl/sprites/sp_logo1.h"
 #include "../models/ovl/sprites/sp_logo2.h"
 #include "../models/static/floor/model_floor.h"
 #include "../models/static/ptcl00/sprite_ptcl00.h"
-#include "../models/static/yoshi/model_yoshi.h"
+#include "../models/static/yoshi/model_test.h"
 #include "../data/ptcl_test.h"
+#include "../data/anim_test.h"
 
 // -------------------------------------------------------------------------- //
 
@@ -130,7 +133,7 @@ void TLogoScene::init()
         _logo_ovlSegmentRomEnd-_logo_ovlSegmentRomStart
     );
 
-    TAudio::playMusic(EBgm::BGM_INTRO);
+    //TAudio::playMusic(EBgm::BGM_INTRO);
 
     mShowTimer = new TTimer;
     mFadeTimer = new TTimer;
@@ -148,7 +151,9 @@ void TLogoScene::init()
     mEmitterList.setHeap(THeap::getCurrentHeap());
     mEmitterList.push(sTestEmitter);
 
-    sYoshiJoint = new TJoint(2);
+    sYoshiJoint = new TJoint(32);
+    sYoshiJoint->registerAnimation(reinterpret_cast<TJointAnimData const &>(mario_anim_ArmatureAction));
+    sYoshiJoint->playAnimation();
 }
 
 // -------------------------------------------------------------------------- //
@@ -168,6 +173,7 @@ void TLogoScene::update()
     }
 
     mTestCamera->update();
+    sYoshiJoint->updateAnimation();
 }
 
 // -------------------------------------------------------------------------- //
@@ -185,11 +191,14 @@ void TLogoScene::draw()
     //gSPDisplayList(mDynList->pushDL(), yoshi_wrist_r1_001_mesh);
     
     sYoshiJoint->setDl(mDynList);
-    sYoshiJoint->attachJoint("body", mario_Bone_mesh_layer_1, TVec3F{0.0f,0.0f,0.0f});
-        gSPDisplayList(mDynList->pushDL(), mario_Bone_001_skinned_mesh_layer_1);
-        sYoshiJoint->attachJoint("head", mario_Bone_001_mesh_layer_1, TVec3F{0.0f,49.0f,0.0f});
+
+		sYoshiJoint->attachAnimatedJoint(NULL, NULL, TVec3F{0.0f, 0.0f, 0.0f});
+		//GEO_OPEN_NODE(),
+			//GEO_ANIMATED_PART(LAYER_OPAQUE, 0, 12, 0, mario_Bone_001_mesh_layer_1),
+            sYoshiJoint->attachAnimatedJoint(NULL, mario_Bone_001_mesh_layer_1, TVec3F{0.0f, 12.0f, 0.0f});
+            sYoshiJoint->detach();
         sYoshiJoint->detach();
-    sYoshiJoint->detach();
+
     sYoshiJoint->reset();
     
     //gDPSetPrimColor(mDynList->pushDL(), 0, 0, 254, 254, 254, 255)
