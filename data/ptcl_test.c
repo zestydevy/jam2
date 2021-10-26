@@ -10,13 +10,13 @@ TEmitData const sTestPtcl00 =
     SHAPESPHERE,                        // shape
     20.0f,                               // radius
     TRUE,                               // loop
-    1.0f,                               // lifespan
+    4.0f,                               // lifespan
     0.05f,                               // rate
-    {3.0f, 3.0f, 3.0f},                 // scale
-    {1.0f, 1.0f, 1.0f},                 // scale over time
+    {2.0f, 2.0f, 2.0f},                 // scale
+    {0.0f, 0.0f, 0.0f},                 // scale over time
     {0.0f, 0.0f, 0.0f},                 // velocity
-    {0.0f, -0.02f, 0.0f},               // acceleration
-    {0.0f, 0.80f, 0.0f},                // force
+    {0.0f, 0.02f, 0.0f},               // acceleration
+    {0.0f, -0.80f, 0.0f},                // force
     {255, 255, 255},                    // color
     {255, 255, 255},                    // color over time
     255,                                // alpha

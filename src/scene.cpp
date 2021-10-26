@@ -24,7 +24,9 @@
 #include "../models/ovl/sprites/sp_logo2.h"
 #include "../models/static/floor/model_floor.h"
 #include "../models/static/ptcl00/sprite_ptcl00.h"
-#include "../models/static/yoshi/model_test.h"
+#include "../models/static/yoshi/model_dino.h"
+#include "../models/static/n64/model_n64.h"
+#include "../models/static/sprites/black_sprite.h"
 #include "../data/ptcl_test.h"
 #include "../data/anim_test.h"
 
@@ -35,6 +37,10 @@ extern Gfx rdpinit_dl[];
 extern Gfx rspinit_dl[];
 
 TJoint * sYoshiJoint;
+TObject * sLogoObj;
+f32 sLogoRot = 0.0f;
+TSprite * sFadeSpr;
+u8 sFadeAlpha = 255;
 
 // -------------------------------------------------------------------------- //
 
@@ -151,8 +157,16 @@ void TLogoScene::init()
     mEmitterList.setHeap(THeap::getCurrentHeap());
     mEmitterList.push(sTestEmitter);
 
+    sLogoObj = new TObject(mDynList);
+    sLogoObj->setMesh(n64_n64_N_mesh_mesh_mesh);
+    sLogoObj->setPosition(TVec3F{0.0f, -20.0f, 0.0f});
+    sLogoObj->setScale(TVec3F{0.6f, 0.6f, 0.6f});
+
+    sFadeSpr = new TSprite();
+    sFadeSpr->load(black_sprite);
+
     sYoshiJoint = new TJoint(32);
-    sYoshiJoint->registerAnimation(reinterpret_cast<TJointAnimData const &>(mario_anim_ArmatureAction));
+    sYoshiJoint->registerAnimation(reinterpret_cast<TJointAnimData const &>(dino_anim_ArmatureAction));
     sYoshiJoint->playAnimation();
 }
 
@@ -174,6 +188,10 @@ void TLogoScene::update()
 
     mTestCamera->update();
     sYoshiJoint->updateAnimation();
+    sLogoObj->update();
+    
+    sLogoRot += 140.0f;
+    sLogoObj->setRotation(TVec3F{0.0f, sLogoRot, 0.0f});
 }
 
 // -------------------------------------------------------------------------- //
@@ -188,16 +206,11 @@ void TLogoScene::draw()
 
     mTestCamera->render();
 
-    //gSPDisplayList(mDynList->pushDL(), yoshi_wrist_r1_001_mesh);
+    //gSPDisplayList(mDynList->pushDL(), n64_n64_N_mesh_mesh_mesh);
     
     sYoshiJoint->setDl(mDynList);
 
-		sYoshiJoint->attachAnimatedJoint(NULL, NULL, TVec3F{0.0f, 0.0f, 0.0f});
-		//GEO_OPEN_NODE(),
-			//GEO_ANIMATED_PART(LAYER_OPAQUE, 0, 12, 0, mario_Bone_001_mesh_layer_1),
-            sYoshiJoint->attachAnimatedJoint(NULL, mario_Bone_001_mesh_layer_1, TVec3F{0.0f, 12.0f, 0.0f});
-            sYoshiJoint->detach();
-        sYoshiJoint->detach();
+	sLogoObj->draw();
 
     sYoshiJoint->reset();
     
@@ -212,6 +225,13 @@ void TLogoScene::draw()
 
 void TLogoScene::draw2D()
 {
+    sFadeSpr->load(black_sprite);
+    sFadeSpr->setScale(TVec2F{320.0f, 240.0f});
+    sFadeAlpha = TMath<u8>::clamp(sFadeAlpha -= 2, 7, 255);
+    sFadeSpr->setColor(TColor{255,255,255, sFadeAlpha});
+    sFadeSpr->setAttributes(SP_FRACPOS | SP_TRANSPARENT);
+    sFadeSpr->draw();
+    
     /*
     switch(mLogoState)
     {

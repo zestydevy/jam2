@@ -73,7 +73,7 @@ class TMath<float> {
     return min(max(x, a), b);
   }
 
-  static float frand(float min, float max) {return static_cast <float> (rand()) / static_cast <float> (kRandMax) * max + min;}
+  static float frand(float min, float max) {return min + static_cast <f32> (rand()) / ( static_cast <f32> (kRandMax / (max - min)));}
 
 };
 

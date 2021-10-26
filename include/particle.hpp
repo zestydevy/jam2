@@ -38,8 +38,10 @@ class TParticle : public TObject
     TVec3F mVelocity{};
     TVec3F mAcceleration{};
     TVec3F mDirection{};
+    TVec3<u8> mInitColor{};
     u8 mAlpha{0};
     TTimer mLifeTimer;
+    f32 mFrame{0};
     bool mIsExpired{false};
 
 };

@@ -52,6 +52,8 @@ class TSprite {
     void setOnAttributes(u32);
     void setOffAttributes(u32);
 
+    void setExplosion(TVec2S const & exp);
+
     void draw();
 
     // initializes S2DEX. call before utilizing sprites

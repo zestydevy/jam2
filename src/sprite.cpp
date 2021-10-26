@@ -149,6 +149,14 @@ void TSprite::setOffAttributes(
 
 // -------------------------------------------------------------------------- //
 
+void TSprite::setExplosion(TVec2S const & exp)
+{
+    mSpriteData.expx = exp.x();
+    mSpriteData.expy = exp.y();
+}
+
+// -------------------------------------------------------------------------- //
+
 void TSprite::draw() {
     if (mScale.x() <= 0.001F || mScale.y() <= 0.001F) {
         return;

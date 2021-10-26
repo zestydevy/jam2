@@ -21,8 +21,9 @@ void TParticle::update()
     mPosition += mVelocity + mConfig->force;
     mPosition += mDirection;
 
-    mScale.lerpTime(mConfig->scaleOverTime, 0.1f, kInterval);
-    mAlpha = TMath<u8>::lerp(mAlpha, mConfig->alphaOverTime, 0.06f * kInterval * 60.0f);
+    mFrame += kInterval / mConfig->lifeSpan;
+    mScale.lerp(mConfig->scaleOverTime, mFrame * kInterval);
+    mAlpha = TMath<u8>::lerp(mAlpha, mConfig->alphaOverTime, mFrame * kInterval);
 
     mIsExpired = mLifeTimer.update();
 }
@@ -48,7 +49,7 @@ void TParticle::draw()
 	//      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
         
     if (mMesh != nullptr) {
-        gDPSetPrimColor(mDynList->pushDL(), 0, 0, 254, 254, 254, mAlpha)
+        gDPSetPrimColor(mDynList->pushDL(), 0, 0, mInitColor.x(), mInitColor.y(), mInitColor.z(), mAlpha);
         gSPDisplayList(mDynList->pushDL(), mMesh);
     }
 
@@ -82,6 +83,8 @@ void TParticle::setConfig(TEmitConfig const & config)
     if (mMesh == nullptr) {
         TException::fault("PTCL DL IS NULL!");
     }
+    
+    mInitColor = TVec3<u8>{TMath<u8>::random(0, 255), TMath<u8>::random(0, 255), TMath<u8>::random(0, 255)};
 
     mConfig = const_cast<TEmitConfig *>(&config);
 }

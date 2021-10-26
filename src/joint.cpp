@@ -85,7 +85,7 @@ void TJoint::attachAnimatedJoint(char const * name, Gfx * dl, TVec3F const & off
 
     TMtx44 temp1, temp2, temp3, mPosMtx, mScaleMtx, mRotMtx;
     
-    if (mIsAnimOn) {
+    if (!mIsAnimOn && mAnimJntIdx == 0) {
         TVec3F pos{0.0f, 0.0f, 0.0f};
         getAnimTransFrame(pos);
         mPosMtx.translate(pos);    
@@ -94,7 +94,7 @@ void TJoint::attachAnimatedJoint(char const * name, Gfx * dl, TVec3F const & off
     }
 
     TVec3S rot{};
-    if (mIsAnimOn && mAnimJntIdx > 0) {
+    if (mIsAnimOn) {
         getAnimRotFrame(rot);
         rot.x() = static_cast<s16>((f32)(rot.x()) / 360.0F * 360.0);
         rot.y() = static_cast<s16>((f32)(rot.y()) / 360.0F * 360.0);
@@ -165,13 +165,14 @@ void TJoint::registerAnimation(TJointAnimData const & anim)
     }
 
     // set all translation keyframes
-    for (s32 i = 0; i < anim.numOfAnimatedJoints; ++i) {
-        *mTransAnimList[i] = reinterpret_cast<TBone *>(&anim.indices[(i * 6)]);
+    // TODO: one translation keyframe for now
+    for (s32 i = 0; i < 1; ++i) {
+        *mTransAnimList[i] = reinterpret_cast<TBone *>(&anim.indices[i]);
     }
 
     // set all rotation keyframes
-    for (s32 i = 1; i < anim.numOfAnimatedJoints; ++i) {
-        *mRotAnimList[i] = reinterpret_cast<TBone *>(&anim.indices[i + (anim.numOfAnimatedJoints * 6) - 1]);
+    for (s32 i = 0; i < anim.numOfAnimatedJoints; ++i) {
+        *mRotAnimList[i] = reinterpret_cast<TBone *>(&anim.indices[((i + 1) * (12 / 2))]);
     }
 
     mAnim = const_cast<TJointAnimData *>(&anim);
@@ -258,20 +259,20 @@ void TJoint::getAnimRotFrame(TVec3S & dest)
         mLastRotIdx.x() = mFrame;
         dest.x() = (mAnim->values[mRotAnimList[mAnimJntIdx]->x.index + mFrame]);
     } else {
-        dest.x() = (mAnim->values[mRotAnimList[mAnimJntIdx]->x.index + mLastRotIdx.x()]);
+        //dest.x() = (mAnim->values[mRotAnimList[mAnimJntIdx]->x.index + mLastRotIdx.x()]);
     }
 
     if (mFrame <= mRotAnimList[mAnimJntIdx]->y.frameCount) {
         mLastRotIdx.y() = mFrame;
         dest.y() = (mAnim->values[mRotAnimList[mAnimJntIdx]->y.index + mFrame]);
     } else {
-        dest.y() = (mAnim->values[mRotAnimList[mAnimJntIdx]->y.index + mLastRotIdx.y()]);
+        //dest.y() = (mAnim->values[mRotAnimList[mAnimJntIdx]->y.index + mLastRotIdx.y()]);
     }
 
     if (mFrame <= mRotAnimList[mAnimJntIdx]->z.frameCount) {
         mLastRotIdx.z() = mFrame;
         dest.z() = (mAnim->values[mRotAnimList[mAnimJntIdx]->z.index + mFrame]);
     } else { 
-        dest.z() = (mAnim->values[mRotAnimList[mAnimJntIdx]->z.index + mLastRotIdx.z()]);
+        //dest.z() = (mAnim->values[mRotAnimList[mAnimJntIdx]->z.index + mLastRotIdx.z()]);
     }
 }

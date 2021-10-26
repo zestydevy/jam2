@@ -43,7 +43,7 @@ void TEmitter::emit()
     if (mRateTimer.update()) {
         TVec3F pos{0.0f, 0.0f, 0.0f};
         TVec3F up{0.0f, 1.0f, 0.0f};
-        TVec3F forward{(f32)TMath<s32>::random(-1, 1), 0.0f, (f32)TMath<s32>::random(-1, 1)};
+        TVec3F forward{TMath<f32>::frand(-1.0f, 1.0f), 0.0f, TMath<f32>::frand(-1.0f, 1.0f)};
         TVec3F right{TVec3<f32>(-forward.z(), 0.0f, forward.x())};
         TVec3F direction = forward + right;
         TParticle * ptcl = new TParticle(mDl, reinterpret_cast<TEmitConfig const & >(*mConfig));

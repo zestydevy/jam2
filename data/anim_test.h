@@ -1,2 +1,3 @@
 #include "animdata.h"
-extern TAnimData mario_anim_ArmatureAction;
+
+extern TAnimData dino_anim_ArmatureAction;

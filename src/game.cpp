@@ -118,7 +118,7 @@ void TGame::update()
     initFrameBuffer();
 
     gDPPipelineMode(mDynList->pushDL(), G_PM_NPRIMITIVE);
-    gDPSetScissor(mDynList->pushDL(), G_SC_NON_INTERLACE, 10, 10, kResWidth - 10, kResHeight - 10);
+    //gDPSetScissor(mDynList->pushDL(), G_SC_NON_INTERLACE, 10, 10, kResWidth - 10, kResHeight - 10);
     //gDPSetScissor(mDynList->pushDL(), G_SC_NON_INTERLACE, -80, -80, kResWidth + 80, kResHeight + 80);
 
     auto scene = getCurrentScene();
@@ -162,8 +162,9 @@ void TGame::update()
     
     nuGfxTaskStart(mDynList->getHead(),
         (s32)(mDynList->fetchCmdIndex()) * sizeof (Gfx),
-	    NU_GFX_UCODE_F3DEX, NU_SC_NOSWAPBUFFER);
+	    NU_GFX_UCODE_F3DEX, NU_SC_SWAPBUFFER);
 
+    /*
     char conbuff[128];
     nuDebConTextColor(0, NU_DEB_CON_TEXT_RED);
     nuDebConTextPos(0,3,3);
@@ -173,6 +174,7 @@ void TGame::update()
     sprintf(conbuff,"Ptcls: %d", sParticleCnt);
     nuDebConCPuts(0, conbuff);
     nuDebConDisp(NU_SC_SWAPBUFFER);
+    */
 
     mDynList->flip();
 }

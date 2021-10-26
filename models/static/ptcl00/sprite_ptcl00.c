@@ -38,7 +38,7 @@ Gfx ptcl00_Plane_mesh_tri_0[] = {
 
 Gfx mat_ptcl00_f3d_material[] = {
 	gsDPPipeSync(),
-	gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0),
+	gsDPSetCombineLERP(TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0),
 	gsSPClearGeometryMode(G_CULL_BACK),
 	gsSPTexture(65535, 65535, 0, 0, 1),
 	gsDPTileSync(),
@@ -49,7 +49,7 @@ Gfx mat_ptcl00_f3d_material[] = {
 	gsDPPipeSync(),
 	gsDPSetTile(G_IM_FMT_I, G_IM_SIZ_8b, 2, 0, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 4, 0, G_TX_WRAP | G_TX_NOMIRROR, 4, 0),
 	gsDPSetTileSize(0, 0, 0, 60, 60),
-	gsSPSetLights1(ptcl00_f3d_material_lights),
+	//gsSPSetLights1(ptcl00_f3d_material_lights),
 	gsSPEndDisplayList(),
 };
 
@@ -63,7 +63,7 @@ Gfx ptcl00_Plane_mesh[] = {
 	gsSPClearGeometryMode(G_LIGHTING),
 	gsSPVertex(ptcl00_Plane_mesh_vtx_cull + 0, 8, 0),
 	gsDPSetRenderMode(G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2),
-	gsSPSetGeometryMode(G_LIGHTING),
+	//gsSPSetGeometryMode(G_LIGHTING),
 	gsSPCullDisplayList(0, 7),
 	gsSPDisplayList(mat_ptcl00_f3d_material),
 	gsSPDisplayList(ptcl00_Plane_mesh_tri_0),
