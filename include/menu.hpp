@@ -5,7 +5,6 @@
 #include <nusys.h>
 
 #include "dynlist.hpp"
-#include "hud.hpp"
 #include "pad.hpp"
 #include "scene.hpp"
 #include "sprite.hpp"
