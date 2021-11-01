@@ -51,6 +51,7 @@ void TParticle::draw()
     if (mMesh != nullptr) {
         gDPSetPrimColor(mDynList->pushDL(), 0, 0, mInitColor.x(), mInitColor.y(), mInitColor.z(), mAlpha);
         gSPDisplayList(mDynList->pushDL(), mMesh);
+        gDPSetPrimColor(mDynList->pushDL(), 0, 0, 255, 255, 255, 255);
     }
 
     gSPPopMatrix(mDynList->pushDL(), G_MTX_MODELVIEW);

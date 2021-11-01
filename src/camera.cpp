@@ -1,13 +1,58 @@
 #include <nusys.h>
+#include <ultra64.h>
 
 #include "camera.hpp"
 #include "pad.hpp"
 #include "math.hpp"
 #include "util.hpp"
 
+#include "graphic.h"
+
 // -------------------------------------------------------------------------- //
 
 TCamera * TCamera::sCamera { nullptr };
+
+static Vp sPlayer1Viewp = {
+	SCREEN_WD * 1, SCREEN_HT * 1, G_MAXZ / 2, 0,
+	SCREEN_WD * 1, SCREEN_HT * 1, G_MAXZ / 2, 0,
+};
+static Vp sPlayer2Viewp = {
+	SCREEN_WD * 1, SCREEN_HT * 1, G_MAXZ / 2, 0,
+	SCREEN_WD * 3, SCREEN_HT * 1, G_MAXZ / 2, 0,
+};
+static Vp sPlayer3Viewp = {
+	SCREEN_WD * 1, SCREEN_HT * 1, G_MAXZ / 2, 0,
+	SCREEN_WD * 1, SCREEN_HT * 3, G_MAXZ / 2, 0,
+};
+static Vp sPlayer4Viewp = {
+	SCREEN_WD * 1, SCREEN_HT * 1, G_MAXZ / 2, 0,
+	SCREEN_WD * 3, SCREEN_HT * 3, G_MAXZ / 2, 0,
+};
+
+static Gfx const sPlayer1CameraDl[] = {
+    gsSPViewport(&sPlayer1Viewp),
+    gsDPSetScissor(G_SC_NON_INTERLACE, 
+	0, 0, SCREEN_WD / 2, SCREEN_HT / 2),
+    gsSPEndDisplayList(),
+};
+static Gfx const sPlayer2CameraDl[] = {
+    gsSPViewport(&sPlayer2Viewp),
+    gsDPSetScissor(G_SC_NON_INTERLACE, 
+	SCREEN_WD / 2, 0, SCREEN_WD, SCREEN_HT / 2),
+    gsSPEndDisplayList(),
+};
+static Gfx const sPlayer3CameraDl[] = {
+    gsSPViewport(&sPlayer3Viewp),
+    gsDPSetScissor(G_SC_NON_INTERLACE, 
+	0, SCREEN_HT / 2, SCREEN_WD / 2, SCREEN_HT),
+    gsSPEndDisplayList(),
+};
+static Gfx const sPlayer4CameraDl[] = {
+    gsSPViewport(&sPlayer4Viewp),
+    gsDPSetScissor(G_SC_NON_INTERLACE, 
+	SCREEN_WD / 2, SCREEN_HT / 2, SCREEN_WD, SCREEN_HT),
+    gsSPEndDisplayList(),
+};
 
 // -------------------------------------------------------------------------- //
 
@@ -232,6 +277,24 @@ void TCamera::render()
 
     TMtx44::floatToFixed(mWindowPosMtx, mFWindowPosMtx);
     TMtx44::floatToFixed(mWindowRotMtx, mFWindowRotMtx);
+}
+
+// -------------------------------------------------------------------------- //
+
+Gfx const * TCamera::getPlayer1View() {
+    return sPlayer1CameraDl;
+}
+
+Gfx const * TCamera::getPlayer2View() {
+    return sPlayer2CameraDl;
+}
+
+Gfx const * TCamera::getPlayer3View() {
+    return sPlayer3CameraDl;
+}
+
+Gfx const * TCamera::getPlayer4View() {
+    return sPlayer4CameraDl;
 }
 
 // -------------------------------------------------------------------------- //

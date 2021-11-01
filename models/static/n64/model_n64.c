@@ -491,7 +491,7 @@ Gfx n64_n64_N_mesh_mesh_mesh_tri_3[] = {
 
 Gfx mat_n64_f3d_material_001[] = {
 	gsDPPipeSync(),
-	gsDPSetCombineLERP(NOISE, 0, TEXEL0, 0, 0, 0, 0, ENVIRONMENT, NOISE, 0, TEXEL0, 0, 0, 0, 0, ENVIRONMENT),
+	gsDPSetCombineLERP(PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, ENVIRONMENT),
 	gsSPSetGeometryMode(G_TEXTURE_GEN),
 	gsSPTexture(1983, 1983, 0, 0, 1),
 	gsDPSetTextureLUT(G_TT_RGBA16),
@@ -521,7 +521,7 @@ Gfx mat_revert_n64_f3d_material_001[] = {
 
 Gfx mat_n64_f3d_material_002[] = {
 	gsDPPipeSync(),
-	gsDPSetCombineLERP(NOISE, 0, TEXEL0, 0, 0, 0, 0, ENVIRONMENT, NOISE, 0, TEXEL0, 0, 0, 0, 0, ENVIRONMENT),
+	gsDPSetCombineLERP(PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, ENVIRONMENT),
 	gsSPSetGeometryMode(G_TEXTURE_GEN),
 	gsSPTexture(1983, 1983, 0, 0, 1),
 	gsDPSetTextureLUT(G_TT_RGBA16),
@@ -559,7 +559,7 @@ Gfx mat_n64_f3d_material_003[] = {
 
 Gfx mat_n64_f3d_material_004[] = {
 	gsDPPipeSync(),
-	gsDPSetCombineLERP(NOISE, 0, TEXEL0, 0, 0, 0, 0, ENVIRONMENT, NOISE, 0, TEXEL0, 0, 0, 0, 0, ENVIRONMENT),
+	gsDPSetCombineLERP(PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, ENVIRONMENT),
 	gsSPSetGeometryMode(G_TEXTURE_GEN),
 	gsSPTexture(1983, 1983, 0, 0, 1),
 	gsDPSetTextureLUT(G_TT_RGBA16),

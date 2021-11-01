@@ -27,6 +27,10 @@
 #include "../models/static/yoshi/model_dino.h"
 #include "../models/static/n64/model_n64.h"
 #include "../models/static/sprites/black_sprite.h"
+#include "../models/static/sprites/sp_p1.h"
+#include "../models/static/sprites/sp_p2.h"
+#include "../models/static/sprites/sp_p3.h"
+#include "../models/static/sprites/sp_p4.h"
 #include "../data/ptcl_test.h"
 #include "../data/anim_test.h"
 
@@ -40,6 +44,10 @@ TJoint * sYoshiJoint;
 TObject * sLogoObj;
 f32 sLogoRot = 0.0f;
 TSprite * sFadeSpr;
+TSprite * sP1;
+TSprite * sP2;
+TSprite * sP3;
+TSprite * sP4;
 u8 sFadeAlpha = 255;
 
 // -------------------------------------------------------------------------- //
@@ -123,8 +131,9 @@ void TLogoScene::init()
 {
     mStatus = ESceneState::RUNNING;
 
-    mTestCamera = new TCamera(mDynList);
     mTestPad = new TPad(0);
+
+    mTestCamera = new TCamera(mDynList);
     mTestCamera->setPad(mTestPad);
     mTestCamera->setTarget(&sTestPos);
     mTestCamera->jumpToTarget();
@@ -164,6 +173,15 @@ void TLogoScene::init()
 
     sFadeSpr = new TSprite();
     sFadeSpr->load(black_sprite);
+    
+    sP1 = new TSprite();
+    sP1->load(p1_sprite);
+    sP2 = new TSprite();
+    sP2->load(p2_sprite);
+    sP3 = new TSprite();
+    sP3->load(p3_sprite);
+    sP4 = new TSprite();
+    sP4->load(p4_sprite);
 
     sYoshiJoint = new TJoint(32);
     sYoshiJoint->registerAnimation(reinterpret_cast<TJointAnimData const &>(dino_anim_ArmatureAction));
@@ -204,23 +222,40 @@ void TLogoScene::draw()
     //gSPDisplayList(mDynList->pushDL(), rdpinit_dl);
     //gSPDisplayList(mDynList->pushDL(), rspinit_dl);
 
+    //gSPDisplayList(mDynList->pushDL(), TCamera::getPlayer1View());
     mTestCamera->render();
-
-    //gSPDisplayList(mDynList->pushDL(), n64_n64_N_mesh_mesh_mesh);
-    
-    sYoshiJoint->setDl(mDynList);
-
 	sLogoObj->draw();
-
-    sYoshiJoint->reset();
-    
-    //gDPSetPrimColor(mDynList->pushDL(), 0, 0, 254, 254, 254, 255)
-    //gSPDisplayList(mDynList->pushDL(), ptcl00_Plane_mesh);
-    //gSPDisplayList(mDynList->pushDL(), distant_Distant_mesh);
-
     for (int i = 0; i < mEmitterList.capacity(); ++i) {
         mEmitterList[i]->draw();
     }
+
+    /*
+    gSPDisplayList(mDynList->pushDL(), letters_setup_dl);
+    gSPDisplayList(mDynList->pushDL(), TCamera::getPlayer2View());
+    mTestCamera2->render();
+	sLogoObj->draw();
+    for (int i = 0; i < mEmitterList.capacity(); ++i) {
+        mEmitterList[i]->draw();
+    }
+
+    gSPDisplayList(mDynList->pushDL(), letters_setup_dl);
+    gSPDisplayList(mDynList->pushDL(), TCamera::getPlayer3View());
+    mTestCamera3->render();
+	sLogoObj->draw();
+    for (int i = 0; i < mEmitterList.capacity(); ++i) {
+        mEmitterList[i]->draw();
+    }
+
+    gSPDisplayList(mDynList->pushDL(), letters_setup_dl);
+    gSPDisplayList(mDynList->pushDL(), TCamera::getPlayer4View());
+    mTestCamera4->render();
+	sLogoObj->draw();
+    for (int i = 0; i < mEmitterList.capacity(); ++i) {
+        mEmitterList[i]->draw();
+    }
+    */
+
+    //gSPDisplayList(mDynList->pushDL(), n64_n64_N_mesh_mesh_mesh);
 }
 
 void TLogoScene::draw2D()
@@ -231,6 +266,24 @@ void TLogoScene::draw2D()
     sFadeSpr->setColor(TColor{255,255,255, sFadeAlpha});
     sFadeSpr->setAttributes(SP_FRACPOS | SP_TRANSPARENT);
     sFadeSpr->draw();
+
+    /*
+    sP1->setPosition(TVec2S{16, 16});
+    sP1->setAttributes(SP_FRACPOS | SP_TRANSPARENT);
+    sP1->draw();
+
+    sP2->setPosition(TVec2S{320/2+16, 16});
+    sP2->setAttributes(SP_FRACPOS | SP_TRANSPARENT);
+    sP2->draw();
+
+    sP3->setPosition(TVec2S{16, 240/2+16});
+    sP3->setAttributes(SP_FRACPOS | SP_TRANSPARENT);
+    sP3->draw();
+
+    sP4->setPosition(TVec2S{320/2+16, 240/2+16});
+    sP4->setAttributes(SP_FRACPOS | SP_TRANSPARENT);
+    sP4->draw();
+    */
     
     /*
     switch(mLogoState)

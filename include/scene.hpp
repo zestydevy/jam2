@@ -85,6 +85,9 @@ class TLogoScene final
     TTimer * mShowTimer{nullptr};
     TTimer * mFadeTimer{nullptr};
     TCamera * mTestCamera{nullptr};
+    TCamera * mTestCamera2{nullptr};
+    TCamera * mTestCamera3{nullptr};
+    TCamera * mTestCamera4{nullptr};
     TPad * mTestPad{nullptr};
     TArray<TEmitter *> mEmitterList;
     s32 mLogoX{0};

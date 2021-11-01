@@ -50,6 +50,11 @@ class TCamera
     static bool checkVisible(const TVec3F & pos, float drawDistance);
     static bool checkClipping(const TVec3F & pos, float radius, bool ignoreBehind = false);
 
+    static Gfx const * getPlayer1View();
+    static Gfx const * getPlayer2View();
+    static Gfx const * getPlayer3View();
+    static Gfx const * getPlayer4View();
+
     private:
 
     static TCamera * sCamera;
