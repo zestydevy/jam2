@@ -28,6 +28,7 @@ CP_LD_SCRIPT	= ./build/$(PROJECT)_cp.ld
 HFILES  := $(wildcard include/*.h) $(wildcard models/*.h) $(wildcard models/*/*.h) $(wildcard models/objects/*/*.h)
 
 ASMFILES   := $(wildcard src/*.s) $(wildcard sound/*.s)
+ASMSTATIC	:= $(wildcard models/static/*/*.s) $(wildcard models/static/objects/*/*.s)
 CODEFILES   := $(wildcard src/*.c)
 CXXFILES    := $(wildcard src/*.cpp)
 DATAFILES   := $(wildcard data/*.c)
@@ -46,7 +47,7 @@ RELOBJECTS =	$(RELCFILES:.c=.nrel) $(RELCXXFILES:.cpp=.nrel)
 RELOBJNAME =   $(notdir $(RELOBJECTS))
 RELOBJPATH =   $(addprefix $(NRELPATH)/,$(RELOBJNAME))
 
-CODEOBJECTS =	$(CODEFILES:.c=.o) $(CXXFILES:.cpp=.o) $(SCENEFILES:.c=.o) $(MODELFILES:.c=.o)
+CODEOBJECTS =	$(CODEFILES:.c=.o) $(CXXFILES:.cpp=.o) $(SCENEFILES:.c=.o) $(MODELFILES:.c=.o) $(ASMSTATIC:.s=.o) 
 CODEOBJNAME =   $(notdir $(CODEOBJECTS))
 CODEOBJPATH =   $(addprefix $(OBJPATH)/,$(CODEOBJNAME))
 
@@ -107,6 +108,10 @@ build/obj/%.o: */%.cpp | makeDirs
 
 build/obj/%.o: */*/*/%.c
 	@echo "\e[35mCompiling data $<...\e[0m"
+	@$(CC) -MF $(DEPPATH)/$*.d -o $@ $(CFLAGS) $<
+
+build/obj/%.o: */*/*/%.s
+	@echo "\e[35mCompiling data$<...\e[0m"
 	@$(CC) -MF $(DEPPATH)/$*.d -o $@ $(CFLAGS) $<
 
 build/obj/%.o: */*/*/*/%.c

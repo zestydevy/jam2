@@ -26,6 +26,7 @@
 #include "../models/static/ptcl00/sprite_ptcl00.h"
 #include "../models/static/yoshi/model_dino.h"
 #include "../models/static/n64/model_n64.h"
+#include "../models/static/test00/model_test00.h"
 #include "../models/static/sprites/black_sprite.h"
 #include "../models/static/sprites/sp_p1.h"
 #include "../models/static/sprites/sp_p2.h"
@@ -42,6 +43,7 @@ extern Gfx rspinit_dl[];
 
 TJoint * sYoshiJoint;
 TObject * sLogoObj;
+TObject * sSkyObj;
 f32 sLogoRot = 0.0f;
 TSprite * sFadeSpr;
 TSprite * sP1;
@@ -133,11 +135,6 @@ void TLogoScene::init()
 
     mTestPad = new TPad(0);
 
-    mTestCamera = new TCamera(mDynList);
-    mTestCamera->setPad(mTestPad);
-    mTestCamera->setTarget(&sTestPos);
-    mTestCamera->jumpToTarget();
-
     // turn on screen
     //nuGfxDisplayOn();
 
@@ -171,6 +168,16 @@ void TLogoScene::init()
     sLogoObj->setPosition(TVec3F{0.0f, -20.0f, 0.0f});
     sLogoObj->setScale(TVec3F{0.6f, 0.6f, 0.6f});
 
+    sSkyObj = new TObject(mDynList);
+    sSkyObj->setMesh(sky_Track1_mesh);
+    sSkyObj->setPosition(TVec3F{0.0f, 0.0f, 0.0f});
+    sSkyObj->setScale(TVec3F{4.5f, 4.5f, 4.5f});
+
+    mTestCamera = new TCamera(mDynList);
+    mTestCamera->setPad(mTestPad);
+    mTestCamera->setTarget(&sLogoObj->getPosition());
+    mTestCamera->jumpToTarget();
+
     sFadeSpr = new TSprite();
     sFadeSpr->load(black_sprite);
     
@@ -189,7 +196,7 @@ void TLogoScene::init()
 }
 
 // -------------------------------------------------------------------------- //
-
+TVec3F sTestlp{0.0f, 0.0f, 0.0f};
 void TLogoScene::update()
 {
     // wait two seconds to boot
@@ -207,9 +214,28 @@ void TLogoScene::update()
     mTestCamera->update();
     sYoshiJoint->updateAnimation();
     sLogoObj->update();
+    sSkyObj->mAlwaysDraw = true;
+    sSkyObj->update();
+    sLogoObj->setPosition(sTestlp);
     
     sLogoRot += 140.0f;
     sLogoObj->setRotation(TVec3F{0.0f, sLogoRot, 0.0f});
+
+    if (mTestPad->isHeld(EButton::C_UP)) {
+        sTestlp.y() += 4.0f;
+    }
+
+    if (mTestPad->isHeld(EButton::C_LEFT)) {
+        sTestlp.x() -= 4.0f;
+    }
+
+    if (mTestPad->isHeld(EButton::C_RIGHT)) {
+        sTestlp.x() += 4.0f;
+    }
+
+    if (mTestPad->isHeld(EButton::C_DOWN)) {
+        sTestlp.y() -= 4.0f;
+    }
 }
 
 // -------------------------------------------------------------------------- //
@@ -224,7 +250,11 @@ void TLogoScene::draw()
 
     //gSPDisplayList(mDynList->pushDL(), TCamera::getPlayer1View());
     mTestCamera->render();
+    sSkyObj->draw();
 	sLogoObj->draw();
+
+    gSPDisplayList(mDynList->pushDL(), grass_Track1_001_mesh);
+
     for (int i = 0; i < mEmitterList.capacity(); ++i) {
         mEmitterList[i]->draw();
     }
