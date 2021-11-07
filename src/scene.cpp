@@ -52,7 +52,7 @@ TSprite * sP3;
 TSprite * sP4;
 u8 sFadeAlpha = 255;
 
-Gfx _sFaces_align_;
+Gfx _sFaces_align_[] = { gsSPEndDisplayList() };
 TCollision::TFace sFaces[test00_layer1_count];
 
 // -------------------------------------------------------------------------- //
@@ -132,6 +132,7 @@ void TScene::loadObjects(TSceneEntry const list[])
 
 // -------------------------------------------------------------------------- //
 
+TCollision::TFace sTestFaces[2];
 void TLogoScene::init()
 {
     mStatus = ESceneState::RUNNING;
@@ -169,11 +170,12 @@ void TLogoScene::init()
     mEmitterList.push(sTestEmitter);
 
     mTestCamera = new TCamera(mDynList);
+    mTestCamera->setPad(mTestPad);
 
     for (int i = 0; i < 1; i++){
         mPlayers[i] = new TPlayer(mDynList);
         mPlayers[i]->setMesh(n64_n64_N_mesh_mesh_mesh);
-        mPlayers[i]->setPosition(TVec3F{0.0f, 1000.0f, 0.0f});
+        mPlayers[i]->setPosition(TVec3F{0.0f, 500.0f, 0.0f});
         mPlayers[i]->setScale(TVec3F{0.4f, 0.4f, 0.4f});
 
         mPlayers[i]->init();
@@ -193,8 +195,6 @@ void TLogoScene::init()
     sSkyObj->setPosition(TVec3F{0.0f, 0.0f, 0.0f});
     sSkyObj->setScale(TVec3F{4.5f, 4.5f, 4.5f});
 
-    mTestCamera->setPad(mTestPad);
-    mTestCamera->setTarget(&mPlayers[0]->getPosition());
     mTestCamera->jumpToTarget();
 
     sFadeSpr = new TSprite();
@@ -220,14 +220,17 @@ void TLogoScene::init()
         _col_ovlSegmentRomEnd-_col_ovlSegmentRomStart
     );
 
-    TCollision::startup(
+    if (!TCollision::startup(
         sFaces, test00_layer1_count, nullptr,
-        (test00_layer1_count * 1.5f), 12, 5120.0F
-    );
+        (test00_layer1_count * 1.75f), 12, 2048.0F
+    ))
+        *(int*)0 = 0;
+
+    for (int i = 0; i < test00_layer1_count; i++)
+        sFaces[i].setPassThru(false);
 }
 
 // -------------------------------------------------------------------------- //
-TVec3F sTestlp{0.0f, 0.0f, 0.0f};
 void TLogoScene::update()
 {
     // wait two seconds to boot
@@ -252,26 +255,9 @@ void TLogoScene::update()
     sLogoObj->update();
     sSkyObj->mAlwaysDraw = true;
     sSkyObj->update();
-    sLogoObj->setPosition(sTestlp);
     
     sLogoRot += 140.0f;
     sLogoObj->setRotation(TVec3F{0.0f, sLogoRot, 0.0f});
-
-    if (mTestPad->isHeld(EButton::C_UP)) {
-        sTestlp.y() += 4.0f;
-    }
-
-    if (mTestPad->isHeld(EButton::C_LEFT)) {
-        sTestlp.x() -= 4.0f;
-    }
-
-    if (mTestPad->isHeld(EButton::C_RIGHT)) {
-        sTestlp.x() += 4.0f;
-    }
-
-    if (mTestPad->isHeld(EButton::C_DOWN)) {
-        sTestlp.y() -= 4.0f;
-    }
 
     TCollider::frameEnd();
 }
@@ -291,8 +277,8 @@ void TLogoScene::draw()
     sSkyObj->draw();
 	sLogoObj->draw();
 
-    //for (int i = 0; i < 1; i++)
-    //    mPlayers[i]->draw();
+    for (int i = 0; i < 1; i++)
+        mPlayers[i]->draw();
 
     gSPDisplayList(mDynList->pushDL(), grass_Track1_001_mesh);
 

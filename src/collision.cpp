@@ -51,7 +51,7 @@ void TCollFace::setPassThru(bool pass_thru) {
 // -------------------------------------------------------------------------- //
 
 bool TCollFace::isGround() const {
-  return (nrm.y() >= 0.1F);
+  return true; //(nrm.y() >= 0.1F);
 }
 
 // -------------------------------------------------------------------------- //
@@ -525,6 +525,67 @@ TCollision::findGroundBelow(
         }
 
         if (gr == nullptr || y > record) {
+          record = y;
+          gr = face;
+        }
+      }
+    }
+  }
+
+  return gr;
+}
+
+// -------------------------------------------------------------------------- //
+
+TCollFace const *
+TCollision::findGroundAbove(
+  TVec3F const & pt, float bias, float limit
+) {
+  TFace const * gr = nullptr;
+  TVec2F xz = pt.xz();
+  float py = (pt.y() + bias);
+  float record;
+
+  u32 l, b, r, t;
+  TFace const * face;
+  TPacket const * pkt;
+  getSphereBlk(pt, 0.0F, &l, &b, &r, &t);
+
+  for (u32 y = b; y <= t; ++y) {
+    for (u32 x = l; x <= r; ++x) {
+      pkt = sBlkMap[y * sNumBlkMap + x];
+
+      while (pkt != nullptr) {
+        face = pkt->face;
+        pkt = pkt->next;
+
+        if (!face->isGround()) {
+          continue;
+        }
+
+        if (face->isPassThru()) {
+          continue;
+        }
+
+        if (py < face->minY()) {
+          continue;
+        }
+
+        if (!face->isXZInside(xz)) {
+          continue;
+        }
+
+        float y = face->calcYAt(xz);
+
+        if (py > y) {
+          continue;
+        }
+
+        if (limit > 0.0F && TMath<float>::abs(py - y) > limit) {
+          continue;
+        }
+
+        if (gr == nullptr || y < record) {
           record = y;
           gr = face;
         }

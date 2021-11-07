@@ -157,7 +157,7 @@ void TCamera::update()
         if (!moveCamera)
             mAngle = TSine::atan2(dif.x(), dif.z());
         x = mTarget->x() - TSine::ssin(mAngle) * pdist;
-        y = mTarget->y() + 20.00f;
+        y = mTarget->y() + 100.00f;
         z = mTarget->z() - TSine::scos(mAngle) * pdist;
         mPosition.set(x, y, z);
     }

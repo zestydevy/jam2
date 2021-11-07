@@ -11,7 +11,7 @@
 
 #include "../models/static/shadow/shadow.h"
 
-const float PLAYER_GRAVITY = 0.1f * kInterval;
+const float PLAYER_GRAVITY = 980.0f * kInterval;
 const float PLAYER_WALKSPEED = 1.2f * kInterval;
 const float PLAYER_RUNSPEED = 1.2f * kInterval;
 const float PLAYER_TURNSPEED = 1.2f * kInterval;
@@ -36,7 +36,7 @@ void TPlayer::init()
     //Load model from ROM
 
     //Set up model animator
-    setAnimation(1, ANIM_IDLE);
+    //setAnimation(1, ANIM_IDLE);
 
     // shadow
     mShadow = new TShadow(mDynList);
@@ -55,6 +55,8 @@ void TPlayer::init()
     mSpeed = 0.0f;
 
     mGameState = gameplaystate_t::PLAYERGAMESTATE_NORMAL;
+
+    startIdle();
 }
 
 void TPlayer::setAnimation(int length, playeranim_t anim, bool loop, float timescale){
@@ -71,8 +73,10 @@ void TPlayer::checkLateralCollision(){
 
     mGroundFace = TCollision::findGroundBelow(mPosition + nrmm, PLAYER_RADIUS);  //recalc ground pos
 
-    float yPos = mGroundFace->calcYAt((mPosition + nrmm).xz()) + PLAYER_RADIUS;
-    mPosition.y() = yPos;
+    //if (mGroundFace != nullptr){
+    //    float yPos = mGroundFace->calcYAt((mPosition + nrmm).xz()) + PLAYER_RADIUS;
+    //    mPosition.y() = yPos;
+    //}
 
     mClosestFace = TCollision::findClosest(mPosition + nrmm , PLAYER_RADIUS / 2.0f); //use closest face in front of player
 }
@@ -90,23 +94,33 @@ void TPlayer::update()
     /* Ground check */
     TVec3F pt = getPosition();
     mGroundFace = TCollision::findGroundBelow(pt, PLAYER_RADIUS);
-    float groundY = 0.0f;
-    if (mGroundFace != nullptr) mGroundFace->calcYAt(pt.xz());
+    float groundY = -1000.0f;
+    if (mGroundFace != nullptr) groundY = mGroundFace->calcYAt(pt.xz());
+    else {
+        mGroundFace = TCollision::findGroundAbove(pt + TVec3F( 0.0f, 0.0f, 0.0f ), PLAYER_RADIUS); //Jump to ground above
+        if (mGroundFace != nullptr) groundY = mGroundFace->calcYAt(pt.xz());
+    }
 
     /* Collision check */
     mClosestFace = TCollision::findClosest(mPosition, PLAYER_RADIUS);
 
-    if (mPosition.y() > groundY)
+    
+    if (mPosition.y() > groundY){
         mYSpeed -= PLAYER_GRAVITY;
+        mPosition.y() = mPosition.y() + (mYSpeed * kInterval);
+    }
+    else if (mYSpeed <= 0.0f) {
+        mPosition.y() = groundY;
+        mYSpeed = -mYSpeed / 1.5f;
+    }
     else{
-        mPosition = {mPosition.x(), groundY, mPosition.z()};
-        mYSpeed = -mYSpeed / 4.0f;
+        mPosition.y() = mPosition.y() + (mYSpeed * kInterval);
     }
 
     switch (mState){
         // idle. c'mon let's get a move on...
         case playerstate_t::PLAYERSTATE_IDLE:{
-            checkLateralCollision();
+            //checkLateralCollision();
 
             mCameraTarget = mPosition;
             
@@ -119,7 +133,7 @@ void TPlayer::update()
         // -------------------------------------------------------------------- //
         // walking on the ground
         case playerstate_t::PLAYERSTATE_WALKING:{
-            checkLateralCollision();
+            //checkLateralCollision();
 
             mCameraTarget = mPosition;  //Target slightly above player and slightly in front of player
 
@@ -133,21 +147,21 @@ void TPlayer::update()
     }
 
     //Mesh collision
-    checkMeshCollision(mClosestFace, PLAYER_RADIUS);
+    //if (mClosestFace != nullptr)
+    //    checkMeshCollision(mClosestFace, PLAYER_RADIUS);
 
     //Object collision
     setCollideCenter(mPosition);
 
     // set shadow position and rotation to floor
-    if (mGroundFace != nullptr) {
-        pt = getPosition();
-        pt.y() = mGroundFace->calcYAt(pt.xz()) + 1.0f;
-        mShadow->setPosition(pt);
-        mShadow->setRotation(TVec3<s16>((s16)TSine::atan2(mGroundFace->nrm.z(), mGroundFace->nrm.y()), (s16)0, (s16)-TSine::atan2(mGroundFace->nrm.x(), mGroundFace->nrm.y())));
-    }
-    else if (mPosition.y() < 0.0f){
-        mPosition.y() = 0.0f;   //if they somehow got underground
-    }
+    //if (mGroundFace != nullptr) {
+    //    pt = getPosition();
+    //    pt.y() = mGroundFace->calcYAt(pt.xz()) + 1.0f;
+    //    mShadow->setPosition(pt);
+    //    mShadow->setRotation(TVec3<s16>((s16)TSine::atan2(mGroundFace->nrm.z(), mGroundFace->nrm.y()), (s16)0, (s16)-TSine::atan2(mGroundFace->nrm.x(), mGroundFace->nrm.y())));
+    //}
+
+    mCameraTarget = mPosition;
 
     updateBlkMap();
 }
@@ -176,16 +190,14 @@ void TPlayer::updateMtx()
 
 void TPlayer::draw()
 {
-    mAnim->draw();
+    //mAnim->draw();
 
-    //setMesh(mesh);
-    
     updateMtx();
     TObject::draw();
 
-    if (mGroundFace != nullptr) {
-        mShadow->draw();
-    }
+    //if (mGroundFace != nullptr) {
+    //    mShadow->draw();
+    //}
 }
 
 // -------------------------------------------------------------------------- //
