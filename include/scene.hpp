@@ -11,6 +11,7 @@
 #include "emitter.hpp"
 #include "scenedata.h"
 #include "staticobj.hpp"
+#include "player.hpp"
 
 // -------------------------------------------------------------------------- //
 
@@ -39,6 +40,7 @@ class TScene
     virtual TScene * exit() = 0;
 
     void loadObjects(TSceneEntry const list[]);
+    void loadCollision(const s16 collision[], TCollFace * dest, int offset);
 
     inline char const * getName() {return mName;}
     ESceneState getState() {return mStatus;}
@@ -88,6 +90,9 @@ class TLogoScene final
     TCamera * mTestCamera2{nullptr};
     TCamera * mTestCamera3{nullptr};
     TCamera * mTestCamera4{nullptr};
+
+    TPlayer * mPlayers[4];
+
     TPad * mTestPad{nullptr};
     TArray<TEmitter *> mEmitterList;
     s32 mLogoX{0};

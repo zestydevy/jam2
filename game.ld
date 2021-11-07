@@ -134,6 +134,13 @@ SECTIONS
    }
    END_NOLOAD(title_ovl)
 
+   BEGIN_SEG(col_ovl, _codeSegmentBssEnd)
+   {
+      build/obj/model_test00_col.o(.data*);
+      . = ALIGN(0x10);
+   }
+   END_SEG(col_ovl)
+
    BEGIN_SEG(crash_ovl, _codeSegmentBssEnd)
    {
       build/obj/sp_crash.o(.data*);

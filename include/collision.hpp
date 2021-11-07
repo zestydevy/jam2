@@ -17,6 +17,8 @@ class TCollision {
 
     TVec3F vtx[3];
     TVec3F nrm;
+    u32 surf;
+
     float d;
 
     void calc();

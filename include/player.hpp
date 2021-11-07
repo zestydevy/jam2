@@ -79,6 +79,8 @@ class TPlayer :
 
     void setAnimation(int length, playeranim_t anim, bool loop = true, float timescale = 0.25f);
 
+    inline void setShadowMesh(Gfx * mesh, Gfx * initializer = nullptr) { mShadow->setMesh(mesh, initializer); }
+
     protected:
     void startIdle();
     void checkLateralCollision();
@@ -93,6 +95,7 @@ class TPlayer :
     TVec3<f32> mCameraTarget{};
 
     f32 mSpeed;
+    f32 mYSpeed;
     TVec3<f32> mDirection{};
     TVec3F mCenter{};
 

@@ -1,3 +1,5 @@
+#include "collision.h"
+
 extern Lights1 grass_f3d_fence_lights;
 extern u64 grass_grass2_ci8[];
 extern u64 grass_grass2_ci8_pal_rgba16[];
@@ -21,3 +23,6 @@ extern Gfx mat_grass_f3d_fence[];
 extern Gfx mat_revert_grass_f3d_fence[];
 extern Gfx sky_Track1_mesh[];
 extern Gfx grass_Track1_001_mesh[];
+
+#define test00_layer1_count 1800
+extern CollisionFace test00_layer1_faces[];

@@ -62,4 +62,7 @@ extern u8 _testRelSegmentStart[];
 extern u8 _testRelSegmentEnd[];
 extern u8 _testSegmentReloc[];
 
+extern u8 _col_ovlSegmentRomStart[];
+extern u8 _col_ovlSegmentRomEnd[];
+
 #endif /* SEGMENT_H */

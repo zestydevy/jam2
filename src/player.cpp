@@ -11,6 +11,7 @@
 
 #include "../models/static/shadow/shadow.h"
 
+const float PLAYER_GRAVITY = 0.1f * kInterval;
 const float PLAYER_WALKSPEED = 1.2f * kInterval;
 const float PLAYER_RUNSPEED = 1.2f * kInterval;
 const float PLAYER_TURNSPEED = 1.2f * kInterval;
@@ -27,7 +28,6 @@ void TPlayer::init()
 {
     TObject::init();
 
-
     // set up to start in flight for testing:
     mDirection = TVec3<f32>(0.0f, 0.0f, 0.0f);
     mRotation = TVec3<f32>(0.0f, 0.0f, 0.0f);
@@ -39,19 +39,20 @@ void TPlayer::init()
     setAnimation(1, ANIM_IDLE);
 
     // shadow
-    /*mShadow = new TShadow(mDynList);
+    mShadow = new TShadow(mDynList);
     mShadow->init();
     mShadow->setParent(this);
     mShadow->setPosition({0.0f,0.0f,0.0f});
     mShadow->setScale(mScale);
-    mShadow->setMesh(mesh);
-    */
 
     initCollider(TAG_PLAYER, TAG_PLAYER, 0, 1);
     setCollideRadius(PLAYER_RADIUS);
     setCollideCenter(mPosition);
 
     mCameraTarget = mPosition;
+
+    mYSpeed = 0.0f;
+    mSpeed = 0.0f;
 
     mGameState = gameplaystate_t::PLAYERGAMESTATE_NORMAL;
 }
@@ -86,36 +87,28 @@ void TPlayer::update()
 {
     TObject::update();
 
-    // ...
-    //if (mPad->getAnalogX() != 0 || mPad->getAnalogY() != 0) {
-    //    mAngle = TSine::atan2(-mPad->getAnalogX(), -mPad->getAnalogY());
-    //}
-
-    TMtx44 temp1, temp2, temp3;
-
-    //find the camera
-    s16 cameraAngle = mCamera->getAngle();
-    TVec3<f32> up = TVec3<f32>(0.0f, 1.0f, 0.0f);   //Camera up
-    TVec3<f32> forward = TVec3<f32>(TSine::ssin(cameraAngle), 0.0f, TSine::scos(cameraAngle));  //Camera forward
-    TVec3<f32> right = TVec3<f32>(-forward.z(), 0.0f, forward.x()); //Camera right
-
-    TVec3<f32> fright;  //Flight right
-    TVec3<f32> fback;  //Flight back
-
-    float animRate = 0.25f;
-
-    TVec3<f32> move = TVec3<f32>(0.0f, 0.0f, 0.0f);
-
     /* Ground check */
-    mGroundFace = TCollision::findGroundBelow(mPosition, PLAYER_RADIUS);
+    TVec3F pt = getPosition();
+    mGroundFace = TCollision::findGroundBelow(pt, PLAYER_RADIUS);
+    float groundY = 0.0f;
+    if (mGroundFace != nullptr) mGroundFace->calcYAt(pt.xz());
 
     /* Collision check */
     mClosestFace = TCollision::findClosest(mPosition, PLAYER_RADIUS);
+
+    if (mPosition.y() > groundY)
+        mYSpeed -= PLAYER_GRAVITY;
+    else{
+        mPosition = {mPosition.x(), groundY, mPosition.z()};
+        mYSpeed = -mYSpeed / 4.0f;
+    }
 
     switch (mState){
         // idle. c'mon let's get a move on...
         case playerstate_t::PLAYERSTATE_IDLE:{
             checkLateralCollision();
+
+            mCameraTarget = mPosition;
             
             if (mPad->getAnalogX() != 0 || mPad->getAnalogY() != 0) {
                 mState = playerstate_t::PLAYERSTATE_WALKING;
@@ -128,15 +121,13 @@ void TPlayer::update()
         case playerstate_t::PLAYERSTATE_WALKING:{
             checkLateralCollision();
 
-            mCameraTarget = mPosition + (up * 35.00f) + (mDirection * mSpeed * 10.0f);  //Target slightly above player and slightly in front of player
+            mCameraTarget = mPosition;  //Target slightly above player and slightly in front of player
 
             // played moved, change to walking state
             if (mPad->getAnalogX() == 0 && mPad->getAnalogY() == 0) {
                 // back to idle
                 mState = playerstate_t::PLAYERSTATE_IDLE;
             }
-
-            mAnim->setTimescale(move.getLength() * 0.1f);
         }
         break;
     }
@@ -148,17 +139,15 @@ void TPlayer::update()
     setCollideCenter(mPosition);
 
     // set shadow position and rotation to floor
-    if (getGroundFace() != nullptr) {
-        TVec3F pt = getPosition();
-        pt.y() = getGroundFace()->calcYAt(pt.xz()) + 1.0f;
+    if (mGroundFace != nullptr) {
+        pt = getPosition();
+        pt.y() = mGroundFace->calcYAt(pt.xz()) + 1.0f;
         mShadow->setPosition(pt);
         mShadow->setRotation(TVec3<s16>((s16)TSine::atan2(mGroundFace->nrm.z(), mGroundFace->nrm.y()), (s16)0, (s16)-TSine::atan2(mGroundFace->nrm.x(), mGroundFace->nrm.y())));
     }
     else if (mPosition.y() < 0.0f){
         mPosition.y() = 0.0f;   //if they somehow got underground
     }
-
-    mAnim->update();
 
     updateBlkMap();
 }

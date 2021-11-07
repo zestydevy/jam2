@@ -52,6 +52,9 @@ TSprite * sP3;
 TSprite * sP4;
 u8 sFadeAlpha = 255;
 
+Gfx _sFaces_align_;
+TCollision::TFace sFaces[test00_layer1_count];
+
 // -------------------------------------------------------------------------- //
 
 Lights2 litc2 = gdSPDefLights2(
@@ -145,6 +148,8 @@ void TLogoScene::init()
         _logo_ovlSegmentRomEnd-_logo_ovlSegmentRomStart
     );
 
+    TCollider::startup(nullptr, 10, 512.0F);
+
     //TAudio::playMusic(EBgm::BGM_INTRO);
 
     mShowTimer = new TTimer;
@@ -163,6 +168,21 @@ void TLogoScene::init()
     mEmitterList.setHeap(THeap::getCurrentHeap());
     mEmitterList.push(sTestEmitter);
 
+    mTestCamera = new TCamera(mDynList);
+
+    for (int i = 0; i < 1; i++){
+        mPlayers[i] = new TPlayer(mDynList);
+        mPlayers[i]->setMesh(n64_n64_N_mesh_mesh_mesh);
+        mPlayers[i]->setPosition(TVec3F{0.0f, 1000.0f, 0.0f});
+        mPlayers[i]->setScale(TVec3F{0.4f, 0.4f, 0.4f});
+
+        mPlayers[i]->init();
+
+        mPlayers[i]->setCamera(mTestCamera);
+        mPlayers[i]->setPad(mTestPad);
+        mPlayers[i]->setShadowMesh(n64_n64_N_mesh_mesh_mesh);
+    }
+
     sLogoObj = new TObject(mDynList);
     sLogoObj->setMesh(n64_n64_N_mesh_mesh_mesh);
     sLogoObj->setPosition(TVec3F{0.0f, -20.0f, 0.0f});
@@ -173,9 +193,8 @@ void TLogoScene::init()
     sSkyObj->setPosition(TVec3F{0.0f, 0.0f, 0.0f});
     sSkyObj->setScale(TVec3F{4.5f, 4.5f, 4.5f});
 
-    mTestCamera = new TCamera(mDynList);
     mTestCamera->setPad(mTestPad);
-    mTestCamera->setTarget(&sLogoObj->getPosition());
+    mTestCamera->setTarget(&mPlayers[0]->getPosition());
     mTestCamera->jumpToTarget();
 
     sFadeSpr = new TSprite();
@@ -193,6 +212,18 @@ void TLogoScene::init()
     sYoshiJoint = new TJoint(32);
     sYoshiJoint->registerAnimation(reinterpret_cast<TJointAnimData const &>(dino_anim_ArmatureAction));
     sYoshiJoint->playAnimation();
+
+    //Load collision data
+    TUtil::toMemory(
+        reinterpret_cast<void *>(sFaces), 
+        _col_ovlSegmentRomStart, 
+        _col_ovlSegmentRomEnd-_col_ovlSegmentRomStart
+    );
+
+    TCollision::startup(
+        sFaces, test00_layer1_count, nullptr,
+        (test00_layer1_count * 1.5f), 12, 5120.0F
+    );
 }
 
 // -------------------------------------------------------------------------- //
@@ -210,6 +241,11 @@ void TLogoScene::update()
     for (int i = 0; i < mEmitterList.capacity(); ++i) {
         mEmitterList[i]->emit();
     }
+
+    TCollider::frameBegin();
+
+    for (int i = 0; i < 1; i++)
+        mPlayers[i]->update();
 
     mTestCamera->update();
     sYoshiJoint->updateAnimation();
@@ -236,6 +272,8 @@ void TLogoScene::update()
     if (mTestPad->isHeld(EButton::C_DOWN)) {
         sTestlp.y() -= 4.0f;
     }
+
+    TCollider::frameEnd();
 }
 
 // -------------------------------------------------------------------------- //
@@ -252,6 +290,9 @@ void TLogoScene::draw()
     mTestCamera->render();
     sSkyObj->draw();
 	sLogoObj->draw();
+
+    //for (int i = 0; i < 1; i++)
+    //    mPlayers[i]->draw();
 
     gSPDisplayList(mDynList->pushDL(), grass_Track1_001_mesh);
 
