@@ -11,10 +11,11 @@
 #include "pad.hpp"
 #include "staticobj.hpp"
 
+#include "carstats.hpp"
+
 enum playerstate_t : u16 {
     PLAYERSTATE_STUNNED,    //Falling
-    PLAYERSTATE_IDLE,       //Idle
-    PLAYERSTATE_WALKING    //Walking on ground
+    PLAYERSTATE_DRIVING,       //Driving
 };
 
 enum gameplaystate_t : u16 {
@@ -82,7 +83,8 @@ class TPlayer :
     inline void setShadowMesh(Gfx * mesh, Gfx * initializer = nullptr) { mShadow->setMesh(mesh, initializer); }
 
     protected:
-    void startIdle();
+    void startDriving();
+    void startCrashing();
     void checkLateralCollision();
     void checkMeshCollision(const TCollFace * face, float radius);
 
@@ -99,10 +101,14 @@ class TPlayer :
     TVec3<f32> mDirection{};
     TVec3F mCenter{};
 
+    s16 mDriveDirection;
+
+    TCarStats mCarStats;
+
     TCollFace const * mGroundFace { nullptr };
     const TCollFace * mClosestFace;
 
-    playerstate_t mState{playerstate_t::PLAYERSTATE_IDLE};
+    playerstate_t mState{playerstate_t::PLAYERSTATE_DRIVING};
     gameplaystate_t mGameState{gameplaystate_t::PLAYERGAMESTATE_NORMAL};
 
     virtual void onCollide(TCollider *) override;

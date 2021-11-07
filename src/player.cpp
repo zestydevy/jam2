@@ -11,10 +11,16 @@
 
 #include "../models/static/shadow/shadow.h"
 
+//TODO: convert to variables
 const float PLAYER_GRAVITY = 980.0f * kInterval;
-const float PLAYER_WALKSPEED = 1.2f * kInterval;
-const float PLAYER_RUNSPEED = 1.2f * kInterval;
-const float PLAYER_TURNSPEED = 1.2f * kInterval;
+const float PLAYER_BOUNCE_SCALE = 1.5f;
+const float PLAYER_MIN_BOUNCE_SPEED = 50.0f * kInterval;
+
+const float PLAYER_BRAKE_MIN_SPEED = 20.0f * kInterval;
+
+const float PLAYER_CAMERA_TRAIL_MINSPEED = 20.0f * kInterval;
+const float PLAYER_CAMERA_TRAIL_DISTANCE = 200.0f;
+const float PLAYER_CAMERA_TRAIL_HEIGHT = 100.0f;
 
 const float PLAYER_RADIUS = 10.0f;
 
@@ -54,16 +60,25 @@ void TPlayer::init()
     mYSpeed = 0.0f;
     mSpeed = 0.0f;
 
+    //Car stats
+    mCarStats = TCarStats(testCar);
+
+    mDriveDirection = 0;
+
     mGameState = gameplaystate_t::PLAYERGAMESTATE_NORMAL;
 
-    startIdle();
+    startDriving();
 }
 
 void TPlayer::setAnimation(int length, playeranim_t anim, bool loop, float timescale){
 }
 
-void TPlayer::startIdle(){
-    mState = PLAYERSTATE_IDLE;
+void TPlayer::startDriving(){
+    mState = PLAYERSTATE_DRIVING;
+}
+
+void TPlayer::startCrashing(){
+    mState = PLAYERSTATE_STUNNED;
 }
 
 void TPlayer::checkLateralCollision(){
@@ -92,7 +107,7 @@ void TPlayer::update()
     TObject::update();
 
     /* Ground check */
-    TVec3F pt = getPosition();
+    TVec3F pt = getPosition() + TVec3F(0.0f, PLAYER_RADIUS, 0.0f);
     mGroundFace = TCollision::findGroundBelow(pt, PLAYER_RADIUS);
     float groundY = -1000.0f;
     if (mGroundFace != nullptr) groundY = mGroundFace->calcYAt(pt.xz());
@@ -104,14 +119,16 @@ void TPlayer::update()
     /* Collision check */
     mClosestFace = TCollision::findClosest(mPosition, PLAYER_RADIUS);
 
-    
     if (mPosition.y() > groundY){
         mYSpeed -= PLAYER_GRAVITY;
         mPosition.y() = mPosition.y() + (mYSpeed * kInterval);
     }
     else if (mYSpeed <= 0.0f) {
         mPosition.y() = groundY;
-        mYSpeed = -mYSpeed / 1.5f;
+        if (mYSpeed < PLAYER_MIN_BOUNCE_SPEED)
+            mYSpeed = 0.0f;
+        else
+            mYSpeed = -mYSpeed / PLAYER_BOUNCE_SCALE;
     }
     else{
         mPosition.y() = mPosition.y() + (mYSpeed * kInterval);
@@ -119,29 +136,46 @@ void TPlayer::update()
 
     switch (mState){
         // idle. c'mon let's get a move on...
-        case playerstate_t::PLAYERSTATE_IDLE:{
+        case playerstate_t::PLAYERSTATE_DRIVING:{
             //checkLateralCollision();
+
+            float turn = (float)mPad->getAnalogX() / 160.0f;
+
+            //acceleration and deceleration
+            if (mPad->isHeld(A)) {
+                mSpeed += mCarStats.getAcceleration(mSpeed) * kInterval;
+            }
+            if (mPad->isHeld(B)) {
+                if (mSpeed >= PLAYER_BRAKE_MIN_SPEED)
+                    mSpeed *= mCarStats.getBrake(mSpeed);
+                else
+                    mSpeed -= mCarStats.getAcceleration(0.0f) * kInterval;
+            }
+            else
+                mSpeed *= mCarStats.getDrift(mSpeed);
+
+            //apply turn rate
+            if (turn != 0.0f)
+            {
+                mDriveDirection -= (int)(turn * mSpeed * mCarStats.getTurn(mSpeed) + 0.99f);
+                mRotation.y() = mDriveDirection;
+
+                f32 amtTurn = TMath<f32>::abs(turn);
+                f32 conversionLoss = (amtTurn * mCarStats.getTurnConversion(mSpeed)) + (1.0f - amtTurn);
+                mSpeed *= conversionLoss;
+            }
+
+            TVec3F turnVec = TVec3F(TSine::ssin(mDriveDirection), 0.0f, TSine::scos(mDriveDirection));
+
+            //snap camera behind player
+            bool cameraMode = mSpeed > PLAYER_CAMERA_TRAIL_MINSPEED || mSpeed < -PLAYER_CAMERA_TRAIL_MINSPEED;
+            mCamera->setMode(cameraMode);
+            if (cameraMode)
+                mCamera->setPosition(mPosition - (turnVec * PLAYER_CAMERA_TRAIL_DISTANCE * (mSpeed >= 0 ? 1.0f : -1.0f)) + TVec3F(0.0f, PLAYER_CAMERA_TRAIL_HEIGHT, 0.0f));
+
+            mPosition += turnVec * mSpeed * kInterval;
 
             mCameraTarget = mPosition;
-            
-            if (mPad->getAnalogX() != 0 || mPad->getAnalogY() != 0) {
-                mState = playerstate_t::PLAYERSTATE_WALKING;
-            }
-        }
-        break;
-
-        // -------------------------------------------------------------------- //
-        // walking on the ground
-        case playerstate_t::PLAYERSTATE_WALKING:{
-            //checkLateralCollision();
-
-            mCameraTarget = mPosition;  //Target slightly above player and slightly in front of player
-
-            // played moved, change to walking state
-            if (mPad->getAnalogX() == 0 && mPad->getAnalogY() == 0) {
-                // back to idle
-                mState = playerstate_t::PLAYERSTATE_IDLE;
-            }
         }
         break;
     }
@@ -154,12 +188,12 @@ void TPlayer::update()
     setCollideCenter(mPosition);
 
     // set shadow position and rotation to floor
-    //if (mGroundFace != nullptr) {
-    //    pt = getPosition();
-    //    pt.y() = mGroundFace->calcYAt(pt.xz()) + 1.0f;
-    //    mShadow->setPosition(pt);
-    //    mShadow->setRotation(TVec3<s16>((s16)TSine::atan2(mGroundFace->nrm.z(), mGroundFace->nrm.y()), (s16)0, (s16)-TSine::atan2(mGroundFace->nrm.x(), mGroundFace->nrm.y())));
-    //}
+    if (mGroundFace != nullptr) {
+        pt = getPosition();
+        pt.y() = mGroundFace->calcYAt(pt.xz()) + 1.0f;
+        mShadow->setPosition(pt);
+        mShadow->setRotation(TVec3<s16>((s16)TSine::atan2(mGroundFace->nrm.z(), mGroundFace->nrm.y()), (s16)0, (s16)-TSine::atan2(mGroundFace->nrm.x(), mGroundFace->nrm.y())));
+    }
 
     mCameraTarget = mPosition;
 
@@ -195,9 +229,9 @@ void TPlayer::draw()
     updateMtx();
     TObject::draw();
 
-    //if (mGroundFace != nullptr) {
-    //    mShadow->draw();
-    //}
+    if (mGroundFace != nullptr) {
+        mShadow->draw();
+    }
 }
 
 // -------------------------------------------------------------------------- //
