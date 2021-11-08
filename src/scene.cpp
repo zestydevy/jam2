@@ -27,6 +27,7 @@
 #include "../models/static/yoshi/model_dino.h"
 #include "../models/static/n64/model_n64.h"
 #include "../models/static/test00/model_test00.h"
+#include "../models/static/car/model_car.h"
 #include "../models/static/sprites/black_sprite.h"
 #include "../models/static/sprites/sp_p1.h"
 #include "../models/static/sprites/sp_p2.h"
@@ -165,7 +166,7 @@ void TLogoScene::init()
     mLogoSpr = new TSprite;
     mLogoNinSpr = new TSprite;
 
-    sTestEmitter = new TEmitter(sTestPos, reinterpret_cast<TEmitConfig const &>(sTestPtcl00), mDynList);
+    sTestEmitter = new TEmitter(sTestPos, reinterpret_cast<TEmitConfig const &>(sPtclSmoke), mDynList);
     mEmitterList.setHeap(THeap::getCurrentHeap());
     mEmitterList.push(sTestEmitter);
 
@@ -174,7 +175,7 @@ void TLogoScene::init()
 
     for (int i = 0; i < 1; i++){
         mPlayers[i] = new TPlayer(mDynList);
-        mPlayers[i]->setMesh(n64_n64_N_mesh_mesh_mesh);
+        mPlayers[i]->setMesh(car_Cube1_mesh);
         mPlayers[i]->setPosition(TVec3F{0.0f, 500.0f, 0.0f});
         mPlayers[i]->setScale(TVec3F{0.4f, 0.4f, 0.4f});
 
@@ -184,6 +185,8 @@ void TLogoScene::init()
         mPlayers[i]->setPad(mTestPad);
         mPlayers[i]->setShadowMesh(n64_n64_N_mesh_mesh_mesh);
     }
+
+    sTestEmitter->attach(mPlayers[0], TVec3F{0.0f, 0.0f, 0.0f});
 
     sLogoObj = new TObject(mDynList);
     sLogoObj->setMesh(n64_n64_N_mesh_mesh_mesh);
@@ -258,6 +261,8 @@ void TLogoScene::update()
     
     sLogoRot += 140.0f;
     sLogoObj->setRotation(TVec3F{0.0f, sLogoRot, 0.0f});
+
+    sTestEmitter->setParentOffset(TVec3F{TMath<f32>::frand(-6.0f, 6.0f), 0.0f, 0.0f});
 
     TCollider::frameEnd();
 }

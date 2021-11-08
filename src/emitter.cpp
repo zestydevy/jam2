@@ -40,18 +40,25 @@ void TEmitter::emit()
     }
     
     // rate time is up
-    if (mRateTimer.update()) {
-        TVec3F pos{0.0f, 0.0f, 0.0f};
+    if (mRateTimer.update())
+    {
         TVec3F up{0.0f, 1.0f, 0.0f};
         TVec3F forward{TMath<f32>::frand(-1.0f, 1.0f), 0.0f, TMath<f32>::frand(-1.0f, 1.0f)};
         TVec3F right{TVec3<f32>(-forward.z(), 0.0f, forward.x())};
         TVec3F direction = forward + right;
         TParticle * ptcl = new TParticle(mDl, reinterpret_cast<TEmitConfig const & >(*mConfig));
-        ptcl->setPosition(pos + direction);
+
+        if (mParent != nullptr) {
+            mPosition = mParent->getPosition() + mParentOffset;
+        }
+        
+        ptcl->setPosition(mPosition);
         ptcl->setScale(mConfig->scale);
-        ptcl->setDirection(direction);
+        //ptcl->setDirection(direction);
+
         mPtclList.push(ptcl);
         mRateTimer.start(mConfig->lifeSpan * mConfig->rate);
+
         sParticleCnt++;
     } else {
 
@@ -82,12 +89,28 @@ void TEmitter::destroy()
 
 // -------------------------------------------------------------------------- //
 
+void TEmitter::attach(TObject * const object, TVec3F const & offset)
+{
+    mParent = const_cast<TObject *>(object);
+    mPosition = object->getPosition();
+    mParentOffset = offset;
+}
+
+// -------------------------------------------------------------------------- //
+
 void TEmitter::attachCallback(void(*callback)())
 {
     if (mCallbacks.capacity() > kMaxCallbacks) {
         TException::fault("TOO MANY CALLBACKS ATTACHED TO EMITTER");
     }
     mCallbacks.push(callback);
+}
+
+// -------------------------------------------------------------------------- //
+
+void TEmitter::setParentOffset(TVec3F const & offset)
+{
+    mParentOffset = offset;
 }
 
 // -------------------------------------------------------------------------- //

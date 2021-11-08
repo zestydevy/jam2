@@ -22,8 +22,8 @@ void TParticle::update()
     mPosition += mDirection;
 
     mFrame += kInterval / mConfig->lifeSpan;
-    mScale.lerp(mConfig->scaleOverTime, mFrame * kInterval);
-    mAlpha = TMath<u8>::lerp(mAlpha, mConfig->alphaOverTime, mFrame * kInterval);
+    mScale.lerp(mConfig->scaleOverTime, mFrame);
+    mAlpha = TMath<u8>::lerp(mAlpha, mConfig->alphaOverTime, mFrame);
 
     mIsExpired = mLifeTimer.update();
 }
@@ -85,7 +85,8 @@ void TParticle::setConfig(TEmitConfig const & config)
         TException::fault("PTCL DL IS NULL!");
     }
     
-    mInitColor = TVec3<u8>{TMath<u8>::random(0, 255), TMath<u8>::random(0, 255), TMath<u8>::random(0, 255)};
+    //mInitColor = TVec3<u8>{TMath<u8>::random(0, 255), TMath<u8>::random(0, 255), TMath<u8>::random(0, 255)};
+    mInitColor = config.color;
 
     mConfig = const_cast<TEmitConfig *>(&config);
 }

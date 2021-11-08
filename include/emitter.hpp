@@ -6,6 +6,7 @@
 #include "util.hpp"
 #include "dynlist.hpp"
 #include "linklist.hpp"
+#include "staticobj.hpp"
 
 class TParticle;
 
@@ -68,7 +69,9 @@ class TEmitter
     ~TEmitter() = delete;
 
     void setGlbDl(TDynList2 * dl){mDl = dl;}
+    void attach(TObject * const object, TVec3F const & offset);
     void attachCallback(void(*)());
+    void setParentOffset(TVec3F const & offset);
     void emit();
     void draw();
     void destroy();
@@ -77,6 +80,8 @@ class TEmitter
 
     EEmitType mType{EMIT_2D};
     TVec3F mPosition{};
+    TObject * mParent{nullptr};
+    TVec3F mParentOffset{};
     TEmitConfig * mConfig{nullptr};
     TArray<TParticle *> mPtclList;
     TArray<void(*)()> mCallbacks;

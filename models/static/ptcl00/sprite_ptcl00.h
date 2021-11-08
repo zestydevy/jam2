@@ -6,3 +6,4 @@ extern Gfx mat_ptcl00_f3d_material[];
 extern Gfx mat_revert_ptcl00_f3d_material[];
 extern Lights1 ptcl00_f3d_material_lights;
 extern Gfx ptcl00_Plane_mesh[];
+extern Gfx ptcl_smoke_Plane_mesh[];
