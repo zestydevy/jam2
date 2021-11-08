@@ -107,8 +107,8 @@ void TPlayer::update()
     mGroundFace = TCollision::findGroundBelow(pt, PLAYER_RADIUS);
     float groundY = -1000.0f;
     if (mGroundFace != nullptr) groundY = mGroundFace->calcYAt(pt.xz());
-    else {
-        mGroundFace = TCollision::findGroundAbove(pt, PLAYER_RADIUS); //Jump to ground above
+    else{ 
+        mGroundFace = TCollision::findGroundBelow(pt + (mForward * PLAYER_RADIUS), PLAYER_RADIUS);
         if (mGroundFace != nullptr) groundY = mGroundFace->calcYAt(pt.xz());
     }
 
@@ -117,7 +117,7 @@ void TPlayer::update()
     /* Collision check */
     mClosestFace = TCollision::findClosest(mPosition, PLAYER_RADIUS);
 
-    if (mPosition.y() <= groundY + 0.001f && mGroundFace != nullptr && vel.dot(mGroundFace->nrm) < 0.05f) {
+    if (mGroundFace != nullptr && mPosition.y() <= groundY + 0.001f && vel.dot(mGroundFace->nrm) < 0.05f) {
         mPosition.y() = groundY;
 
         if (mYSpeed < PLAYER_MIN_BOUNCE_SPEED)
