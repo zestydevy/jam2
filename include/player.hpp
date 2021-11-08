@@ -77,6 +77,7 @@ class TPlayer :
     virtual void init() override;
     virtual void update() override;
     virtual void draw() override;
+    virtual void drawShadow();
 
     void setAnimation(int length, playeranim_t anim, bool loop = true, float timescale = 0.25f);
 

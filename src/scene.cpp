@@ -183,7 +183,7 @@ void TLogoScene::init()
 
         mPlayers[i]->setCamera(mTestCamera);
         mPlayers[i]->setPad(mTestPad);
-        mPlayers[i]->setShadowMesh(n64_n64_N_mesh_mesh_mesh);
+        mPlayers[i]->setShadowMesh(car_Cube1_mesh_shadow);
     }
 
     sTestEmitter->attach(mPlayers[0], TVec3F{0.0f, 0.0f, 0.0f});
@@ -286,6 +286,9 @@ void TLogoScene::draw()
         mPlayers[i]->draw();
 
     gSPDisplayList(mDynList->pushDL(), grass_Track1_001_mesh);
+
+    for (int i = 0; i < 1; i++)
+        mPlayers[i]->drawShadow();
 
     for (int i = 0; i < mEmitterList.capacity(); ++i) {
         mEmitterList[i]->draw();

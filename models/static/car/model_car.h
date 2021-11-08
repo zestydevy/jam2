@@ -4,3 +4,4 @@ extern Vtx car_Cube1_mesh_vtx_0[1904];
 extern Gfx car_Cube1_mesh_tri_0[];
 extern Gfx mat_car_default_f3d[];
 extern Gfx car_Cube1_mesh[];
+extern Gfx car_Cube1_mesh_shadow[];

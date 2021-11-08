@@ -140,7 +140,7 @@ void TPlayer::update()
     }
 
     //Debug show rpm
-    mScale.y() = (0.1f + mCarStats.getGearTransition(mSpeed)) * mScale.x();
+    //mScale.y() = (0.1f + mCarStats.getGearTransition(mSpeed)) * mScale.x();
 
     switch (mState){
         // idle. c'mon let's get a move on...
@@ -218,7 +218,7 @@ void TPlayer::update()
         setRotation(TVec3<s16>((s16)TSine::atan2(mGroundFace->nrm.z(), mGroundFace->nrm.y()), (s16)0, (s16)-TSine::atan2(mGroundFace->nrm.x(), mGroundFace->nrm.y())));
 
         pt = getPosition();
-        pt.y() = mGroundFace->calcYAt(pt.xz()) + 1.0f;
+        pt.y() = mGroundFace->calcYAt(pt.xz());
         mShadow->setPosition(pt);
         mShadow->setRotation(TVec3<s16>((s16)TSine::atan2(mGroundFace->nrm.z(), mGroundFace->nrm.y()), (s16)0, (s16)-TSine::atan2(mGroundFace->nrm.x(), mGroundFace->nrm.y())));
     }
@@ -259,6 +259,13 @@ void TPlayer::draw()
     updateMtx();
     TObject::draw();
 
+    if (mGroundFace != nullptr) {
+        mShadow->draw();
+    }
+}
+
+void TPlayer::drawShadow()
+{
     if (mGroundFace != nullptr) {
         mShadow->draw();
     }

@@ -2514,3 +2514,28 @@ Gfx car_Cube1_mesh[] = {
 	gsSPEndDisplayList(),
 };
 
+Gfx mat_car_shadow_f3d[] = {
+	gsDPPipeSync(),
+    gsDPSetPrimColor(0, 0, 0, 0, 0, 255),
+    gsDPSetCombineLERP(0, 0, 0, 0, 0, 0, 0, PRIMITIVE, 0, 0, 0, 0, 0, 0, 0, PRIMITIVE),
+    gsSPTexture(65535, 65535, 0, 0, 1),
+    gsSPEndDisplayList(),
+};
+
+Gfx car_Cube1_mesh_shadow[] = {
+	gsDPSetRenderMode(G_RM_AA_ZB_OPA_DECAL, G_RM_AA_ZB_OPA_DECAL2),
+	gsSPClearGeometryMode(G_LIGHTING),
+	gsSPVertex(car_Cube1_mesh_vtx_cull + 0, 8, 0),
+	gsSPSetGeometryMode(G_LIGHTING),
+	gsSPCullDisplayList(0, 7),
+	gsSPDisplayList(mat_car_shadow_f3d),
+	gsSPDisplayList(car_Cube1_mesh_tri_0),
+	gsDPPipeSync(),
+	gsDPSetRenderMode(G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2),
+	gsDPSetPrimColor(0, 0, 255, 255, 255, 255),
+	gsSPSetGeometryMode(G_LIGHTING),
+	gsSPClearGeometryMode(G_TEXTURE_GEN),
+	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
+	gsSPTexture(65535, 65535, 0, 0, 0),
+	gsSPEndDisplayList(),
+};
