@@ -21,6 +21,8 @@ class TCollision {
 
     float d;
 
+    u32 padding[2];
+
     void calc();
 
     bool isPassThru() const;

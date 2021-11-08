@@ -20,6 +20,8 @@ typedef struct t_collisionface{
     u32 surf;
 
     float d;
+
+    u32 padding[2];
 } CollisionFace;
 
 #ifdef _cplusplus

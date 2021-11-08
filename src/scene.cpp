@@ -53,8 +53,7 @@ TSprite * sP3;
 TSprite * sP4;
 u8 sFadeAlpha = 255;
 
-Gfx _sFaces_align_[] = { gsSPEndDisplayList() };
-TCollision::TFace sFaces[test00_layer1_count];
+TCollision::TFace* sFaces;
 
 // -------------------------------------------------------------------------- //
 
@@ -133,7 +132,6 @@ void TScene::loadObjects(TSceneEntry const list[])
 
 // -------------------------------------------------------------------------- //
 
-TCollision::TFace sTestFaces[2];
 void TLogoScene::init()
 {
     mStatus = ESceneState::RUNNING;
@@ -216,6 +214,8 @@ void TLogoScene::init()
     sYoshiJoint->registerAnimation(reinterpret_cast<TJointAnimData const &>(dino_anim_ArmatureAction));
     sYoshiJoint->playAnimation();
 
+    sFaces = new TCollision::TFace[test00_layer1_count];
+
     //Load collision data
     TUtil::toMemory(
         reinterpret_cast<void *>(sFaces), 
@@ -225,12 +225,12 @@ void TLogoScene::init()
 
     if (!TCollision::startup(
         sFaces, test00_layer1_count, nullptr,
-        (test00_layer1_count * 1.75f), 12, 2048.0F
+        (test00_layer1_count * 1.4f), 10, 2048.0F
     ))
         *(int*)0 = 0;
 
-    for (int i = 0; i < test00_layer1_count; i++)
-        sFaces[i].setPassThru(false);
+    //for (int i = 0; i < test00_layer1_count; i++)
+    //    sFaces[i].setPassThru(false);
 }
 
 // -------------------------------------------------------------------------- //
