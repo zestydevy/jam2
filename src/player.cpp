@@ -8,17 +8,18 @@
 #include <nusys.h>
 #include <nualstl_n.h>
 #include "audio.hpp"
+#include "collision.h"
 
 #include "../models/static/shadow/shadow.h"
 
 //TODO: convert to variables
 const float PLAYER_GRAVITY = 980.0f * kInterval;
 const float PLAYER_BOUNCE_SCALE = 1.5f;
-const float PLAYER_MIN_BOUNCE_SPEED = 50.0f * kInterval;
+const float PLAYER_MIN_BOUNCE_SPEED = 50.0f;
 
-const float PLAYER_BRAKE_MIN_SPEED = 20.0f * kInterval;
+const float PLAYER_BRAKE_MIN_SPEED = 20.0f;
 
-const float PLAYER_CAMERA_TRAIL_MINSPEED = 20.0f * kInterval;
+const float PLAYER_CAMERA_TRAIL_MINSPEED = 20.0f;
 const float PLAYER_CAMERA_TRAIL_DISTANCE = 200.0f;
 const float PLAYER_CAMERA_TRAIL_HEIGHT = 100.0f;
 
@@ -57,13 +58,8 @@ void TPlayer::init()
 
     mCameraTarget = mPosition;
 
-    mYSpeed = 0.0f;
-    mSpeed = 0.0f;
-
     //Car stats
-    mCarStats = TCarStats(testCar);
-
-    mDriveDirection = 0;
+    mCarStats.importStats(sTestCar);
 
     mGameState = gameplaystate_t::PLAYERGAMESTATE_NORMAL;
 
@@ -112,73 +108,103 @@ void TPlayer::update()
     float groundY = -1000.0f;
     if (mGroundFace != nullptr) groundY = mGroundFace->calcYAt(pt.xz());
     else {
-        mGroundFace = TCollision::findGroundAbove(pt + TVec3F( 0.0f, 0.0f, 0.0f ), PLAYER_RADIUS); //Jump to ground above
+        mGroundFace = TCollision::findGroundAbove(pt, PLAYER_RADIUS); //Jump to ground above
         if (mGroundFace != nullptr) groundY = mGroundFace->calcYAt(pt.xz());
     }
+
+    TVec3F vel = mForward * mSpeed + (mYSpeed * TVec3F(0.0f, 1.0f, 0.0f));
 
     /* Collision check */
     mClosestFace = TCollision::findClosest(mPosition, PLAYER_RADIUS);
 
-    if (mPosition.y() > groundY){
-        mYSpeed -= PLAYER_GRAVITY;
-        mPosition.y() = mPosition.y() + (mYSpeed * kInterval);
-    }
-    else if (mYSpeed <= 0.0f) {
+    if (mPosition.y() <= groundY + 0.001f && mGroundFace != nullptr && vel.dot(mGroundFace->nrm) < 0.05f) {
         mPosition.y() = groundY;
+
         if (mYSpeed < PLAYER_MIN_BOUNCE_SPEED)
             mYSpeed = 0.0f;
         else
             mYSpeed = -mYSpeed / PLAYER_BOUNCE_SCALE;
+
+        mOnGround = true;
     }
-    else{
-        mPosition.y() = mPosition.y() + (mYSpeed * kInterval);
+    else {
+        if (mOnGround)
+            mYSpeed = vel.y();
+
+        mYSpeed -= PLAYER_GRAVITY;
+        mPosition.y() += mYSpeed * kInterval;
+
+        mForward = TVec3F(0.0f, 1.0f, 0.0f) * mYSpeed;
+
+        mOnGround = false;
     }
+
+    //Debug show rpm
+    mScale.y() = (0.1f + mCarStats.getGearTransition(mSpeed)) * mScale.x();
 
     switch (mState){
         // idle. c'mon let's get a move on...
         case playerstate_t::PLAYERSTATE_DRIVING:{
             //checkLateralCollision();
 
-            float turn = (float)mPad->getAnalogX() / 160.0f;
+            float turn = TMath<f32>::clamp((float)mPad->getAnalogX() / 160.0f, -1.0f, 1.0f);
 
-            //acceleration and deceleration
-            if (mPad->isHeld(A)) {
-                mSpeed += mCarStats.getAcceleration(mSpeed) * kInterval;
-            }
-            if (mPad->isHeld(B)) {
-                if (mSpeed >= PLAYER_BRAKE_MIN_SPEED)
-                    mSpeed *= mCarStats.getBrake(mSpeed);
-                else
-                    mSpeed -= mCarStats.getAcceleration(0.0f) * kInterval;
-            }
-            else
+            if (mOnGround && mGroundFace->surf == SURFACE_GRASS)        //Grass slowdown
+                mSpeed *= 0.985f;
+            if (!mOnGround || (!mPad->isHeld(A) && !mPad->isHeld(B)))   //Air resistance
                 mSpeed *= mCarStats.getDrift(mSpeed);
 
+            //Get real up direction
+            if (mOnGround)
+                mUp = mGroundFace->nrm.xyz();
+            else
+                mUp = TVec3F(0.0f, 1.0f, 0.0f);
+
+            //Get real forward direction
+            TVec3F forward = TVec3F(TSine::ssin(mDriveDirection), 0.0f, TSine::scos(mDriveDirection));
+            TVec3F proj = forward.dot(mUp) * mUp;
+            mForward = forward - proj;
+
+            //Apply gravity to speed
+            mSpeed -= (mForward.dot(TVec3F(0.0f, 1.0f, 0.0f)) * PLAYER_GRAVITY * 50.0f) * kInterval;
+
+            //acceleration and deceleration
+            if (mOnGround){
+                if (mPad->isHeld(A)) {
+                    mSpeed += mCarStats.getAcceleration(mSpeed) * kInterval;
+                }
+                if (mPad->isHeld(B)) {
+                    if (mSpeed >= PLAYER_BRAKE_MIN_SPEED)
+                        mSpeed *= mCarStats.getBrake(mSpeed);
+                    else
+                        mSpeed -= mCarStats.getAcceleration(0.0f) * kInterval;
+                    if (mSpeed < -200.0f)
+                        mSpeed = -200.0f;
+                }
+            }
+
             //apply turn rate
-            if (turn != 0.0f)
+            if (mOnGround && turn != 0.0f)
             {
                 mDriveDirection -= (int)(turn * mSpeed * mCarStats.getTurn(mSpeed) + 0.99f);
-                mRotation.y() = mDriveDirection;
 
                 f32 amtTurn = TMath<f32>::abs(turn);
                 f32 conversionLoss = (amtTurn * mCarStats.getTurnConversion(mSpeed)) + (1.0f - amtTurn);
                 mSpeed *= conversionLoss;
             }
 
-            TVec3F turnVec = TVec3F(TSine::ssin(mDriveDirection), 0.0f, TSine::scos(mDriveDirection));
-
             //snap camera behind player
             bool cameraMode = mSpeed > PLAYER_CAMERA_TRAIL_MINSPEED || mSpeed < -PLAYER_CAMERA_TRAIL_MINSPEED;
             mCamera->setMode(cameraMode);
             if (cameraMode)
-                mCamera->setPosition(mPosition - (turnVec * PLAYER_CAMERA_TRAIL_DISTANCE * (mSpeed >= 0 ? 1.0f : -1.0f)) + TVec3F(0.0f, PLAYER_CAMERA_TRAIL_HEIGHT, 0.0f));
-
-            mPosition += turnVec * mSpeed * kInterval;
-
+                mCamera->setPosition(mPosition - (mForward * PLAYER_CAMERA_TRAIL_DISTANCE * (mSpeed >= 0 ? 1.0f : -1.0f)) + TVec3F(0.0f, PLAYER_CAMERA_TRAIL_HEIGHT, 0.0f));
             mCameraTarget = mPosition;
         }
         break;
     }
+
+    //Apply forward momentum
+    mPosition += mForward * mSpeed * kInterval;
 
     //Mesh collision
     //if (mClosestFace != nullptr)
@@ -189,6 +215,8 @@ void TPlayer::update()
 
     // set shadow position and rotation to floor
     if (mGroundFace != nullptr) {
+        setRotation(TVec3<s16>((s16)TSine::atan2(mGroundFace->nrm.z(), mGroundFace->nrm.y()), (s16)0, (s16)-TSine::atan2(mGroundFace->nrm.x(), mGroundFace->nrm.y())));
+
         pt = getPosition();
         pt.y() = mGroundFace->calcYAt(pt.xz()) + 1.0f;
         mShadow->setPosition(pt);
@@ -205,11 +233,13 @@ void TPlayer::updateMtx()
     TMtx44 temp1, temp2, temp3, mPosMtx, mScaleMtx;
     
     mPosMtx.translate(mPosition);
-    temp1.rotateAxis(TVec3<f32>(-TSine::scos(mRotation.y()), 0.0f, TSine::ssin(mRotation.y())), -mRotation.x());
+    temp1.rotateAxisX(mRotation.x());
     temp2.rotateAxisY(mRotation.y());
-    TMtx44::concat(temp1, temp2, temp3);
-    temp1.rotateAxis(temp3.mul(TVec3<f32>(0.0f, 0.0f, 1.0f)), mRotation.z());
-    TMtx44::concat(temp1, temp3, mRotMtx);
+    temp3.rotateAxisZ(mRotation.z());
+    TMtx44::concat(temp2, temp1, mRotMtx);
+    TMtx44::concat(mRotMtx, temp3, mRotMtx);
+    temp2.rotateAxisY(mDriveDirection);
+    TMtx44::concat(mRotMtx, temp2, mRotMtx);
     mScaleMtx.scale(mScale);
 
     //Combine mtx

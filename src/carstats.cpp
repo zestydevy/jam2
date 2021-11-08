@@ -1,3 +1,4 @@
+#include "math.hpp"
 #include "carstats.hpp"
 
 int TCarStats::calcGear(f32 speed, f32* speeds){
@@ -5,32 +6,50 @@ int TCarStats::calcGear(f32 speed, f32* speeds){
         if (speed < speeds[i])
             return i;
     }
-    return 3;
+    return NUM_GEARS;
+}
+f32 TCarStats::calcStatTransition(f32 speed, f32* speeds){
+    if (speed < 0.0f)
+        speed = 0.0f;
+
+    int gear = calcGear(speed, speeds);
+
+    if (gear <= 0)
+        return 0.0f;
+    if (gear >= NUM_GEARS)
+        return 1.0f;
+    
+    float low = speeds[gear - 1];
+    float high = speeds[gear];
+
+    float t = (speed - low) / (high - low);
+
+    return t;
 }
 f32 TCarStats::calcStat(f32 speed, f32* speeds, f32* stat){
     if (speed < 0.0f)
         speed = 0.0f;
 
     int gear = calcGear(speed, speeds);
-    int nextGear = gear + 1;
-    if (gear >= 3)
-        return stat[3];
+
+    if (gear <= 0)
+        return stat[0];
+    if (gear >= NUM_GEARS)
+        return stat[NUM_GEARS - 1];
     
-    float low = 0.0f;
+    float low = speeds[gear - 1];
     float high = speeds[gear];
-    if (gear >= 1)
-        low = speeds[gear - 1];
 
-    float diff = (speed - low) / (high - low);
+    float t = (speed - low) / (high - low);
 
-    return ((1.0f - diff) * stat[gear]) + (diff * stat[nextGear]);
+    return ((1.0f - t) * stat[gear - 1]) + (t * stat[gear]);
 }
 
-const t_carstatdata testCar{
-    100.0f,                 400.0f,                 800.0f,                 1000.0f,    //Gear Speeds
-    100.0f,                 500.0f,                 200.0f,                 0.0f,       //Accelerations
-    0.99f,                  0.99f,                  0.9925f,                0.995f,     //Drift Rates
-    0.97f,                  0.97f,                  0.96f,                  0.96f,      //Brake Rates
-    1.0f,                   1.0f,                   0.5f,                   0.005f,     //Turn Rates
-    1.0f,                   1.0f,                   1.0f,                   0.99f       //Turn Energy Conversion Rates
+t_carstatdata sTestCar{
+    100.0f,                 200.0f,                 600.0f,                 1200.0f,     //Gear Speeds
+    200.0f,                 120.0f,                 100.0f,                 0.0f,       //Accelerations
+    0.992f,                 0.994f,                 0.996f,                 0.998f,      //Drift Rates
+    0.96f,                  0.97f,                  0.99f,                  0.992f,      //Brake Rates
+    1.0f,                   1.0f,                   0.2f,                   0.15f,       //Turn Rates
+    0.999f,                 0.999f,                 0.999f,                 0.998f      //Turn Energy Conversion Rates
 };
