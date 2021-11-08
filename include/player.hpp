@@ -96,15 +96,18 @@ class TPlayer :
     TCamera * mCamera;
     TVec3<f32> mCameraTarget{};
 
-    f32 mSpeed;
-    f32 mYSpeed;
+    f32 mSpeed{0.0f};
+    f32 mYSpeed{0.0f};
     TVec3<f32> mDirection{};
     TVec3F mCenter{};
 
-    s16 mDriveDirection;
+    s16 mDriveDirection{0};
+    TVec3F mForward{0.0f, 0.0f, 1.0f};
+    TVec3F mUp{0.0f,1.0f,0.0f};
 
-    TCarStats mCarStats;
+    TCarStats mCarStats{TCarStats()};
 
+    bool mOnGround {false};
     TCollFace const * mGroundFace { nullptr };
     const TCollFace * mClosestFace;
 

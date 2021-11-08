@@ -6,15 +6,18 @@
 #define NUM_GEARS 4
 #define NUM_STATS 5
 
-typedef const f32 t_carstatdata[NUM_GEARS * (1 + NUM_STATS)];
+typedef f32 t_carstatdata[NUM_GEARS * (1 + NUM_STATS)];
 
 class TCarStats {
     public:
     TCarStats( ){
     };
-    TCarStats(  t_carstatdata data ){
-        int i = 0;
 
+    bool importStats(t_carstatdata data){
+        if (data == nullptr)
+            return false;
+
+        int i = 0;
         mGearSpeeds[0] = data[i++];
         mGearSpeeds[1] = data[i++];
         mGearSpeeds[2] = data[i++];
@@ -44,10 +47,17 @@ class TCarStats {
         mTurnEnergyConversion[1] = data[i++];
         mTurnEnergyConversion[2] = data[i++];
         mTurnEnergyConversion[3] = data[i++];
-    };
+
+        if (i != NUM_GEARS * (1 + NUM_STATS))
+            return false;
+        return true;
+    }
 
     inline int getGear(f32 speed){
         return calcGear(speed, mGearSpeeds);
+    };
+    inline f32 getGearTransition(f32 speed){
+        return calcStatTransition(speed, mGearSpeeds);
     };
     inline f32 getAcceleration(f32 speed){
         return calcStat(speed, mGearSpeeds, mAcceleration);
@@ -66,15 +76,16 @@ class TCarStats {
     };
 
     private:
-    f32 mGearSpeeds[NUM_GEARS];                     //Speed of each gear
-    f32 mAcceleration[NUM_GEARS];               //acceration
-    f32 mDriftRate[NUM_GEARS];                  //slow down when no button pressed
-    f32 mBrakeRate[NUM_GEARS];                  //slow down when brake pressed
-    f32 mTurnRate[NUM_GEARS];                   //turn rate per unit travelled
-    f32 mTurnEnergyConversion[NUM_GEARS];       //turn rate per unit travelled
+    f32 mGearSpeeds[NUM_GEARS] = {0.0f};                 //Speed of each gear
+    f32 mAcceleration[NUM_GEARS] = {0.0f};               //acceration
+    f32 mDriftRate[NUM_GEARS] = {0.0f};                  //slow down when no button pressed
+    f32 mBrakeRate[NUM_GEARS] = {0.0f};                  //slow down when brake pressed
+    f32 mTurnRate[NUM_GEARS] = {0.0f};                   //turn rate per unit travelled
+    f32 mTurnEnergyConversion[NUM_GEARS] = {0.0f};       //turn rate per unit travelled
 
     int calcGear(f32 speed, f32* speeds);
     f32 calcStat(f32 speed, f32* speeds, f32* stat);
+    f32 calcStatTransition(f32 speed, f32* speeds);
 };
 
-extern t_carstatdata testCar;
+extern t_carstatdata sTestCar;
