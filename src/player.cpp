@@ -224,7 +224,11 @@ void TPlayer::update()
 
     // set shadow position and rotation to floor
     if (mGroundFace != nullptr) {
-        setRotation(TVec3<s16>((s16)TSine::atan2(mGroundFace->nrm.z(), mGroundFace->nrm.y()), (s16)0, (s16)-TSine::atan2(mGroundFace->nrm.x(), mGroundFace->nrm.y())));
+        s16 rotX = mRotation.x();
+        s16 rotZ = mRotation.z();
+        rotX = TMath<s16>::lerp(rotX, (s16)TSine::atan2(mGroundFace->nrm.z(), mGroundFace->nrm.y()), kInterval * 4.0f);
+        rotZ = TMath<s16>::lerp(rotZ, (s16)-TSine::atan2(mGroundFace->nrm.x(), mGroundFace->nrm.y()), kInterval * 4.0f);
+        setRotation(TVec3<s16>(rotX, (s16)0, rotZ));
 
         pt = getPosition();
         pt.y() = mGroundFace->calcYAt(pt.xz());
