@@ -9,6 +9,7 @@
 #include <nualstl_n.h>
 #include "audio.hpp"
 #include "collision.h"
+#include "checkpoint.hpp"
 
 #include "../models/static/shadow/shadow.h"
 
@@ -27,7 +28,7 @@ const float PLAYER_RADIUS = 10.0f;
 
 // -------------------------------------------------------------------------- //
 
-TPlayer * gPlayer { nullptr };
+TPlayer * gPlayers[4] { nullptr, nullptr, nullptr, nullptr };
 
 // -------------------------------------------------------------------------- //
 
@@ -63,6 +64,8 @@ void TPlayer::init()
 
     mGameState = gameplaystate_t::PLAYERGAMESTATE_NORMAL;
 
+    mLastCheckpoint = 0;
+
     startDriving();
 }
 
@@ -96,6 +99,12 @@ void TPlayer::checkMeshCollision(const TCollFace * face, float radius){
     TVec3F p;
     face->project(mPosition, &p);
     mPosition = p + face->nrm * radius;
+}
+
+void TPlayer::snapToGround(){
+    TVec3F pt = getPosition() + TVec3F(0.0f, PLAYER_RADIUS, 0.0f);
+    auto face = TCollision::findGroundBelow(pt, PLAYER_RADIUS);
+    if (face != nullptr) mPosition.y() = face->calcYAt(pt.xz());
 }
 
 void TPlayer::update()
@@ -224,6 +233,17 @@ void TPlayer::update()
     }
 
     mCameraTarget = mPosition;
+
+    int nextcheckpoint = gCurrentRace->getNextCheckpoint(mLastCheckpoint);
+    float checkPointDist = gCurrentRace->getDistance(mPosition, nextcheckpoint);
+    float progress = gCurrentRace->getRaceProgress(mPosition, mLastCheckpoint);
+    
+    if (checkPointDist < 50.0f){
+        mLastCheckpoint = nextcheckpoint;
+        //mScale.y() += 0.1f;
+        if (gCurrentRace->getNextCheckpoint(mLastCheckpoint) == 1)
+            *(int*)0 = 0;   //you win!!! :)
+    }
 
     updateBlkMap();
 }

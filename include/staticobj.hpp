@@ -61,7 +61,7 @@ enum EObjType : s16
     BUSH,
     LAMP,
     CAR,
-    GOAL,
+    CHECKPOINT,
     INVALID
 };
 

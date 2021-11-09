@@ -107,7 +107,14 @@ void TScene::loadObjects(TSceneEntry const list[])
 
         switch(list[i].id) {
             case EObjType::PLAYERSTART:
-                //gPlayer->setPosition({list[i].positionX, list[i].positionY, list[i].positionZ});
+                if (gPlayers[list[i].data[0]] != nullptr){
+                    gPlayers[list[i].data[0]]->setPosition({list[i].positionX, list[i].positionY, list[i].positionZ});
+                    gPlayers[list[i].data[0]]->setDriveDirection(TSine::fromDeg(list[i].data[1]));
+                    gPlayers[list[i].data[0]]->snapToGround();
+                }
+                continue;
+            case EObjType::CHECKPOINT:
+                gCurrentRace->loadCheckpoint(list[i]);
                 break;
             case EObjType::DEBUG_CUBE:
                 obj = new TObject(mDynList);
@@ -117,9 +124,8 @@ void TScene::loadObjects(TSceneEntry const list[])
                 break;
         }
 
-        if (obj == nullptr) {
+        if (obj == nullptr)
             continue;
-        }
 
         obj->setPosition({list[i].positionX, list[i].positionY, list[i].positionZ});
         obj->setRotation({TSine::fromDeg(list[i].rotationX), TSine::fromDeg(list[i].rotationY), TSine::fromDeg(list[i].rotationZ)});
@@ -150,6 +156,34 @@ void TLogoScene::init()
 
     TCollider::startup(nullptr, 10, 512.0F);
 
+    sFaces = new TCollision::TFace[test00_layer1_count];
+
+    //Load collision data
+    TUtil::toMemory(
+        reinterpret_cast<void *>(sFaces), 
+        _col_ovlSegmentRomStart, 
+        _col_ovlSegmentRomEnd-_col_ovlSegmentRomStart
+    );
+
+    if (!TCollision::startup(
+        sFaces, test00_layer1_count, nullptr,
+        (test00_layer1_count * 1.4f), 10, 2048.0F
+    ))
+        *(int*)0 = 0;
+
+    mRacist.clearCheckpoints();
+    gCurrentRace = &mRacist;
+
+    for (int i = 0; i < 1; i++){
+        mPlayers[i] = new TPlayer(mDynList);
+        mPlayers[i]->setMesh(car_Cube1_mesh);
+        gPlayers[i] = mPlayers[i];
+    }
+
+    loadObjects(scene_test00);
+
+    gCurrentRace->postLoadCheckpoints();
+
     //TAudio::playMusic(EBgm::BGM_INTRO);
 
     mShowTimer = new TTimer;
@@ -172,9 +206,6 @@ void TLogoScene::init()
     mTestCamera->setPad(mTestPad);
 
     for (int i = 0; i < 1; i++){
-        mPlayers[i] = new TPlayer(mDynList);
-        mPlayers[i]->setMesh(car_Cube1_mesh);
-        mPlayers[i]->setPosition(TVec3F{0.0f, 500.0f, 0.0f});
         mPlayers[i]->setScale(TVec3F{0.4f, 0.4f, 0.4f});
 
         mPlayers[i]->init();
@@ -213,24 +244,6 @@ void TLogoScene::init()
     sYoshiJoint = new TJoint(32);
     sYoshiJoint->registerAnimation(reinterpret_cast<TJointAnimData const &>(dino_anim_ArmatureAction));
     sYoshiJoint->playAnimation();
-
-    sFaces = new TCollision::TFace[test00_layer1_count];
-
-    //Load collision data
-    TUtil::toMemory(
-        reinterpret_cast<void *>(sFaces), 
-        _col_ovlSegmentRomStart, 
-        _col_ovlSegmentRomEnd-_col_ovlSegmentRomStart
-    );
-
-    if (!TCollision::startup(
-        sFaces, test00_layer1_count, nullptr,
-        (test00_layer1_count * 1.4f), 10, 2048.0F
-    ))
-        *(int*)0 = 0;
-
-    //for (int i = 0; i < test00_layer1_count; i++)
-    //    sFaces[i].setPassThru(false);
 }
 
 // -------------------------------------------------------------------------- //

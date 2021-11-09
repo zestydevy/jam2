@@ -12,6 +12,7 @@
 #include "scenedata.h"
 #include "staticobj.hpp"
 #include "player.hpp"
+#include "checkpoint.hpp"
 
 // -------------------------------------------------------------------------- //
 
@@ -91,6 +92,7 @@ class TLogoScene final
     TCamera * mTestCamera3{nullptr};
     TCamera * mTestCamera4{nullptr};
 
+    TCheckpointTracker mRacist;
     TPlayer * mPlayers[4];
 
     TPad * mTestPad{nullptr};

@@ -22,6 +22,8 @@ struct TSceneEntry
     float scaleX;
     float scaleY;
     float scaleZ;
+
+    s16 data[4];
 };
 
 enum EObject
@@ -76,7 +78,7 @@ enum EObject
     OBJECT_BUSH,
     OBJECT_LAMP,
     OBJECT_CAR,
-    OBJECT_GOAL
+    OBJECT_CHECKPOINT
 };
 
 #endif

@@ -25,4 +25,5 @@ extern Gfx sky_Track1_mesh[];
 extern Gfx grass_Track1_001_mesh[];
 
 #define test00_layer1_count 1800
-extern CollisionFace test00_layer1_faces[];
+
+extern TSceneEntry scene_test00[];

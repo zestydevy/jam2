@@ -36,7 +36,7 @@ enum playeranim_t : u16 {
 
 class TPlayer;
 
-extern TPlayer * gPlayer;
+extern TPlayer * gPlayers[4];
 
 // -------------------------------------------------------------------------- //
 
@@ -50,7 +50,6 @@ class TPlayer :
     TPlayer(TDynList2 * dl) :
         TObject { dl }
     {
-        gPlayer = this;
     }
 
     virtual ~TPlayer() = default;
@@ -64,6 +63,10 @@ class TPlayer :
         mCamera->setTarget(&mCameraTarget);
     }
 
+    void setDriveDirection(s16 rotation){
+        mDriveDirection = rotation;
+    }
+
     TCollFace const * getGroundFace() const {
         return mGroundFace;
     }
@@ -71,6 +74,8 @@ class TPlayer :
     TVec3F getVelocity() {
         return mDirection * mSpeed;
     }
+
+    void snapToGround();
 
     virtual void updateMtx() override;
 
@@ -106,6 +111,7 @@ class TPlayer :
     TVec3F mForward{0.0f, 0.0f, 1.0f};
     TVec3F mUp{0.0f,1.0f,0.0f};
 
+    s16 mLastCheckpoint;
     TCarStats mCarStats{TCarStats()};
 
     bool mOnGround {false};
