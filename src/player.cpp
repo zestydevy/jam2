@@ -65,6 +65,8 @@ void TPlayer::init()
     mGameState = gameplaystate_t::PLAYERGAMESTATE_NORMAL;
 
     mLastCheckpoint = 0;
+    if (mPad == nullptr)
+        aiCalcNextTarget();
 
     startDriving();
 }
@@ -107,9 +109,76 @@ void TPlayer::snapToGround(){
     if (face != nullptr) mPosition.y() = face->calcYAt(pt.xz());
 }
 
+void TPlayer::resetCamera(){
+    if (mCamera != nullptr){
+        mCamera->setAngle(mDriveDirection);
+        mCamera->setPosition(mPosition - (mForward * PLAYER_CAMERA_TRAIL_DISTANCE * (mSpeed >= 0 ? 1.0f : -1.0f)) + TVec3F(0.0f, PLAYER_CAMERA_TRAIL_HEIGHT, 0.0f));
+        mCamera->jumpToTarget();
+    }
+}
+
+void TPlayer::aiUpdate(bool& aButton, bool& bButton, f32& steer){
+    bool inGrass = false;
+    if (mGroundFace != nullptr && mGroundFace->surf == SURFACE_GRASS)
+        inGrass = true;
+
+    aButton = true;
+
+    TVec2F forward = TVec2F(TSine::ssin(mDriveDirection), TSine::scos(mDriveDirection));
+    TVec2F right = TVec2F(TSine::ssin(mDriveDirection + TSine::fromDeg(90)), TSine::scos(mDriveDirection + TSine::fromDeg(90)));
+
+    TVec2F diff = mCurrentAITarget.xz() - mPosition.xz();
+    diff.normalize();
+
+    float amtRight = -diff.dot(right);
+
+    steer = TMath<f32>::clamp(amtRight * 4.0f, -1.0f, 1.0f);
+    if (mSpeed < 0)
+        steer = -steer;
+
+    if (!inGrass){
+        if (TMath<f32>::abs(amtRight) > 0.5f && mSpeed > 10.0f)
+            aButton = false;
+        if (TMath<f32>::abs(amtRight) > 0.75f && mSpeed > 10.0f)
+            bButton = true;
+        else if (TMath<f32>::abs(amtRight) > 0.9f)
+            bButton = true;
+    }
+}
+
+void TPlayer::aiCalcNextTarget(){
+    switch (mAIType){
+        case AI_BAD:
+            mCurrentAITarget = gCurrentRace->getCheckpointCenter(gCurrentRace->getNextCheckpoint(mLastCheckpoint));
+            break;
+        case AI_RANDOM:
+            mCurrentAITarget = gCurrentRace->getRandomCheckpointPosition(gCurrentRace->getNextCheckpoint(mLastCheckpoint));
+            break;
+        case AI_GOOD:
+            mCurrentAITarget = gCurrentRace->getClosestCheckpointPosition(mPosition, gCurrentRace->getNextCheckpoint(mLastCheckpoint));
+            break;
+    }
+}
+
 void TPlayer::update()
 {
     TObject::update();
+
+    /* Get controller/ai inputs */
+    bool aButton = false;
+    bool bButton = false;
+    float steer = 0.0f;
+
+    if (mPad != nullptr){
+        //Player controlled
+        aButton = mPad->isHeld(A);
+        bButton = mPad->isHeld(B);
+        steer = TMath<f32>::clamp((float)mPad->getAnalogX() / 160.0f, -1.0f, 1.0f);
+    }
+    else{
+        //AI
+        aiUpdate(aButton, bButton, steer);
+    }
 
     /* Ground check */
     TVec3F pt = getPosition() + TVec3F(0.0f, PLAYER_RADIUS, 0.0f);
@@ -156,11 +225,11 @@ void TPlayer::update()
         case playerstate_t::PLAYERSTATE_DRIVING:{
             //checkLateralCollision();
 
-            float turn = TMath<f32>::clamp((float)mPad->getAnalogX() / 160.0f, -1.0f, 1.0f);
+            float turn = steer;
 
             if (mOnGround && mGroundFace->surf == SURFACE_GRASS)        //Grass slowdown
                 mSpeed *= 0.985f;
-            if (!mOnGround || (!mPad->isHeld(A) && !mPad->isHeld(B)))   //Air resistance
+            if (!mOnGround || (!aButton && !bButton))   //Air resistance
                 mSpeed *= mCarStats.getDrift(mSpeed);
 
             //Get real up direction
@@ -179,10 +248,10 @@ void TPlayer::update()
 
             //acceleration and deceleration
             if (mOnGround){
-                if (mPad->isHeld(A)) {
+                if (aButton) {
                     mSpeed += mCarStats.getAcceleration(mSpeed) * kInterval;
                 }
-                if (mPad->isHeld(B)) {
+                if (bButton) {
                     if (mSpeed >= PLAYER_BRAKE_MIN_SPEED)
                         mSpeed *= mCarStats.getBrake(mSpeed);
                     else
@@ -204,10 +273,12 @@ void TPlayer::update()
 
             //snap camera behind player
             bool cameraMode = mSpeed > PLAYER_CAMERA_TRAIL_MINSPEED || mSpeed < -PLAYER_CAMERA_TRAIL_MINSPEED;
-            mCamera->setMode(cameraMode);
-            if (cameraMode)
-                mCamera->setPosition(mPosition - (mForward * PLAYER_CAMERA_TRAIL_DISTANCE * (mSpeed >= 0 ? 1.0f : -1.0f)) + TVec3F(0.0f, PLAYER_CAMERA_TRAIL_HEIGHT, 0.0f));
-            mCameraTarget = mPosition;
+            if (mCamera != nullptr){
+                mCamera->setMode(cameraMode);
+                if (cameraMode)
+                    mCamera->setPosition(mPosition - (mForward * PLAYER_CAMERA_TRAIL_DISTANCE * (mSpeed >= 0 ? 1.0f : -1.0f)) + TVec3F(0.0f, PLAYER_CAMERA_TRAIL_HEIGHT, 0.0f));
+                mCameraTarget = mPosition;
+            }
         }
         break;
     }
@@ -244,9 +315,9 @@ void TPlayer::update()
     
     if (checkPointDist < 50.0f){
         mLastCheckpoint = nextcheckpoint;
-        //mScale.y() += 0.1f;
-        if (gCurrentRace->getNextCheckpoint(mLastCheckpoint) == 1)
-            *(int*)0 = 0;   //you win!!! :)
+
+        if (mPad == nullptr)
+            aiCalcNextTarget();
     }
 
     updateBlkMap();
@@ -282,10 +353,6 @@ void TPlayer::draw()
 
     updateMtx();
     TObject::draw();
-
-    if (mGroundFace != nullptr) {
-        mShadow->draw();
-    }
 }
 
 void TPlayer::drawShadow()

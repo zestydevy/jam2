@@ -174,7 +174,7 @@ void TLogoScene::init()
     mRacist.clearCheckpoints();
     gCurrentRace = &mRacist;
 
-    for (int i = 0; i < 1; i++){
+    for (int i = 0; i < 4; i++){
         mPlayers[i] = new TPlayer(mDynList);
         mPlayers[i]->setMesh(car_Cube1_mesh);
         gPlayers[i] = mPlayers[i];
@@ -205,15 +205,24 @@ void TLogoScene::init()
     mTestCamera = new TCamera(mDynList);
     mTestCamera->setPad(mTestPad);
 
-    for (int i = 0; i < 1; i++){
+    for (int i = 0; i < 4; i++){
         mPlayers[i]->setScale(TVec3F{0.4f, 0.4f, 0.4f});
-
         mPlayers[i]->init();
-
-        mPlayers[i]->setCamera(mTestCamera);
-        mPlayers[i]->setPad(mTestPad);
         mPlayers[i]->setShadowMesh(car_Cube1_mesh_shadow);
     }
+
+    //Player 1
+    mPlayers[0]->setCamera(mTestCamera);
+    mPlayers[0]->setPad(mTestPad);
+
+    //Player 2
+    mPlayers[1]->setAIType(AI_BAD);
+
+    //Player 3
+    mPlayers[2]->setAIType(AI_RANDOM);
+
+    //Player 4
+    mPlayers[3]->setAIType(AI_GOOD);
 
     sTestEmitter->attach(mPlayers[0], TVec3F{0.0f, 0.0f, 0.0f});
 
@@ -263,7 +272,7 @@ void TLogoScene::update()
 
     TCollider::frameBegin();
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 4; i++)
         mPlayers[i]->update();
 
     mTestCamera->update();
@@ -295,12 +304,12 @@ void TLogoScene::draw()
     sSkyObj->draw();
 	sLogoObj->draw();
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 4; i++)
         mPlayers[i]->draw();
 
     gSPDisplayList(mDynList->pushDL(), grass_Track1_001_mesh);
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 4; i++)
         mPlayers[i]->drawShadow();
 
     for (int i = 0; i < mEmitterList.capacity(); ++i) {

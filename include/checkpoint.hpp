@@ -34,6 +34,7 @@ class TCheckpointTracker
     s16 getNextCheckpoint(s16 index);
     TVec3F getCheckpointCenter(s16 index);
     TVec3F getRandomCheckpointPosition(s16 index);
+    TVec3F getClosestCheckpointPosition(TVec3F& position, s16 index);
     f32 getRaceProgress(TVec3F& position, s16 index);
 };
 

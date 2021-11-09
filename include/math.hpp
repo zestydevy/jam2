@@ -61,6 +61,7 @@ class TMath<float> {
   static float abs(float x) { return (x >= 0.0F ? x : -x); }
 
   static inline float sqrt(float x) { return sqrtf(x); }
+  static inline float log(float x) { return logf(x); }
 
   static inline float mod(float x, float y) {
     return (x - static_cast<u64>(x / y) * y);
@@ -74,6 +75,20 @@ class TMath<float> {
   }
 
   static float frand(float min, float max) {return min + static_cast <f32> (rand()) / ( static_cast <f32> (kRandMax / (max - min)));}
+  static float frandnorm(float mu, float sigma, float* z1 = nullptr) {
+    float twopi = M_PI * 2.0;
+    float r1 = frand(0.0f, 1.0f);
+    float r2 = frand(0.0f, 1.0f);
+    if (r1 <= epsilon())
+      r1 = 2.0f * epsilon();
+
+    float m = sigma * sqrt(-2.0f * log(r1));
+    float z0 = m * cos(twopi * r2) + mu;
+    if (z1 != nullptr)
+      *z1 = m * sin(twopi * r2) + mu;
+
+    return z0;
+  }
 
 };
 

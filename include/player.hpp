@@ -32,6 +32,18 @@ enum playeranim_t : u16 {
     ANIM_COUNT
 };
 
+enum playeraistate_t : u16 {
+    AISTATE_DRIVETOTARGET,
+    AISTATE_RETURNTOTRACK,
+    AISTATE_FINISH
+};
+
+enum playeraitype_t : u16 {
+    AI_BAD,
+    AI_RANDOM,
+    AI_GOOD
+};
+
 // -------------------------------------------------------------------------- //
 
 class TPlayer;
@@ -61,6 +73,7 @@ class TPlayer :
     void setCamera(TCamera * camera) {
         mCamera = camera;
         mCamera->setTarget(&mCameraTarget);
+        resetCamera();
     }
 
     void setDriveDirection(s16 rotation){
@@ -75,6 +88,8 @@ class TPlayer :
         return mDirection * mSpeed;
     }
 
+    void setAIType(playeraitype_t ai) { mAIType = ai; }
+
     void snapToGround();
 
     virtual void updateMtx() override;
@@ -83,6 +98,11 @@ class TPlayer :
     virtual void update() override;
     virtual void draw() override;
     virtual void drawShadow();
+
+    void resetCamera();
+
+    void aiUpdate(bool& aButton, bool& bButton, f32& steer);
+    void aiCalcNextTarget();
 
     void setAnimation(int length, playeranim_t anim, bool loop = true, float timescale = 0.25f);
 
@@ -99,7 +119,7 @@ class TPlayer :
 
     TShadow * mShadow{nullptr};
 
-    TCamera * mCamera;
+    TCamera * mCamera {nullptr};
     TVec3<f32> mCameraTarget{};
 
     f32 mSpeed{0.0f};
@@ -117,6 +137,11 @@ class TPlayer :
     bool mOnGround {false};
     TCollFace const * mGroundFace { nullptr };
     const TCollFace * mClosestFace;
+
+    /* AI */
+    playeraitype_t mAIType { AI_RANDOM };
+    playeraistate_t mAIState { AISTATE_DRIVETOTARGET };
+    TVec3F mCurrentAITarget {0.0f, 0.0f, 0.0f};
 
     playerstate_t mState{playerstate_t::PLAYERSTATE_DRIVING};
     gameplaystate_t mGameState{gameplaystate_t::PLAYERGAMESTATE_NORMAL};

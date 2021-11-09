@@ -56,8 +56,16 @@ TVec3F TCheckpointTracker::getCheckpointCenter(s16 index){
     return (mCheckpoints[index].a + mCheckpoints[index].b) / 2.0f;
 }
 
+TVec3F TCheckpointTracker::getClosestCheckpointPosition(TVec3F& position, s16 index){
+    TVec3F pt;
+    TCollideUtil::distPtLine(mCheckpoints[index].a, mCheckpoints[index].b, TVec3F(position.x(), 0.0f, position.z()), &pt);
+    return pt;
+}
+
 TVec3F TCheckpointTracker::getRandomCheckpointPosition(s16 index){
-    return (mCheckpoints[index].a + mCheckpoints[index].b) / 2.0f;
+    float t = TMath<float>::clamp(TMath<float>::frandnorm(0.5f, 0.1f), 0.25f, 0.75f);
+    TVec3F ab = mCheckpoints[index].b - mCheckpoints[index].a;
+    return mCheckpoints[index].a + (ab * t);
 }
 
 f32 TCheckpointTracker::getRaceProgress(TVec3F& position, s16 index){
