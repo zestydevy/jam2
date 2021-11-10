@@ -167,7 +167,7 @@ void TLogoScene::init()
 
     if (!TCollision::startup(
         sFaces, test00_layer1_count, nullptr,
-        (test00_layer1_count * 1.4f), 10, 2048.0F
+        (test00_layer1_count * 1.4f), 10, 4096.0F
     ))
         *(int*)0 = 0;
 
@@ -280,7 +280,7 @@ void TLogoScene::update()
     sLogoObj->update();
     sSkyObj->mAlwaysDraw = true;
     sSkyObj->update();
-    
+
     sLogoRot += 140.0f;
     sLogoObj->setRotation(TVec3F{0.0f, sLogoRot, 0.0f});
 

@@ -91,9 +91,6 @@ class TCollision {
   static TFace const * findGroundBelow(
     TVec3F const & pt, float b = 0.0F, float d = 0.0F
   );
-    static TFace const * findGroundAbove(
-    TVec3F const & pt, float b = 0.0F, float d = 0.0F
-  );
 
   static void getBlkBox(u32 x, u32 y,
     float * min_x, float * min_z,

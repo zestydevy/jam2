@@ -13,6 +13,9 @@
 
 #include "../models/static/shadow/shadow.h"
 
+const bool PLAYER_DOUBLESIDEDCOL = true;
+const int PLAYER_COLLISIONCHECK_COUNT = 8;
+
 //TODO: convert to variables
 const float PLAYER_GRAVITY = 980.0f * kInterval;
 const float PLAYER_BOUNCE_SCALE = 1.5f;
@@ -24,7 +27,13 @@ const float PLAYER_CAMERA_TRAIL_MINSPEED = 20.0f;
 const float PLAYER_CAMERA_TRAIL_DISTANCE = 200.0f;
 const float PLAYER_CAMERA_TRAIL_HEIGHT = 100.0f;
 
-const float PLAYER_RADIUS = 10.0f;
+const float CAR_STEPDIST = 50.0f;
+const float CAR_COLHEIGHT = 10.0f;
+const float CAR_WIDTH = 50.0f;
+const float CAR_LENGTH = 45.0f;
+
+const float FRICTION_ENERGYLOSS = 0.01f;
+const float CAR_FRONT_THRESHOLD = 0.75f;
 
 // -------------------------------------------------------------------------- //
 
@@ -54,7 +63,7 @@ void TPlayer::init()
     mShadow->setScale(mScale);
 
     initCollider(TAG_PLAYER, TAG_PLAYER, 0, 1);
-    setCollideRadius(PLAYER_RADIUS);
+    setCollideRadius(CAR_LENGTH);
     setCollideCenter(mPosition);
 
     mCameraTarget = mPosition;
@@ -82,19 +91,74 @@ void TPlayer::startCrashing(){
     mState = PLAYERSTATE_STUNNED;
 }
 
+s16 calcTriangleAngle(TVec3F& a, TVec3F& b, TVec3F& c){
+    float ab = TVec3F::dist(a, b);
+    float ac = TVec3F::dist(a, c);
+    float bc = TVec3F::dist(b, c);
+    float abc = ((ac * ac) + (ab * ab) - (bc * bc)) / (2 * ac * ab);
+    return TSine::acos(abc);
+}
+
 void TPlayer::checkLateralCollision(){
-    TVec3F nrmm = mDirection;
-    nrmm.normalize();
-    nrmm *= (PLAYER_RADIUS / 2.0f);
+    const TCollFace* collFaces[PLAYER_COLLISIONCHECK_COUNT];
+    for (int i = 0; i < PLAYER_COLLISIONCHECK_COUNT; i++)
+        collFaces[i] = nullptr;
 
-    mGroundFace = TCollision::findGroundBelow(mPosition + nrmm, PLAYER_RADIUS);  //recalc ground pos
+    TCollision::checkRadius(mPosition, CAR_LENGTH, collFaces, PLAYER_COLLISIONCHECK_COUNT);
 
-    //if (mGroundFace != nullptr){
-    //    float yPos = mGroundFace->calcYAt((mPosition + nrmm).xz()) + PLAYER_RADIUS;
-    //    mPosition.y() = yPos;
-    //}
+    TMtx44 rot;
+    rot.rotateAxis(mUp, TSine::fromDeg(90));
+    TVec3F carFront = mPosition + (mForward * CAR_LENGTH);
+    TVec3F right = rot.mul(mForward);
 
-    mClosestFace = TCollision::findClosest(mPosition + nrmm , PLAYER_RADIUS / 2.0f); //use closest face in front of player
+    TVec3F p, cp;
+    for (int i = 0; i < PLAYER_COLLISIONCHECK_COUNT; i++){
+        if (collFaces[i] == nullptr)
+            break;
+        if (collFaces[i]->isGround())
+            continue;
+
+        TVec3F carCenter = mPosition + (mUp * CAR_STEPDIST);
+
+        collFaces[i]->calcClosestPt(carCenter + (mUp * CAR_STEPDIST), &cp);
+
+        //Ignore face if its low enough to drive over
+        if (cp.y() < carCenter.y())
+            continue;
+
+        TVec3F nrm = collFaces[i]->nrm;
+
+        collFaces[i]->project(mPosition, &p);
+
+        //Flip normal if double sided collisions are enabled and we are on the wrong side
+        if (PLAYER_DOUBLESIDEDCOL){
+            float direction = nrm.dot(mPosition - p);
+            if (direction < 0.0f)
+                nrm = TVec3F(0.0f, 0.0f, 0.0f) - nrm;
+        }
+
+        float energy = -mForward.dot(nrm);
+        float friction = FRICTION_ENERGYLOSS;
+
+        float steerDot = right.dot(nrm);
+
+        if (energy > CAR_FRONT_THRESHOLD){
+            //Turn car towards wall
+            friction = 1.0f;
+
+            mDriveDirection -= (int)(steerDot * steerDot * mSpeed * CAR_LENGTH + 0.99f);
+        }
+        else{
+            //Turn car along wall
+            mDriveDirection += (int)(energy * mSpeed + 0.99f) * (steerDot >= 0.0f ? 1 : -1);
+            showFriction(p,  energy * friction * mSpeed);
+        }
+
+        mSpeed -= TMath<f32>::clamp(energy * friction * mSpeed, 0.0f, mSpeed);
+        showCollision(p, energy * mSpeed);
+
+        mPosition = p + nrm * CAR_LENGTH;
+    }
 }
 
 void TPlayer::checkMeshCollision(const TCollFace * face, float radius){
@@ -104,8 +168,8 @@ void TPlayer::checkMeshCollision(const TCollFace * face, float radius){
 }
 
 void TPlayer::snapToGround(){
-    TVec3F pt = getPosition() + TVec3F(0.0f, PLAYER_RADIUS, 0.0f);
-    auto face = TCollision::findGroundBelow(pt, PLAYER_RADIUS);
+    TVec3F pt = getPosition() + TVec3F(0.0f, CAR_STEPDIST, 0.0f);
+    auto face = TCollision::findGroundBelow(pt, CAR_STEPDIST);
     if (face != nullptr) mPosition.y() = face->calcYAt(pt.xz());
 }
 
@@ -124,7 +188,6 @@ void TPlayer::aiUpdate(bool& aButton, bool& bButton, f32& steer){
 
     aButton = true;
 
-    TVec2F forward = TVec2F(TSine::ssin(mDriveDirection), TSine::scos(mDriveDirection));
     TVec2F right = TVec2F(TSine::ssin(mDriveDirection + TSine::fromDeg(90)), TSine::scos(mDriveDirection + TSine::fromDeg(90)));
 
     TVec2F diff = mCurrentAITarget.xz() - mPosition.xz();
@@ -181,19 +244,13 @@ void TPlayer::update()
     }
 
     /* Ground check */
-    TVec3F pt = getPosition() + TVec3F(0.0f, PLAYER_RADIUS, 0.0f);
-    mGroundFace = TCollision::findGroundBelow(pt, PLAYER_RADIUS);
+    TVec3F pt = getPosition() + TVec3F(0.0f, CAR_STEPDIST, 0.0f);
+    TVec3F front = pt + (mForward * CAR_LENGTH);
+    mGroundFace = TCollision::findGroundBelow(pt, CAR_STEPDIST);
     float groundY = -1000.0f;
-    if (mGroundFace != nullptr) groundY = mGroundFace->calcYAt(pt.xz());
-    else{ 
-        mGroundFace = TCollision::findGroundBelow(pt + (mForward * PLAYER_RADIUS), PLAYER_RADIUS);
-        if (mGroundFace != nullptr) groundY = mGroundFace->calcYAt(pt.xz());
-    }
-
+    if (mGroundFace != nullptr)
+        groundY = mGroundFace->calcYAt(pt.xz());
     TVec3F vel = mForward * mSpeed + (mYSpeed * TVec3F(0.0f, 1.0f, 0.0f));
-
-    /* Collision check */
-    mClosestFace = TCollision::findClosest(mPosition, PLAYER_RADIUS);
 
     if (mGroundFace != nullptr && mPosition.y() <= groundY + 0.001f && vel.dot(mGroundFace->nrm) < 0.05f) {
         mPosition.y() = groundY;
@@ -223,8 +280,6 @@ void TPlayer::update()
     switch (mState){
         // idle. c'mon let's get a move on...
         case playerstate_t::PLAYERSTATE_DRIVING:{
-            //checkLateralCollision();
-
             float turn = steer;
 
             if (mOnGround && mGroundFace->surf == SURFACE_GRASS)        //Grass slowdown
@@ -239,9 +294,7 @@ void TPlayer::update()
                 mUp = TVec3F(0.0f, 1.0f, 0.0f);
 
             //Get real forward direction
-            TVec3F forward = TVec3F(TSine::ssin(mDriveDirection), 0.0f, TSine::scos(mDriveDirection));
-            TVec3F proj = forward.dot(mUp) * mUp;
-            mForward = forward - proj;
+            calculateForwardDirection();
 
             //Apply gravity to speed
             mSpeed -= (mForward.dot(TVec3F(0.0f, 1.0f, 0.0f)) * PLAYER_GRAVITY * 50.0f) * kInterval;
@@ -286,9 +339,8 @@ void TPlayer::update()
     //Apply forward momentum
     mPosition += mForward * mSpeed * kInterval;
 
-    //Mesh collision
-    //if (mClosestFace != nullptr)
-    //    checkMeshCollision(mClosestFace, PLAYER_RADIUS);
+    //World collision
+    checkLateralCollision();
 
     //Object collision
     setCollideCenter(mPosition);
@@ -321,6 +373,12 @@ void TPlayer::update()
     }
 
     updateBlkMap();
+}
+
+void TPlayer::calculateForwardDirection(){
+    TVec3F forward = TVec3F(TSine::ssin(mDriveDirection), 0.0f, TSine::scos(mDriveDirection));
+    TVec3F proj = forward.dot(mUp) * mUp;
+    mForward = forward - proj;
 }
 
 void TPlayer::updateMtx()
@@ -360,6 +418,16 @@ void TPlayer::drawShadow()
     if (mGroundFace != nullptr) {
         mShadow->draw();
     }
+}
+
+//Called whenever the player crashes
+void TPlayer::showCollision(TVec3F& p, float energy){
+
+}
+
+//Called whenever the player scrapes a wall
+void TPlayer::showFriction(TVec3F& p, float energy){
+
 }
 
 // -------------------------------------------------------------------------- //

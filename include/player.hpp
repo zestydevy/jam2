@@ -114,6 +114,10 @@ class TPlayer :
     void checkLateralCollision();
     void checkMeshCollision(const TCollFace * face, float radius);
 
+    void calculateForwardDirection();
+    void showFriction(TVec3F& p, float energy); //Called whenever the player crashes
+    void showCollision(TVec3F& p, float energy); //Called whenever the player crashes
+
     TAnimator * mAnim{nullptr};
     TPad * mPad{nullptr};
 
