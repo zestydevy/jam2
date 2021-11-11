@@ -173,7 +173,7 @@ void TPlayer::checkLateralCollision(){
         mSpeed -= TMath<f32>::clamp(energy * friction * mSpeed, 0.0f, mSpeed);
         showCollision(collFaces[i].closestPoint, energy * mSpeed);
 
-        mVelocity += nrm * mVelocity.dot(nrm);
+        mVelocity += nrm * -mVelocity.dot(nrm);
 
         //Push away from wall
         mPosition = collFaces[i].closestPoint + nrm * CAR_LENGTH - (mUp * CAR_STEPDIST * 2.0f);
