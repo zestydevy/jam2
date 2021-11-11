@@ -27,10 +27,13 @@ const float PLAYER_CAMERA_TRAIL_MINSPEED = 20.0f;
 const float PLAYER_CAMERA_TRAIL_DISTANCE = 200.0f;
 const float PLAYER_CAMERA_TRAIL_HEIGHT = 100.0f;
 
+
 const float CAR_STEPDIST = 10.0f;
 const float CAR_COLHEIGHT = 10.0f;
 const float CAR_WIDTH = 30.0f;
 const float CAR_LENGTH = 50.0f;
+
+const float CAR_GRASS_ENERGYLOSS = 0.004f;
 
 const float FRICTION_ENERGYLOSS = 0.01f;
 const float CAR_FRONT_THRESHOLD = 0.75f;
@@ -40,7 +43,7 @@ const float CAR_RECOVERY_TURNTHRESHOLD = 5.0f;
 const float CAR_RECOVERY_DIRECTIONTHRESHOLD = 0.999f;
 
 const float CAR_RECOVERY_LR_ENERGYLOSS_GRASS = 0.005f;
-const float CAR_RECOVERY_FB_ENERGYLOSS_GRASS = 0.005f;
+const float CAR_RECOVERY_FB_ENERGYLOSS_GRASS = 0.004f;
 const float CAR_RECOVERY_LR_ENERGYLOSS_ROAD = 0.06f;
 const float CAR_RECOVERY_FB_ENERGYLOSS_ROAD = 0.002f;
 
@@ -339,32 +342,33 @@ void TPlayer::update()
         case playerstate_t::PLAYERSTATE_DRIVING:{
             float turn = steer;
 
-            if (mOnGround && mGroundFace->surf == SURFACE_GRASS){        //Grass slowdown
-                mVelocity *= CAR_RECOVERY_LR_ENERGYLOSS_GRASS;
-                mSpeed *= 0.985f;
-            }
-            
-            if (!aButton && !bButton){
-                //Slow down when not pressing any button
-                mSpeed *= mCarStats.getDrift(mSpeed);
-            }
-            else if (mOnGround && mOutOfControl){    
-                if (mGroundFace->surf == SURFACE_GRASS){
-                    //Slip on grass
-                    mVelocity -= mForward * mVelocity.dot(mForward) * CAR_RECOVERY_FB_ENERGYLOSS_GRASS;
-                    mVelocity -= mRight * mVelocity.dot(mRight) * CAR_RECOVERY_LR_ENERGYLOSS_GRASS;
+            if (mOnGround){
+                if (mGroundFace->surf == SURFACE_GRASS && !mOutOfControl){        //Grass slowdown
+                    mSpeed -= mSpeed * CAR_GRASS_ENERGYLOSS;
+                }
+                
+                if (mOutOfControl){    
+                    if (mGroundFace->surf == SURFACE_GRASS){
+                        //Slip on grass
+                        mVelocity -= mForward * mVelocity.dot(mForward) * CAR_RECOVERY_FB_ENERGYLOSS_GRASS;
+                        mVelocity -= mRight * mVelocity.dot(mRight) * CAR_RECOVERY_LR_ENERGYLOSS_GRASS;
+                    }
+                    else{
+                        //Drift on road                           
+                        float lr = mVelocity.dot(mRight) * CAR_RECOVERY_LR_ENERGYLOSS_ROAD;
+                        float dot = mVelocity.dot(mForward);
+                        mVelocity -= mForward * dot * CAR_RECOVERY_FB_ENERGYLOSS_ROAD;  //Slow down front/back
+                        mVelocity -= mRight * lr;                                       //Slow down left/right
+                    }
+                }
+                else if (!aButton && !bButton){
+                    //Slow down when not pressing any button
+                    mSpeed *= mCarStats.getDrift(mSpeed);
                 }
                 else{
-                    //Drift on road                           
-                    float lr = mVelocity.dot(mRight) * CAR_RECOVERY_LR_ENERGYLOSS_ROAD;
-                    float dot = mVelocity.dot(mForward);
-                    mVelocity -= mForward * dot * CAR_RECOVERY_FB_ENERGYLOSS_ROAD;  //Slow down front/back
-                    mVelocity -= mRight * lr;                                       //Slow down left/right
+                    //Slow down when pressing a button
+                    mVelocity *= CAR_RECOVERY_LR_ENERGYLOSS_ROAD;
                 }
-            }
-            else if (mOnGround){
-                //Slow down when pressing a button
-                mVelocity *= CAR_RECOVERY_LR_ENERGYLOSS_ROAD;
             }
 
             //Get real up direction
@@ -400,8 +404,8 @@ void TPlayer::update()
             if (mOnGround && turn != 0.0f)
             {
                 if (mOutOfControl){
-                    mTurnRate *= 0.98f;
-                    mTurnRate += turn * kInterval * TSine::fromDeg(120.0f);
+                    mTurnRate *= 0.99f;
+                    mTurnRate += turn * kInterval * TSine::fromDeg(120.0f) * velNrm.dot(mForward);
                     mDriveDirection -= (s16)(mTurnRate * kInterval);
                 }
                 else{
