@@ -125,7 +125,6 @@ class TObject
     Mtx mFMtx{};
     Mtx mFRotMtx{}; //Only used for storing rotation matrix when carrying an object
     
-    u32 mTag{0};
     Gfx * mInitializer{nullptr};
     Gfx * mMesh{nullptr};
     TDynList2 * mDynList{nullptr};

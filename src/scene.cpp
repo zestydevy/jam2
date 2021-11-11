@@ -154,7 +154,7 @@ void TLogoScene::init()
         _logo_ovlSegmentRomEnd-_logo_ovlSegmentRomStart
     );
 
-    TCollider::startup(nullptr, 10, 512.0F);
+    TCollider::startup(nullptr, 10, 4096.0F);
 
     sFaces = new TCollision::TFace[test00_layer1_count];
 

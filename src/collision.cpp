@@ -387,10 +387,10 @@ u32 TCollision::checkRadius(
     for (u32 x = l; x <= r; ++x) {
       pkt = sBlkMap[y * sNumBlkMap + x];
 
-      while (pkt != nullptr) {
+      while (count < limit && pkt != nullptr) {
         face = pkt->face;
         pkt = pkt->next;
-        d = face->calcDist(pt);
+        //d = face->calcDist(pt);
 
         //if (d < 0.0F) {
         //  continue; // ignore backfaces
@@ -412,7 +412,77 @@ u32 TCollision::checkRadius(
     }
   }
 
-  for (u32 i = 0; i < sNumCollFace; ++i) {
+  //for (u32 i = 0; i < sNumCollFace; ++i) {
+  //}
+
+  return count;
+}
+
+// -------------------------------------------------------------------------- //
+
+u32 TCollision::castRadius(
+  TVec3F const & pt, float rd,
+  TIntersection castArray[], u32 limit,
+  bool sort
+) {
+  if (rd <= 0.0F) {
+    return 0;
+  }
+
+  u32 l, b, r, t;
+  getSphereBlk(pt, rd, &l, &b, &r, &t);
+
+  rd *= rd;
+
+  if (castArray == nullptr && limit != 0) {
+    return 0;
+  }
+
+  TPacket const * pkt;
+  TIntersection cur;
+  u32 count = 0;
+  for (u32 y = b; y <= t; ++y) {
+    for (u32 x = l; x <= r; ++x) {
+      pkt = sBlkMap[y * sNumBlkMap + x];
+
+      while (count < limit && pkt != nullptr) {
+        cur.face = pkt->face;
+        pkt = pkt->next;
+        //cur.distSqr = face->calcDist(pt);
+
+        //if (d < 0.0F) {
+        //  continue; // ignore backfaces
+        //}
+
+        cur.face->calcClosestPt(pt, &cur.closestPoint);
+        cur.distSqr = TVec3F::distSqr(cur.closestPoint, pt);
+
+        if (cur.distSqr > rd) {
+          continue;
+        }
+
+        if (count < limit){
+          castArray[count] = cur;
+          castArray[count].intersectionNrm = (pt - cur.closestPoint);
+          castArray[count].intersectionNrm.normalize();
+
+          ++count;
+        }
+      }
+    }
+  }
+
+  // does not work
+  if (sort){
+    for (u32 i = 0; i < count - 1; ++i) {
+      for (u32 j = 0; j < count - i - 1; ++j) {
+        if (castArray[j].distSqr > castArray[j + 1].distSqr){
+          cur = castArray[j];
+          castArray[j] = castArray[j+1];
+          castArray[j+1] = cur;
+        }
+      }
+    }
   }
 
   return count;
