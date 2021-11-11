@@ -127,6 +127,7 @@ const TObjectData & TObject::getNestObjectInfo(
 
 void TShadow::init() {
     TObject::init();
+    mShadowNeedsUpdate = true;
 }
 
 void TShadow::update() {
@@ -140,7 +141,7 @@ void TShadow::updateMtx()
         return;
     }
 
-    TMtx44 temp1, temp2, temp3, mPosMtx, mScaleMtx, mScaleMtx2;
+    TMtx44 temp1, temp2, temp3, mPosMtx, mScaleMtx, mScaleMtx2, mAngleMtx;
     
     mPosMtx.translate(mPosition);
     temp1.rotateAxisX(mRotation.x());
@@ -149,12 +150,23 @@ void TShadow::updateMtx()
     TMtx44::concat(temp2, temp1, mRotMtx);
     TMtx44::concat(mRotMtx, temp3, mRotMtx);
     mScaleMtx.scale(mScale);
-    mScaleMtx2.scale({1.0f, 0.0f, 1.0f});
+
+    if (mShadowNeedsUpdate){
+        //Update dynamic shadow scale
+        mScaleMtx2.scale({1.0f, 0.0f, 1.0f});
+
+        mAngleMtx.shear({0.0f, 0.0f}, mShadowAngle, {0.0f, 0.0f});
+
+        //Combine mtx
+        TMtx44::floatToFixed(mAngleMtx, mFAngleMtx);
+        TMtx44::floatToFixed(mScaleMtx2, mFScaleMtx2);
+
+        mShadowNeedsUpdate = false;
+    }
 
     //Combine mtx
     TMtx44::floatToFixed(mPosMtx, mFMtx);
     TMtx44::floatToFixed(mScaleMtx, mFScaleMtx1);
-    TMtx44::floatToFixed(mScaleMtx2, mFScaleMtx2);
     TMtx44::floatToFixed(mRotMtx, mFRotMtx);
 
     mMtxNeedsUpdate = false;
@@ -172,6 +184,8 @@ void TShadow::draw() {
     gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFRotMtx),
             G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
     gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFScaleMtx2),
+	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
+    gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFAngleMtx),
 	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
     if (mParent != nullptr){
         gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mParent->getRotMtx()),

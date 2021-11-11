@@ -401,14 +401,14 @@ void TPlayer::update()
             }
 
             //apply turn rate
-            if (mOnGround && turn != 0.0f)
+            if (mOnGround)
             {
                 if (mOutOfControl){
                     mTurnRate *= 0.99f;
                     mTurnRate += turn * kInterval * TSine::fromDeg(120.0f) * velNrm.dot(mForward);
                     mDriveDirection -= (s16)(mTurnRate * kInterval);
                 }
-                else{
+                else if (turn != 0.0f) {
                     mTurnRate = (s16)(turn * mSpeed * mCarStats.getTurn(mSpeed)) / kInterval;
                     mDriveDirection -= mTurnRate * kInterval;
 

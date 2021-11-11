@@ -209,6 +209,7 @@ void TLogoScene::init()
         mPlayers[i]->setScale(TVec3F{0.4f, 0.4f, 0.4f});
         mPlayers[i]->init();
         mPlayers[i]->setShadowMesh(car_Cube1_mesh_shadow);
+        mPlayers[i]->setShadowAngle({0.2f, 0.1f});
     }
 
     //Player 1

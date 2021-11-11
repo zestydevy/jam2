@@ -97,6 +97,7 @@ class TPlayer :
     inline void setSpeed(float speed) {
         mSpeed = speed;
     }
+    inline void setShadowAngle(TVec2F const & angle){ mShadow->setShadowAngle(angle); }
 
 
     void setAIType(playeraitype_t ai) { mAIType = ai; }

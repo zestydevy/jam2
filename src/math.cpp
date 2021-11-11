@@ -60,6 +60,18 @@ void TMtx44::scale(TVec3F const & v) {
 
 // -------------------------------------------------------------------------- //
 
+void TMtx44::shear(TVec2F const & x, TVec2F const & y, TVec2F const & z) {
+  set(
+     1.0F, y.x(), z.x(), 0.0F,
+    x.x(),  1.0F, z.y(), 0.0F,
+    x.y(), y.y(),  1.0F, 0.0F,
+     0.0F,  0.0F,  0.0F, 1.0f
+  );
+}
+
+
+// -------------------------------------------------------------------------- //
+
 void TMtx44::translate(TVec3F const & v) {
   set(
     1.0F, 0.0F, 0.0F, v.x(),
