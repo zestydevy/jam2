@@ -632,6 +632,7 @@ class TMtx44 {
   void rotateAxisX(s16);
   void rotateAxisY(s16);
   void rotateAxisZ(s16);
+  void shear(TVec2F const & x, TVec2F const & y, TVec2F const & z);
 
   void transform(
     TVec3F const & t,

@@ -50,6 +50,6 @@ t_carstatdata sTestCar{
     200.0f,                 120.0f,                 100.0f,                 0.0f,       //Accelerations
     0.992f,                 0.994f,                 0.996f,                 0.998f,      //Drift Rates
     0.96f,                  0.97f,                  0.99f,                  0.992f,      //Brake Rates
-    1.0f,                   1.0f,                   0.2f,                   0.15f,       //Turn Rates
+    1.0f,                   0.8f,                   0.18f,                  0.08f,       //Turn Rates
     0.999f,                 0.999f,                 0.999f,                 0.998f      //Turn Energy Conversion Rates
 };

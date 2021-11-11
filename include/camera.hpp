@@ -24,6 +24,8 @@ class TCamera
     void setPosition(const TVec3<f32> & target) { mPosition.set(target.x(), target.y(), target.z()); }
     void setMode(bool mode) {mExternallyControlled = mode;}
 
+    TVec3<f32> const & getPosition() { return mPosition; }
+
     void setAngle(u16 angle) {mAngle = angle;}
     u16 const & getAngle() {return mAngle;}
 

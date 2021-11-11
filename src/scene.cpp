@@ -154,7 +154,7 @@ void TLogoScene::init()
         _logo_ovlSegmentRomEnd-_logo_ovlSegmentRomStart
     );
 
-    TCollider::startup(nullptr, 10, 512.0F);
+    TCollider::startup(nullptr, 10, 4096.0F);
 
     sFaces = new TCollision::TFace[test00_layer1_count];
 
@@ -167,7 +167,7 @@ void TLogoScene::init()
 
     if (!TCollision::startup(
         sFaces, test00_layer1_count, nullptr,
-        (test00_layer1_count * 1.4f), 10, 2048.0F
+        (test00_layer1_count * 1.4f), 10, 4096.0F
     ))
         *(int*)0 = 0;
 
@@ -209,6 +209,7 @@ void TLogoScene::init()
         mPlayers[i]->setScale(TVec3F{0.4f, 0.4f, 0.4f});
         mPlayers[i]->init();
         mPlayers[i]->setShadowMesh(car_Cube1_mesh_shadow);
+        mPlayers[i]->setShadowAngle({0.2f, 0.1f});
     }
 
     //Player 1
@@ -280,7 +281,7 @@ void TLogoScene::update()
     sLogoObj->update();
     sSkyObj->mAlwaysDraw = true;
     sSkyObj->update();
-    
+
     sLogoRot += 140.0f;
     sLogoObj->setRotation(TVec3F{0.0f, sLogoRot, 0.0f});
 

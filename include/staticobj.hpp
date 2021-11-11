@@ -125,7 +125,6 @@ class TObject
     Mtx mFMtx{};
     Mtx mFRotMtx{}; //Only used for storing rotation matrix when carrying an object
     
-    u32 mTag{0};
     Gfx * mInitializer{nullptr};
     Gfx * mMesh{nullptr};
     TDynList2 * mDynList{nullptr};
@@ -153,10 +152,16 @@ class TShadow : public TObject
     virtual void draw() override;
 
     void setParent(TObject * obj) {mParent = obj;}
+    void setShadowAngle(TVec2F const & angle){ mShadowAngle = angle; mShadowNeedsUpdate = true; }
 
     protected:
+    bool mShadowNeedsUpdate {false};
+    TVec2F mShadowAngle;
+
     Mtx mFScaleMtx1{};
     Mtx mFScaleMtx2{};
+
+    Mtx mFAngleMtx{};
 
     TObject * mParent {nullptr};
 };

@@ -340,6 +340,10 @@ void TCollider::blkMapTest(
     b = node;
     node = node->mNext;
 
+    if (a == b) {
+      continue;
+    }
+    
     if (!b->isCollideActive()) {
       continue;
     }

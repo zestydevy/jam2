@@ -1279,6 +1279,8 @@ Gfx mat_sky_f3d_sky[] = {
 };
 
 Gfx sky_Track1_mesh[] = {
+	gsDPPipeSync(),
+	gsDPSetRenderMode(G_RM_OPA_SURF, G_RM_OPA_SURF2),
 	gsDPSetTextureFilter(G_TF_AVERAGE),
 	gsSPClearGeometryMode(G_LIGHTING),
 	gsSPVertex(sky_Track1_mesh_vtx_cull + 0, 8, 0),
@@ -1287,6 +1289,7 @@ Gfx sky_Track1_mesh[] = {
 	gsSPDisplayList(mat_sky_f3d_sky),
 	gsSPDisplayList(sky_Track1_mesh_tri_0),
 	gsDPPipeSync(),
+	gsDPSetRenderMode(G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2),
 	gsSPSetGeometryMode(G_LIGHTING),
 	gsSPClearGeometryMode(G_TEXTURE_GEN),
 	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),

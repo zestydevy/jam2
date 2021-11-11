@@ -66,6 +66,14 @@ class TCollision {
 
   };
 
+  struct TIntersection{
+    const TFace * face;
+    float distSqr;
+    TVec3F closestPoint;
+    TVec3F projection;
+    TVec3F intersectionNrm;
+  };
+
   static bool startup(
     TFace data[], u32 size, THeap * heap,
     u32 num_pkt, u16 num_blk, float blk_sz
@@ -81,6 +89,12 @@ class TCollision {
     TFace const * faces[] = nullptr, u32 limit = 0
   );
 
+  static u32 castRadius(
+    TVec3F const & pt, float r,
+    TIntersection castArray[] = nullptr, u32 limit = 0,
+    bool sort = true
+  );
+
   static TFace const * findClosest(
     TVec3F const & pt, float r = 0.0F
   );
@@ -89,9 +103,6 @@ class TCollision {
   //  b: bias to add to pt.y()
   //  d: if > 0, limit y distance
   static TFace const * findGroundBelow(
-    TVec3F const & pt, float b = 0.0F, float d = 0.0F
-  );
-    static TFace const * findGroundAbove(
     TVec3F const & pt, float b = 0.0F, float d = 0.0F
   );
 
@@ -161,6 +172,7 @@ class TCollision {
 
 using TCollFace = TCollision::TFace;
 using TCollPacket = TCollision::TPacket;
+using TCollCast = TCollision::TIntersection;
 
 // -------------------------------------------------------------------------- //
 

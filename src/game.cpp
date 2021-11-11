@@ -348,7 +348,7 @@ void TGame::testRender(u32 taskNum)
             break;
     }
 
-    if (taskNum > 4){   //2 graphics tasks per framebuffer
+    if (taskNum > 1){   //2 graphics tasks per framebuffer
         return;
     }
 
