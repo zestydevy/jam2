@@ -117,7 +117,7 @@ void TPlayer::checkLateralCollision(){
     mGroundFace = nullptr;
     float yDiff;
     
-    int cnt = TCollision::castRadius(mPosition + (mUp * CAR_STEPDIST * 2.0f), CAR_LENGTH, collFaces, PLAYER_COLLISIONCHECK_COUNT, false);
+    int cnt = TCollision::castRadius(mPosition + (mUp * CAR_STEPDIST * 2.0f), CAR_LENGTH, collFaces, PLAYER_COLLISIONCHECK_COUNT, true);
 
     TVec3F carFront = mPosition + (mForward * CAR_LENGTH);
 
@@ -176,7 +176,7 @@ void TPlayer::checkLateralCollision(){
         mVelocity += nrm * -mVelocity.dot(nrm);
 
         //Push away from wall
-        mPosition = collFaces[i].closestPoint + nrm * CAR_LENGTH - (mUp * CAR_STEPDIST * 2.0f);
+        mPosition = collFaces[i].closestPoint + (nrm * CAR_LENGTH) - (mUp * CAR_STEPDIST * 2.0f);
 
         //Optimization so that we don't need to calculate closest point if the car hasn't moved
         pushed = true;

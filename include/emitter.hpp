@@ -55,6 +55,9 @@ struct TEmitConfig
     u8 alphaOverTime;           // alpha color at end of duration
     Gfx * mesh2d;               // display list of particles if type EMIT_2D
     Gfx * mesh3d;               // display list of particles if type EMIT_3D
+
+    Gfx * initDP;               // display list of particles if type EMIT_3D
+    Gfx * cleanupDP;            // display list of particles if type EMIT_3D
 };
 
 // -------------------------------------------------------------------------- //
@@ -88,6 +91,10 @@ class TEmitter
     TDynList2 * mDl{nullptr};
     TTimer mRateTimer;
     f32 rate{0.0f};
+
+    bool mInCamera {false};
+    bool mAlwaysDraw {false};
+    float mDrawDistanceSquared {100000000.0f};
 };
 
 // -------------------------------------------------------------------------- //

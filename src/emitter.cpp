@@ -3,6 +3,7 @@
 #include "exception.hpp"
 #include "particle.hpp"
 #include "linklist.hpp"
+#include "camera.hpp"
 
 // -------------------------------------------------------------------------- //
 extern int sParticleCnt;
@@ -29,6 +30,15 @@ TEmitter::TEmitter(TVec3<f32> const & position, TEmitConfig const & config, TDyn
 
 void TEmitter::emit()
 {
+    if (mParent != nullptr) {
+        mPosition = mParent->getPosition() + mParentOffset;
+    }
+
+    mInCamera = mAlwaysDraw || TCamera::checkVisible(mPosition, mDrawDistanceSquared);
+    if (!mInCamera){
+        return;
+    }
+    
     for (int i = 0; i < mPtclList.capacity(); ++i) {
         mPtclList[i]->update();
         if (mPtclList[i]->isExpired()) {
@@ -48,10 +58,6 @@ void TEmitter::emit()
         TVec3F direction = forward + right;
         TParticle * ptcl = new TParticle(mDl, reinterpret_cast<TEmitConfig const & >(*mConfig));
 
-        if (mParent != nullptr) {
-            mPosition = mParent->getPosition() + mParentOffset;
-        }
-        
         ptcl->setPosition(mPosition);
         ptcl->setScale(mConfig->scale);
         //ptcl->setDirection(direction);
@@ -69,8 +75,18 @@ void TEmitter::emit()
 
 void TEmitter::draw()
 {
+    if (!mInCamera){
+        return;
+    }
+
+    if (mConfig->initDP){
+        gSPDisplayList(mDl->pushDL(), mConfig->initDP);
+    }
     for (int i = 0; i < mPtclList.capacity(); ++i) {
         mPtclList[i]->draw();
+    }
+    if (mConfig->cleanupDP){
+        gSPDisplayList(mDl->pushDL(), mConfig->cleanupDP);
     }
 }
 

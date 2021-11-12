@@ -155,11 +155,20 @@ void TShadow::updateMtx()
         //Update dynamic shadow scale
         mScaleMtx2.scale({1.0f, 0.0f, 1.0f});
 
-        mAngleMtx.shear({0.0f, 0.0f}, mShadowAngle, {0.0f, 0.0f});
+        float proj = -1.0f / mRelativeLightSource.y(); //Tx = x / (x * proj.x + 1) | Ty = y / (y * proj.y + 1)
+
+        TVec2F shear = { TMath<f32>::sqrt(TMath<f32>::abs(mRelativeLightSource.x() / mRelativeLightSource.y())) * (mRelativeLightSource.x() >= 0.0f ? -1.0f : 1.0f), 
+                         TMath<f32>::sqrt(TMath<f32>::abs(mRelativeLightSource.z() / mRelativeLightSource.y())) * (mRelativeLightSource.z() >= 0.0f ? -1.0f : 1.0f)};
+
+        mAngleMtx.shear({0.0f, 0.0f}, shear, {0.0f, 0.0f});
+        temp1.projective({0.0f, proj, 0.0f});
+        TMtx44::concat(temp1, mAngleMtx, mAngleMtx);
 
         //Combine mtx
         TMtx44::floatToFixed(mAngleMtx, mFAngleMtx);
         TMtx44::floatToFixed(mScaleMtx2, mFScaleMtx2);
+
+        mShadowVisible = proj > -0.05f && mRelativeLightSource.y() > 0.0f;
 
         mShadowNeedsUpdate = false;
     }
@@ -173,11 +182,17 @@ void TShadow::updateMtx()
 }
 
 void TShadow::draw() {
-    if (!mInCamera)
+    if (!mInCamera){
         return;
+    }
 
-    if (mMtxNeedsUpdate)
+    if (mMtxNeedsUpdate){
         updateMtx();
+    }
+
+    if (!mShadowVisible){
+        return;
+    }
 
     gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFMtx),
 	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);

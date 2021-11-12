@@ -152,11 +152,12 @@ class TShadow : public TObject
     virtual void draw() override;
 
     void setParent(TObject * obj) {mParent = obj;}
-    void setShadowAngle(TVec2F const & angle){ mShadowAngle = angle; mShadowNeedsUpdate = true; }
+    void setRelativeLightSource(TVec3F const & pos){ mRelativeLightSource = pos; mShadowNeedsUpdate = true; }
 
     protected:
     bool mShadowNeedsUpdate {false};
-    TVec2F mShadowAngle;
+    bool mShadowVisible {false};
+    TVec3F mRelativeLightSource;
 
     Mtx mFScaleMtx1{};
     Mtx mFScaleMtx2{};

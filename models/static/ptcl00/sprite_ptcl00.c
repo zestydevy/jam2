@@ -59,20 +59,9 @@ Gfx mat_revert_ptcl00_f3d_material[] = {
 	gsSPEndDisplayList(),
 };
 
-Gfx ptcl00_Plane_mesh[] = {
-	gsSPClearGeometryMode(G_LIGHTING),
-	gsSPVertex(ptcl00_Plane_mesh_vtx_cull + 0, 8, 0),
+Gfx ptcl00_Plane_init[] = {
 	gsDPSetRenderMode(G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2),
-	//gsSPSetGeometryMode(G_LIGHTING),
-	gsSPCullDisplayList(0, 7),
 	gsSPDisplayList(mat_ptcl00_f3d_material),
-	gsSPDisplayList(ptcl00_Plane_mesh_tri_0),
-	gsSPDisplayList(mat_revert_ptcl00_f3d_material),
-	gsDPPipeSync(),
-	gsSPSetGeometryMode(G_LIGHTING),
-	gsSPClearGeometryMode(G_TEXTURE_GEN),
-	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
-	gsSPTexture(65535, 65535, 0, 0, 0),
 	gsSPEndDisplayList(),
 };
 

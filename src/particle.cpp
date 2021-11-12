@@ -14,9 +14,6 @@ void TParticle::init()
 
 void TParticle::update()
 {
-    TObject::update();
-
-    mMtxNeedsUpdate = true;
     mVelocity += mAcceleration;
     mPosition += mVelocity + mConfig->force;
     mPosition += mDirection;
@@ -32,11 +29,7 @@ void TParticle::update()
 
 void TParticle::draw()
 {
-    if (!mInCamera)
-        return;
-
-    if (mMtxNeedsUpdate)
-        updateMtx();
+    updateMtx();    //Particle always needs to update its matrix
 
     gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFMtx),
 	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);
@@ -51,7 +44,6 @@ void TParticle::draw()
     if (mMesh != nullptr) {
         gDPSetPrimColor(mDynList->pushDL(), 0, 0, mInitColor.x(), mInitColor.y(), mInitColor.z(), mAlpha);
         gSPDisplayList(mDynList->pushDL(), mMesh);
-        gDPSetPrimColor(mDynList->pushDL(), 0, 0, 255, 255, 255, 255);
     }
 
     gSPPopMatrix(mDynList->pushDL(), G_MTX_MODELVIEW);
@@ -61,7 +53,15 @@ void TParticle::draw()
 
 void TParticle::updateMtx()
 {
-    TObject::updateMtx();
+    TMtx44 temp1, mPosMtx, mScaleMtx;
+    
+    mPosMtx.translate(mPosition);
+    mScaleMtx.scale(mScale);
+
+    //Combine mtx
+    TMtx44::concat(mPosMtx, mScaleMtx, temp1);
+
+    TMtx44::floatToFixed(temp1, mFMtx);
 }
 
 // -------------------------------------------------------------------------- //

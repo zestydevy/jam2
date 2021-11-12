@@ -38,4 +38,6 @@ typedef struct
     u8 alphaOverTime;           // alpha at end of duration
     Gfx * mesh2d;               // display list of particles if type EMIT_2D
     Gfx * mesh3d;               // display list of particles if type EMIT_3D
+    Gfx * meshInit;             // initialization display list
+    Gfx * meshCleanup;          // cleanup display list
 } TEmitData;

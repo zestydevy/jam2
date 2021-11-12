@@ -55,6 +55,8 @@ u8 sFadeAlpha = 255;
 
 TCollision::TFace* sFaces;
 
+char sSceneErrorBuff[32];
+
 // -------------------------------------------------------------------------- //
 
 Lights2 litc2 = gdSPDefLights2(
@@ -98,7 +100,7 @@ void TScene::loadObjects(TSceneEntry const list[])
     for(int i = 0; i < size; ++i) {
         
         if (list[i].id >= EObjType::INVALID) {
-            // wtf kind of model are you tryin to load
+            sprintf(sSceneErrorBuff, "INVALID OBJ ID %d", list[i].id);
             return;
         }
 
@@ -154,7 +156,8 @@ void TLogoScene::init()
         _logo_ovlSegmentRomEnd-_logo_ovlSegmentRomStart
     );
 
-    TCollider::startup(nullptr, 10, 4096.0F);
+    if (!TCollider::startup(nullptr, test00_block_count, test00_block_size))
+        TException::fault("COLDR START ERROR");
 
     sFaces = new TCollision::TFace[test00_layer1_count];
 
@@ -167,9 +170,9 @@ void TLogoScene::init()
 
     if (!TCollision::startup(
         sFaces, test00_layer1_count, nullptr,
-        (test00_layer1_count * 1.4f), 10, 4096.0F
+        (test00_layer1_count * 1.5f), test00_block_count, test00_block_size
     ))
-        *(int*)0 = 0;
+        TException::fault("COLSN START ERROR");
 
     mRacist.clearCheckpoints();
     gCurrentRace = &mRacist;
@@ -209,7 +212,7 @@ void TLogoScene::init()
         mPlayers[i]->setScale(TVec3F{0.4f, 0.4f, 0.4f});
         mPlayers[i]->init();
         mPlayers[i]->setShadowMesh(car_Cube1_mesh_shadow);
-        mPlayers[i]->setShadowAngle({0.2f, 0.1f});
+        mPlayers[i]->setRelativeLightSource({500.0f, 1000.0f, 1000.0f});
     }
 
     //Player 1
@@ -257,6 +260,8 @@ void TLogoScene::init()
 }
 
 // -------------------------------------------------------------------------- //
+
+float sSceneTime = 0.0f;
 void TLogoScene::update()
 {
     // wait two seconds to boot
@@ -273,8 +278,13 @@ void TLogoScene::update()
 
     TCollider::frameBegin();
 
-    for (int i = 0; i < 4; i++)
+    sSceneTime += kInterval;
+
+    for (int i = 0; i < 4; i++){
         mPlayers[i]->update();
+        //mPlayers[i]->setRelativeLightSource({TSine::scos(TSine::fromDeg(10.0f * sSceneTime)) * 1000.0f, TSine::ssin(TSine::fromDeg(10.0f * sSceneTime)) * 1000.0f, 300.0f});
+        //mPlayers[i]->setRelativeLightSource(TVec3F(225.0f, 500.0f, 225.0f) - mPlayers[i]->getPosition());
+    }
 
     mTestCamera->update();
     sYoshiJoint->updateAnimation();

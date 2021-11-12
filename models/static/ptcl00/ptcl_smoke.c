@@ -60,15 +60,15 @@ Gfx mat_revert_ptcl_smoke_f3d_material[] = {
 	gsSPEndDisplayList(),
 };
 
-Gfx ptcl_smoke_Plane_mesh[] = {
-	gsSPClearGeometryMode(G_LIGHTING),
-	gsSPVertex(ptcl_smoke_Plane_mesh_vtx_cull + 0, 8, 0),
-	//gsSPSetGeometryMode(G_LIGHTING),
-	gsSPCullDisplayList(0, 7),
+Gfx ptcl_smoke_Plane_init[] = {
+	gsDPPipeSync(),
 	gsDPSetRenderMode(G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2),
 	gsSPDisplayList(mat_ptcl_smoke_f3d_material),
-	gsSPDisplayList(ptcl_smoke_Plane_mesh_tri_0),
-	gsSPDisplayList(mat_revert_ptcl_smoke_f3d_material),
+	gsSPClearGeometryMode(G_CLIPPING),
+	gsSPEndDisplayList(),
+};
+
+Gfx ptcl_smoke_Plane_revert[] = {
 	gsDPPipeSync(),
 	gsSPSetGeometryMode(G_LIGHTING),
 	gsSPClearGeometryMode(G_TEXTURE_GEN),
