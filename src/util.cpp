@@ -5,6 +5,8 @@
 
 // -------------------------------------------------------------------------- //
 
+f32 TUtil::sGameTick{0.0f};
+
 void TUtil::toMemory(void * dest, void * src, s32 size)
 {
     // transfer size can't be an odd number

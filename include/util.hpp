@@ -15,6 +15,13 @@ class TUtil
     public:
 
     static void toMemory(void * dest, void * src, s32 size);
+    static f32 getTick(){return sGameTick;}
+    static void setTick(float const tick){sGameTick = tick;}
+    static void tick(){++sGameTick;}
+
+    protected:
+    
+    static float sGameTick;
 };
 
 // -------------------------------------------------------------------------- //
