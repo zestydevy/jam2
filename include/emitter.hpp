@@ -79,6 +79,9 @@ class TEmitter
     void draw();
     void destroy();
 
+    void setEnable(bool enabled) { mEnabled = enabled; }
+    void setRateScale(f32 r) {if (r > 0.0f) rate = r; }
+
     private:
 
     EEmitType mType{EMIT_2D};
@@ -90,11 +93,12 @@ class TEmitter
     TArray<void(*)()> mCallbacks;
     TDynList2 * mDl{nullptr};
     TTimer mRateTimer;
-    f32 rate{0.0f};
+    f32 rate{1.0f};
+    bool mEnabled {true};
 
     bool mInCamera {false};
     bool mAlwaysDraw {false};
-    float mDrawDistanceSquared {100000000.0f};
+    float mDrawDistanceSquared {4000000.0f};
 };
 
 // -------------------------------------------------------------------------- //

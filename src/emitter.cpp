@@ -18,20 +18,17 @@ TEmitter::TEmitter(TVec3<f32> const & position, TEmitConfig const & config, TDyn
     if (mConfig == NULL) {
         TException::fault("WARNING!! ptcl config is null...");
     }
-
-    TParticle * ptcl = new TParticle(dl, config);
-    ptcl->setPosition(position);
-    ptcl->setScale(config.scale);
-    mPtclList.push(ptcl);
-    sParticleCnt++;
 }
 
 // -------------------------------------------------------------------------- //
 
 void TEmitter::emit()
 {
+    TMtx44 rotMtx;
+    rotMtx.identity();
     if (mParent != nullptr) {
-        mPosition = mParent->getPosition() + mParentOffset;
+        rotMtx = mParent->getRotationMatrix();
+        mPosition = mParent->getPosition() + rotMtx.mul(mParentOffset);
     }
 
     mInCamera = mAlwaysDraw || TCamera::checkVisible(mPosition, mDrawDistanceSquared);
@@ -50,20 +47,18 @@ void TEmitter::emit()
     }
     
     // rate time is up
-    if (mRateTimer.update())
+    if (mRateTimer.update() && mEnabled)
     {
         TVec3F up{0.0f, 1.0f, 0.0f};
-        TVec3F forward{TMath<f32>::frand(-1.0f, 1.0f), 0.0f, TMath<f32>::frand(-1.0f, 1.0f)};
-        TVec3F right{TVec3<f32>(-forward.z(), 0.0f, forward.x())};
-        TVec3F direction = forward + right;
+        TVec3F direction = rotMtx.mul(mConfig->velocity);
         TParticle * ptcl = new TParticle(mDl, reinterpret_cast<TEmitConfig const & >(*mConfig));
 
         ptcl->setPosition(mPosition);
         ptcl->setScale(mConfig->scale);
-        //ptcl->setDirection(direction);
+        ptcl->setDirection(mConfig->velocity);
 
         mPtclList.push(ptcl);
-        mRateTimer.start(mConfig->lifeSpan * mConfig->rate);
+        mRateTimer.start(mConfig->lifeSpan * mConfig->rate / rate);
 
         sParticleCnt++;
     } else {

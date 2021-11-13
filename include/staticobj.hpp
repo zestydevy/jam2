@@ -95,6 +95,8 @@ class TObject
     const Mtx & getDrawMtx() { return mFMtx; }
     const Mtx & getRotMtx() { return mFRotMtx; }
 
+    const TMtx44 & getRotationMatrix() { return mRotMtx; }
+
     virtual void updateMtx();
 
     virtual void init();

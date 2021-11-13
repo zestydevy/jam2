@@ -10,6 +10,7 @@
 #include "math.hpp"
 #include "pad.hpp"
 #include "staticobj.hpp"
+#include "emitter.hpp"
 
 #include "carstats.hpp"
 
@@ -122,6 +123,8 @@ class TPlayer :
 
     inline void setShadowMesh(Gfx * mesh, Gfx * initializer = nullptr) { mShadow->setMesh(mesh, initializer); }
 
+    void initParticles(TArray<TEmitter *> &);
+
     protected:
     void startDriving();
     void startCrashing();
@@ -157,6 +160,12 @@ class TPlayer :
     s16 mLastCheckpoint;
     TCarStats mCarStats{TCarStats()};
 
+    /* Particles */
+    TEmitter * mSmokeEmitter;
+    TEmitter * mTireEmitters[4];
+    TEmitter * mCollisionEmitter;
+
+    /* Collision */
     bool mOnGround {false};
     bool mOutOfControl {false};
     TCollFace const * mGroundFace { nullptr };

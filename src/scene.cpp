@@ -80,7 +80,6 @@ Gfx letters_setup_dl[] = {
 };
 
 TVec3F const sTestPos{0.0f,0.0f,0.0f};
-TEmitter * sTestEmitter;
 
 // -------------------------------------------------------------------------- //
 
@@ -201,9 +200,7 @@ void TLogoScene::init()
     mLogoSpr = new TSprite;
     mLogoNinSpr = new TSprite;
 
-    sTestEmitter = new TEmitter(sTestPos, reinterpret_cast<TEmitConfig const &>(sPtclSmoke), mDynList);
     mEmitterList.setHeap(THeap::getCurrentHeap());
-    mEmitterList.push(sTestEmitter);
 
     mTestCamera = new TCamera(mDynList);
     mTestCamera->setPad(mTestPad);
@@ -213,6 +210,7 @@ void TLogoScene::init()
         mPlayers[i]->init();
         mPlayers[i]->setShadowMesh(car_Cube1_mesh_shadow);
         mPlayers[i]->setRelativeLightSource({500.0f, 1000.0f, 1000.0f});
+        mPlayers[i]->initParticles(mEmitterList);
     }
 
     //Player 1
@@ -227,8 +225,6 @@ void TLogoScene::init()
 
     //Player 4
     mPlayers[3]->setAIType(AI_GOOD);
-
-    sTestEmitter->attach(mPlayers[0], TVec3F{0.0f, 0.0f, 0.0f});
 
     sLogoObj = new TObject(mDynList);
     sLogoObj->setMesh(n64_n64_N_mesh_mesh_mesh);
@@ -294,8 +290,6 @@ void TLogoScene::update()
 
     sLogoRot += 140.0f;
     sLogoObj->setRotation(TVec3F{0.0f, sLogoRot, 0.0f});
-
-    sTestEmitter->setParentOffset(TVec3F{TMath<f32>::frand(-6.0f, 6.0f), 0.0f, 0.0f});
 
     TCollider::frameEnd();
 }

@@ -11,6 +11,7 @@
 #include "collision.h"
 #include "checkpoint.hpp"
 
+#include "../data/ptcl_test.h"
 #include "../models/static/shadow/shadow.h"
 
 const bool PLAYER_DOUBLESIDEDCOL = true;
@@ -25,8 +26,8 @@ const float PLAYER_BRAKE_MIN_SPEED = 20.0f;
 
 const float PLAYER_CAMERA_TRAIL_MINSPEED = 20.0f;
 const float PLAYER_CAMERA_TRAIL_DISTANCE = 200.0f;
-const float PLAYER_CAMERA_TRAIL_HEIGHT = 100.0f;
-
+const float PLAYER_CAMERA_TRAIL_HEIGHT = 150.0f;
+const float PLAYER_CAMERA_TARGET_HEIGHT = 75.0f;
 
 const float CAR_STEPDIST = 10.0f;
 const float CAR_COLHEIGHT = 10.0f;
@@ -39,8 +40,8 @@ const float FRICTION_ENERGYLOSS = 0.01f;
 const float CAR_FRONT_THRESHOLD = 0.75f;
 
 const float CAR_RECOVERY_SPEEDTHRESHOLD = 100.0f;
-const float CAR_RECOVERY_TURNTHRESHOLD = 5.0f;
-const float CAR_RECOVERY_DIRECTIONTHRESHOLD = 0.999f;
+const float CAR_RECOVERY_TURNTHRESHOLD = 0.5f;
+const float CAR_RECOVERY_DIRECTIONTHRESHOLD = 0.99f;
 
 const float CAR_RECOVERY_LR_ENERGYLOSS_GRASS = 0.005f;
 const float CAR_RECOVERY_FB_ENERGYLOSS_GRASS = 0.004f;
@@ -388,7 +389,7 @@ void TPlayer::update()
             //acceleration and deceleration
             if (mOnGround){
                 if (aButton) {
-                    mSpeed += mCarStats.getAcceleration(mSpeed) * kInterval;
+                    mSpeed += mCarStats.getAcceleration(mSpeed) * kInterval * (bButton ? 0.333f : 1.0f);
                 }
                 if (bButton && !mOutOfControl) {
                     if (mSpeed >= PLAYER_BRAKE_MIN_SPEED)
@@ -427,10 +428,12 @@ void TPlayer::update()
                         mCamera->setPosition(mPosition - (velNrm * PLAYER_CAMERA_TRAIL_DISTANCE) + TVec3F(0.0f, PLAYER_CAMERA_TRAIL_HEIGHT, 0.0f));
                     }
                     else{
-                        mCamera->setPosition(mPosition - (mForward * PLAYER_CAMERA_TRAIL_DISTANCE * (mSpeed >= 0 ? 1.0f : -1.0f)) + TVec3F(0.0f, PLAYER_CAMERA_TRAIL_HEIGHT, 0.0f));
+                        TVec3F fwd = mForward;
+                        fwd.y() = 0.0f;
+                        fwd.normalize();
+                        mCamera->setPosition(mPosition - (fwd * PLAYER_CAMERA_TRAIL_DISTANCE * (mSpeed >= 0 ? 1.0f : -1.0f)) + (mUp * PLAYER_CAMERA_TRAIL_HEIGHT));
                     }
                 }
-                mCameraTarget = mPosition;
             }
         }
         break;
@@ -464,7 +467,7 @@ void TPlayer::update()
         mShadow->setRotation(TVec3<s16>((s16)TSine::atan2(mGroundFace->nrm.z(), mGroundFace->nrm.y()), (s16)0, (s16)-TSine::atan2(mGroundFace->nrm.x(), mGroundFace->nrm.y())));
     }
 
-    mCameraTarget = mPosition;
+    mCameraTarget = mPosition + (mUp * PLAYER_CAMERA_TARGET_HEIGHT);
 
     int nextcheckpoint = gCurrentRace->getNextCheckpoint(mLastCheckpoint);
     float checkPointDist = gCurrentRace->getDistance(mPosition, nextcheckpoint);
@@ -478,6 +481,25 @@ void TPlayer::update()
     }
 
     updateBlkMap();
+
+    //update tire particles
+    if (mTireEmitters[0] != nullptr){
+        bool updateTires = mOnGround && (bButton || mOutOfControl);
+
+        mTireEmitters[0]->setEnable(updateTires);
+        mTireEmitters[1]->setEnable(updateTires);
+        mTireEmitters[2]->setEnable(mOnGround && mOutOfControl);
+        mTireEmitters[3]->setEnable(mOnGround && mOutOfControl);
+
+        if (updateTires){
+            f32 tireRate = getVelocity().getLength() / 100.0f * (1.0f - TMath<f32>::abs(mForward.dot(velNrm)));
+            tireRate = TMath<f32>::clamp(tireRate, 0.1f, 1.0f);
+            mTireEmitters[0]->setRateScale(aButton ? 1.0f : tireRate);
+            mTireEmitters[1]->setRateScale(aButton ? 1.0f : tireRate);
+            mTireEmitters[2]->setRateScale(tireRate);
+            mTireEmitters[3]->setRateScale(tireRate);
+        }
+    }
 }
 
 void TPlayer::calculateForwardDirection(){
@@ -536,6 +558,26 @@ void TPlayer::addCollision(
     float turnAmt = energy.getLength() * torque / 100.0f;
     mDriveDirection += (s16)turnAmt;
     mTurnRate += turnAmt;
+}
+
+void TPlayer::initParticles(TArray<TEmitter *> & emitList){
+    mSmokeEmitter = new TEmitter(mPosition, reinterpret_cast<TEmitConfig const &>(sPtclSmoke), mDynList);
+    mSmokeEmitter->attach(this, {-CAR_WIDTH / 2.0f, 6.0f, -CAR_LENGTH + 25.0f});
+    mSmokeEmitter->setEnable(true);
+    emitList.push(mSmokeEmitter);
+    for (int i = 0; i < 4; i++){
+        mTireEmitters[i] = new TEmitter(mPosition, reinterpret_cast<TEmitConfig const &>(sPtclTire), mDynList);
+        mTireEmitters[i]->setEnable(false);
+        emitList.push(mTireEmitters[i]);
+    }
+    mTireEmitters[0]->attach(this, {-(CAR_WIDTH - 5.0f), 0.0f, -(CAR_LENGTH - 20.0f)});
+    mTireEmitters[1]->attach(this, { (CAR_WIDTH - 5.0f), 0.0f, -(CAR_LENGTH - 20.0f)});
+    mTireEmitters[2]->attach(this, {-(CAR_WIDTH - 5.0f), 0.0f,  (CAR_LENGTH - 10.0f)});
+    mTireEmitters[3]->attach(this, { (CAR_WIDTH - 5.0f), 0.0f,  (CAR_LENGTH - 10.0f)});
+
+    mCollisionEmitter = new TEmitter(mPosition, reinterpret_cast<TEmitConfig const &>(sPtclSmoke), mDynList);
+    mCollisionEmitter->setEnable(false);
+    emitList.push(mCollisionEmitter);
 }
 
 //Called whenever the player crashes
