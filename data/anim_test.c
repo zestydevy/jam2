@@ -273,6 +273,6 @@ const struct TAnimData dino_anim_ArmatureAction = {
 	1,
 	200,
 	ANIMINDEX_NUMPARTS(dino_anim_ArmatureAction_indices),
-	dino_anim_ArmatureAction_values,
-	dino_anim_ArmatureAction_indices,
+	(s16*)dino_anim_ArmatureAction_values,
+	(s16*)dino_anim_ArmatureAction_indices,
 };
