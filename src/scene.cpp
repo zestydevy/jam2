@@ -18,6 +18,7 @@
 #include "joint.hpp"
 #include "exception.hpp"
 #include "hashmap.hpp"
+#include "checkpoint.hpp"
 
 #include "../scene/object_info.h"
 #include "../models/ovl/sprites/sp_logo1.h"
@@ -281,6 +282,7 @@ void TLogoScene::update()
         //mPlayers[i]->setRelativeLightSource({TSine::scos(TSine::fromDeg(10.0f * sSceneTime)) * 1000.0f, TSine::ssin(TSine::fromDeg(10.0f * sSceneTime)) * 1000.0f, 300.0f});
         //mPlayers[i]->setRelativeLightSource(TVec3F(225.0f, 500.0f, 225.0f) - mPlayers[i]->getPosition());
     }
+    gCurrentRace->updateRankings();
 
     mTestCamera->update();
     sYoshiJoint->updateAnimation();

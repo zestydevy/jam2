@@ -90,6 +90,8 @@ void TPlayer::init()
     if (mPad == nullptr)
         aiCalcNextTarget();
 
+    mRacerID = gCurrentRace->registerRacer();
+
     startDriving();
 }
 
@@ -218,38 +220,69 @@ void TPlayer::aiUpdate(bool& aButton, bool& bButton, f32& steer){
     TVec2F diff = mCurrentAITarget.xz() - mPosition.xz();
     diff.normalize();
 
+    bool drifting = false;
+
     if (mOutOfControl){
-        TVec3F temp = mVelocity;
-        temp.normalize();
-        diff = temp.xz();
+        float vel = mVelocity.getLength();
+        if (vel < 200.0f){
+            TVec3F temp = mVelocity;
+            temp.normalize();
+            diff = temp.xz();
+        }
+        else{
+            drifting = true;
+        }
     }
 
     float amtRight = -diff.dot(right);
 
     steer = TMath<f32>::clamp(amtRight * 4.0f, -1.0f, 1.0f);
-    if (mSpeed < 0)
+    if (mSpeed < 0){
         steer = -steer;
+    }
+    if (drifting){
+        steer *= 1.1f;
+    }
 
     if (!inGrass && !mOutOfControl){
-        if (TMath<f32>::abs(amtRight) > 0.5f && mSpeed > 10.0f)
-            aButton = false;
-        if (TMath<f32>::abs(amtRight) > 0.75f && mSpeed > 10.0f)
-            bButton = true;
-        else if (TMath<f32>::abs(amtRight) > 0.9f)
-            bButton = true;
+        if (drifting){
+            aButton = true;
+            bButton = false;
+        }
+        else if (mCarStats.getGear(mSpeed) > 2){
+            if (TMath<f32>::abs(amtRight) > 0.8f && mSpeed > 10.0f){
+                aButton = false;
+            }
+            else if (TMath<f32>::abs(amtRight) > 0.90f){
+                aButton = true;
+                bButton = true;
+            }
+        }
+        else{
+            if (TMath<f32>::abs(amtRight) > 0.95f && mSpeed > 10.0f){
+                aButton = false;
+            }
+            if (TMath<f32>::abs(amtRight) > 0.99f){
+                bButton = true;
+            }
+        }
     }
 }
 
 void TPlayer::aiCalcNextTarget(){
     switch (mAIType){
         case AI_BAD:
-            mCurrentAITarget = gCurrentRace->getCheckpointCenter(gCurrentRace->getNextCheckpoint(mLastCheckpoint));
+            mCurrentAITarget = gCurrentRace->getClosestCheckpointPosition(mPosition, gCurrentRace->getNextCheckpoint(mLastCheckpoint));
             break;
         case AI_RANDOM:
             mCurrentAITarget = gCurrentRace->getRandomCheckpointPosition(gCurrentRace->getNextCheckpoint(mLastCheckpoint));
             break;
-        case AI_GOOD:
-            mCurrentAITarget = gCurrentRace->getClosestCheckpointPosition(mPosition, gCurrentRace->getNextCheckpoint(mLastCheckpoint));
+        case AI_GOOD:{
+            int next = gCurrentRace->getNextCheckpoint(mLastCheckpoint);
+            int next2 = gCurrentRace->getNextCheckpoint(next);
+            TVec3F pAvg = mPosition + gCurrentRace->getClosestCheckpointPosition(mPosition, next) + gCurrentRace->getClosestCheckpointPosition(mPosition, next2);
+            mCurrentAITarget = gCurrentRace->getClosestCheckpointPosition(pAvg / 3.0f, next);
+            }
             break;
     }
 }
@@ -257,6 +290,8 @@ void TPlayer::aiCalcNextTarget(){
 void TPlayer::update()
 {
     TObject::update();
+
+    float aiCheatModifier = 1.0f;
 
     mVelocity += mCollideEnergy;
     TVec3F velNrm = mVelocity;
@@ -278,6 +313,7 @@ void TPlayer::update()
     else{
         //AI
         aiUpdate(aButton, bButton, steer);
+        aiCheatModifier += (gCurrentRace->getDistFromFront(mRacerID) * 0.05f) + 0.05f;
     }
 
     //Recover from being out of control if you are facing towards your velocity
@@ -389,7 +425,7 @@ void TPlayer::update()
             //acceleration and deceleration
             if (mOnGround){
                 if (aButton) {
-                    mSpeed += mCarStats.getAcceleration(mSpeed) * kInterval * (bButton ? 0.333f : 1.0f);
+                    mSpeed += mCarStats.getAcceleration(mSpeed) * kInterval * (bButton ? 0.333f : 1.0f) * aiCheatModifier;
                 }
                 if (bButton && !mOutOfControl) {
                     if (mSpeed >= PLAYER_BRAKE_MIN_SPEED)
@@ -410,7 +446,7 @@ void TPlayer::update()
                     mDriveDirection -= (s16)(mTurnRate * kInterval);
                 }
                 else if (turn != 0.0f) {
-                    mTurnRate = (s16)(turn * mSpeed * mCarStats.getTurn(mSpeed)) / kInterval;
+                    mTurnRate = (s16)(turn * mSpeed * mCarStats.getTurn(mSpeed) * aiCheatModifier / kInterval);
                     mDriveDirection -= mTurnRate * kInterval;
 
                     f32 amtTurn = TMath<f32>::abs(turn);
@@ -471,7 +507,7 @@ void TPlayer::update()
 
     int nextcheckpoint = gCurrentRace->getNextCheckpoint(mLastCheckpoint);
     float checkPointDist = gCurrentRace->getDistance(mPosition, nextcheckpoint);
-    float progress = gCurrentRace->getRaceProgress(mPosition, mLastCheckpoint);
+    float progress = gCurrentRace->updateRaceProgress(mRacerID, mPosition, mLastCheckpoint);
     
     if (checkPointDist < 50.0f){
         mLastCheckpoint = nextcheckpoint;
@@ -637,7 +673,7 @@ void TPlayer::onCollide(
         addCollision(vel * energyTX, torque);
 
         //Apply a small speed decrease to simulate energy loss
-        mSpeed -= mSpeed * 0.05 * diff.dot(vel);
+        mSpeed -= mSpeed * 0.02 * diff.dot(vel) * mForward.dot(diff);
 
         //Treat head-on and side collisions differently
         if (TMath<f32>::abs(colDot) > CAR_FRONT_THRESHOLD){

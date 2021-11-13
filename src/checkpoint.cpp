@@ -1,4 +1,5 @@
 #include "scenedata.h"
+#include "exception.hpp"
 
 #include "checkpoint.hpp"
 
@@ -10,6 +11,18 @@ bool TCheckpointTracker::clearCheckpoints(){
         mCheckpoints[i].nextIdx = -1;
     }
     mCheckpointCount = 0;
+
+    for (int i = 0; i < 8; i++){
+        mRankings[i].curLapProgress = 0.0f;
+        mRankings[i].lap = 0;
+        mRankings[i].totalProgress = 0.0f;
+        mRankings[i].lastCheckpoint = -1;
+        mRankings[i].racerID = -1;
+        mRankings[i].ranking = -1;
+    }
+
+    mLeader = 0;
+    mNumRacers = 0;
     return true;
 }
 
@@ -44,7 +57,7 @@ bool TCheckpointTracker::postLoadCheckpoints(){
     return true;
 }
 
-f32 TCheckpointTracker::getDistance(TVec3F& position, s16 index){
+f32 TCheckpointTracker::getDistance(const TVec3F & position, s16 index){
     return TCollideUtil::distPtLine(mCheckpoints[index].a, mCheckpoints[index].b, TVec3F(position.x(), 0.0f, position.z()));
 }
 
@@ -56,7 +69,7 @@ TVec3F TCheckpointTracker::getCheckpointCenter(s16 index){
     return (mCheckpoints[index].a + mCheckpoints[index].b) / 2.0f;
 }
 
-TVec3F TCheckpointTracker::getClosestCheckpointPosition(TVec3F& position, s16 index){
+TVec3F TCheckpointTracker::getClosestCheckpointPosition(const TVec3F & position, s16 index){
     TVec3F pt;
     TCollideUtil::distPtLine(mCheckpoints[index].a, mCheckpoints[index].b, TVec3F(position.x(), 0.0f, position.z()), &pt);
     return pt;
@@ -68,8 +81,53 @@ TVec3F TCheckpointTracker::getRandomCheckpointPosition(s16 index){
     return mCheckpoints[index].a + (ab * t);
 }
 
-f32 TCheckpointTracker::getRaceProgress(TVec3F& position, s16 index){
+f32 TCheckpointTracker::updateRaceProgress(s16 racerID, const TVec3F & position, s16 index){
     float sigma = 1 / (f32)mCheckpointCount;
     float startProg = sigma * index;
-    return startProg + (sigma * getDistance(position, mCheckpoints[index].nextIdx) / mCheckpoints[index].distFromNext);
+    float progress = startProg + (sigma * getDistance(position, mCheckpoints[index].nextIdx) / mCheckpoints[index].distFromNext);
+
+    if (index == 0 && mRankings[racerID].lastCheckpoint == mCheckpointCount - 1){
+        mRankings[racerID].lap++;
+    }
+    else if (index == mCheckpointCount - 1 && mRankings[racerID].lastCheckpoint == 0){
+        mRankings[racerID].lap--;
+    }
+    mRankings[racerID].lastCheckpoint = index;
+    mRankings[racerID].curLapProgress = progress;
+    mRankings[racerID].totalProgress = (f32)mRankings[racerID].lap + progress;
+
+    return progress;
+}
+
+s16 TCheckpointTracker::getRaceRanking(s16 racerID){
+    return mRankings[racerID].ranking;
+}
+
+f32 TCheckpointTracker::getDistFromFront(s16 racerID){
+    return mRankings[mLeader].totalProgress - mRankings[racerID].totalProgress;
+}
+
+s16 TCheckpointTracker::registerRacer(){
+    if (mNumRacers >= 8){
+        TException::fault("Too many racers!");
+    }
+    mRankings[mNumRacers].ranking = mNumRacers + 1;
+    mRankings[mNumRacers].racerID = mNumRacers;
+    return mNumRacers++;
+}
+
+void TCheckpointTracker::updateRankings(){
+    for (int i = 0; i < 8 || mRankings[i].racerID == -1; i++){
+        for (int j = 0; j < 8 || mRankings[j].racerID == -1; j++){
+            if (mRankings[i].totalProgress > mRankings[j].totalProgress && mRankings[i].ranking < mRankings[j].ranking){
+                int t = mRankings[i].ranking;
+                mRankings[i].ranking = mRankings[j].ranking;
+                mRankings[j].ranking = t;
+
+                if (mRankings[i].ranking == 1){
+                    mLeader = i;
+                }
+            }
+        }
+    }
 }

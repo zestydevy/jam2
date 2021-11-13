@@ -157,7 +157,11 @@ class TPlayer :
     TVec3F mCollideEnergy {0.0f, 0.0f, 0.0f};
     TVec3F mVelocity {0.0f, 0.0f, 0.0f};
 
+    /* Race */
+    s16 mRacerID;
     s16 mLastCheckpoint;
+
+    /* Stats */
     TCarStats mCarStats{TCarStats()};
 
     /* Particles */
