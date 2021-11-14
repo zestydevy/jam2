@@ -85,12 +85,13 @@ class TObject
     void setPosition(TVec3<f32> const & pos);
     void setRotation(TVec3<f32> const & rot);
     void setScale(TVec3<f32> const & scale);
-    inline void setMesh(Gfx * mesh, Gfx * initializer = nullptr) { mMesh = mesh; mInitializer = initializer; }
+    inline void setMesh(Gfx * mesh, Gfx * initializer = nullptr, Gfx * lod = nullptr) { mMesh = mesh; mInitializer = initializer; mLODMesh = lod; }
     const Gfx * getGraphicsInitializer(){ return mInitializer; };
 
     TVec3<f32> const & getPosition() {return mPosition;}
     TVec3<s16> const & getRotation() {return mRotation;}
     TVec3<f32> const & getScale() {return mScale;}
+    bool getInCamera() {return mInCamera;}
 
     const Mtx & getDrawMtx() { return mFMtx; }
     const Mtx & getRotMtx() { return mFRotMtx; }
@@ -129,8 +130,10 @@ class TObject
     
     Gfx * mInitializer{nullptr};
     Gfx * mMesh{nullptr};
+    Gfx * mLODMesh{nullptr};
     TDynList2 * mDynList{nullptr};
 
+    float mLODDistanceSquared{1000000.0f};
     float mDrawDistanceSquared{100000000.0f};
 };
 

@@ -83,6 +83,8 @@ void TObject::draw()
     if (mMtxNeedsUpdate)
         updateMtx();
 
+    bool lod = mLODMesh != nullptr && !TCamera::checkDistance(mPosition, mLODDistanceSquared);
+
     gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFMtx),
 	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);
     //gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFRotMtx),
@@ -91,7 +93,12 @@ void TObject::draw()
 	//      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
         
     if (mMesh != nullptr) {
-        gSPDisplayList(mDynList->pushDL(), mMesh);
+        if (lod){
+            gSPDisplayList(mDynList->pushDL(), mLODMesh);
+        }
+        else{
+            gSPDisplayList(mDynList->pushDL(), mMesh);
+        }
     }
 
     gSPPopMatrix(mDynList->pushDL(), G_MTX_MODELVIEW);
@@ -131,7 +138,7 @@ void TShadow::init() {
 }
 
 void TShadow::update() {
-    TObject::update();
+    mInCamera = mParent->getInCamera();
 }
 
 void TShadow::updateMtx()
@@ -194,6 +201,8 @@ void TShadow::draw() {
         return;
     }
 
+    bool lod = mLODMesh != nullptr && !TCamera::checkDistance(mPosition, mLODDistanceSquared);
+
     gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFMtx),
 	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);
     gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFRotMtx),
@@ -210,7 +219,12 @@ void TShadow::draw() {
 	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
         
     if (mMesh != nullptr) {
-        gSPDisplayList(mDynList->pushDL(), mMesh);
+        if (lod){
+            gSPDisplayList(mDynList->pushDL(), mLODMesh);
+        }
+        else{
+            gSPDisplayList(mDynList->pushDL(), mMesh);
+        }
     }
 
     gSPPopMatrix(mDynList->pushDL(), G_MTX_MODELVIEW);

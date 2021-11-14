@@ -40,8 +40,8 @@ const float FRICTION_ENERGYLOSS = 0.01f;
 const float CAR_FRONT_THRESHOLD = 0.75f;
 
 const float CAR_RECOVERY_SPEEDTHRESHOLD = 100.0f;
-const float CAR_RECOVERY_TURNTHRESHOLD = 0.5f;
-const float CAR_RECOVERY_DIRECTIONTHRESHOLD = 0.99f;
+const float CAR_RECOVERY_TURNTHRESHOLD = 0.4f;
+const float CAR_RECOVERY_DIRECTIONTHRESHOLD = 0.98f;
 
 const float CAR_RECOVERY_LR_ENERGYLOSS_GRASS = 0.005f;
 const float CAR_RECOVERY_FB_ENERGYLOSS_GRASS = 0.004f;
@@ -206,15 +206,17 @@ void TPlayer::resetCamera(){
     }
 }
 
-void TPlayer::aiUpdate(bool& aButton, bool& bButton, f32& steer){
+void TPlayer::aiUpdate(bool& aButton, bool& bButton, f32& steer, const TVec3F & velNrm){
     bool inGrass = false;
     if (mGroundFace != nullptr && mGroundFace->surf == SURFACE_GRASS)
         inGrass = true;
 
-    if (!mOutOfControl){
-        aButton = true;
-    }
+    aButton = true;
 
+    float vel = mSpeed;
+
+    TVec2F forward = mForward.xz();
+    forward.normalize();
     TVec2F right = TVec2F(TSine::ssin(mDriveDirection + TSine::fromDeg(90)), TSine::scos(mDriveDirection + TSine::fromDeg(90)));
 
     TVec2F diff = mCurrentAITarget.xz() - mPosition.xz();
@@ -223,11 +225,10 @@ void TPlayer::aiUpdate(bool& aButton, bool& bButton, f32& steer){
     bool drifting = false;
 
     if (mOutOfControl){
-        float vel = mVelocity.getLength();
+        vel = mVelocity.getLength();
         if (vel < 200.0f){
-            TVec3F temp = mVelocity;
-            temp.normalize();
-            diff = temp.xz();
+            diff = velNrm.xz();
+            aButton = false;
         }
         else{
             drifting = true;
@@ -235,13 +236,19 @@ void TPlayer::aiUpdate(bool& aButton, bool& bButton, f32& steer){
     }
 
     float amtRight = -diff.dot(right);
-
     steer = TMath<f32>::clamp(amtRight * 4.0f, -1.0f, 1.0f);
     if (mSpeed < 0){
         steer = -steer;
     }
-    if (drifting){
-        steer *= 1.1f;
+    if (mOutOfControl){
+        f32 targetTurnRate = steer * 200.0f * 0.8f / kInterval;
+        if (inGrass){
+            aButton = false;
+            targetTurnRate = 0.0f;
+        }
+
+        steer = (targetTurnRate - mTurnRate);
+        steer = TMath<f32>::clamp(steer, -1.0f, 1.0f);
     }
 
     if (!inGrass && !mOutOfControl){
@@ -250,19 +257,19 @@ void TPlayer::aiUpdate(bool& aButton, bool& bButton, f32& steer){
             bButton = false;
         }
         else if (mCarStats.getGear(mSpeed) > 2){
-            if (TMath<f32>::abs(amtRight) > 0.8f && mSpeed > 10.0f){
-                aButton = false;
-            }
-            else if (TMath<f32>::abs(amtRight) > 0.90f){
-                aButton = true;
-                bButton = true;
-            }
+            //if (TMath<f32>::abs(amtRight) > 0.3f && mAIType == AI_GOOD){
+            //    aButton = true;
+            //    bButton = true;
+
+                //Force turn towards closest point
+            //    mCurrentAITarget = gCurrentRace->getClosestCheckpointPosition(mPosition, gCurrentRace->getNextCheckpoint(mLastCheckpoint));
+            //}
         }
         else{
-            if (TMath<f32>::abs(amtRight) > 0.95f && mSpeed > 10.0f){
+            if (TMath<f32>::abs(amtRight) > 0.7f && mSpeed > 10.0f){
                 aButton = false;
             }
-            if (TMath<f32>::abs(amtRight) > 0.99f){
+            if (TMath<f32>::abs(amtRight) > 0.90f){
                 bButton = true;
             }
         }
@@ -270,18 +277,19 @@ void TPlayer::aiUpdate(bool& aButton, bool& bButton, f32& steer){
 }
 
 void TPlayer::aiCalcNextTarget(){
+    if (mOutOfControl){
+        mCurrentAITarget = gCurrentRace->getClosestCheckpointPosition(mPosition, gCurrentRace->getNextCheckpoint(mLastCheckpoint));
+        return;
+    }
     switch (mAIType){
         case AI_BAD:
-            mCurrentAITarget = gCurrentRace->getClosestCheckpointPosition(mPosition, gCurrentRace->getNextCheckpoint(mLastCheckpoint));
+            mCurrentAITarget = gCurrentRace->getClosestCheckpointPosition(mPosition, gCurrentRace->getNextCheckpoint(mLastCheckpoint), 0);
             break;
         case AI_RANDOM:
             mCurrentAITarget = gCurrentRace->getRandomCheckpointPosition(gCurrentRace->getNextCheckpoint(mLastCheckpoint));
             break;
         case AI_GOOD:{
-            int next = gCurrentRace->getNextCheckpoint(mLastCheckpoint);
-            int next2 = gCurrentRace->getNextCheckpoint(next);
-            TVec3F pAvg = mPosition + gCurrentRace->getClosestCheckpointPosition(mPosition, next) + gCurrentRace->getClosestCheckpointPosition(mPosition, next2);
-            mCurrentAITarget = gCurrentRace->getClosestCheckpointPosition(pAvg / 3.0f, next);
+             mCurrentAITarget = gCurrentRace->getClosestCheckpointPosition(mPosition, gCurrentRace->getNextCheckpoint(mLastCheckpoint), 2);
             }
             break;
     }
@@ -312,7 +320,7 @@ void TPlayer::update()
     }
     else{
         //AI
-        aiUpdate(aButton, bButton, steer);
+        aiUpdate(aButton, bButton, steer, velNrm);
         aiCheatModifier += (gCurrentRace->getDistFromFront(mRacerID) * 0.05f) + 0.05f;
     }
 

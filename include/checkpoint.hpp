@@ -45,7 +45,7 @@ class TCheckpointTracker
     s16 getNextCheckpoint(s16 index);
     TVec3F getCheckpointCenter(s16 index);
     TVec3F getRandomCheckpointPosition(s16 index);
-    TVec3F getClosestCheckpointPosition(const TVec3F & position, s16 index);
+    TVec3F getClosestCheckpointPosition(const TVec3F & position, s16 index, bool lookAhead = false);
 
     f32 updateRaceProgress(s16 racerID, const TVec3F & position, s16 index);
     s16 getRaceRanking(s16 racerID);

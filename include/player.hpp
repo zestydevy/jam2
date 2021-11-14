@@ -114,14 +114,14 @@ class TPlayer :
 
     void resetCamera();
 
-    void aiUpdate(bool& aButton, bool& bButton, f32& steer);
+    void aiUpdate(bool& aButton, bool& bButton, f32& steer, const TVec3F & velNrm);
     void aiCalcNextTarget();
 
     void addCollision(const TVec3F& energy, float torque);
 
     void setAnimation(int length, playeranim_t anim, bool loop = true, float timescale = 0.25f);
 
-    inline void setShadowMesh(Gfx * mesh, Gfx * initializer = nullptr) { mShadow->setMesh(mesh, initializer); }
+    inline void setShadowMesh(Gfx * mesh, Gfx * initializer = nullptr, Gfx * lod = nullptr) { mShadow->setMesh(mesh, initializer, lod); }
 
     void initParticles(TArray<TEmitter *> &);
 

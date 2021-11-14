@@ -69,8 +69,16 @@ TVec3F TCheckpointTracker::getCheckpointCenter(s16 index){
     return (mCheckpoints[index].a + mCheckpoints[index].b) / 2.0f;
 }
 
-TVec3F TCheckpointTracker::getClosestCheckpointPosition(const TVec3F & position, s16 index){
+TVec3F TCheckpointTracker::getClosestCheckpointPosition(const TVec3F & position, s16 index, bool lookAhead){
     TVec3F pt;
+    
+    if (lookAhead){
+        TCollideUtil::distPtLine(mCheckpoints[mCheckpoints[index].nextIdx].a, mCheckpoints[mCheckpoints[index].nextIdx].b, TVec3F(position.x(), 0.0f, position.z()), &pt);
+        if (TCollideUtil::testLineLine2D(position.xz(), pt.xz(), mCheckpoints[index].a.xz(), mCheckpoints[index].b.xz())){
+            return pt;
+        }
+    }
+
     TCollideUtil::distPtLine(mCheckpoints[index].a, mCheckpoints[index].b, TVec3F(position.x(), 0.0f, position.z()), &pt);
     return pt;
 }
@@ -78,7 +86,8 @@ TVec3F TCheckpointTracker::getClosestCheckpointPosition(const TVec3F & position,
 TVec3F TCheckpointTracker::getRandomCheckpointPosition(s16 index){
     float t = TMath<float>::clamp(TMath<float>::frandnorm(0.5f, 0.1f), 0.25f, 0.75f);
     TVec3F ab = mCheckpoints[index].b - mCheckpoints[index].a;
-    return mCheckpoints[index].a + (ab * t);
+    TVec3F pt = mCheckpoints[index].a + (ab * t);
+    return pt;
 }
 
 f32 TCheckpointTracker::updateRaceProgress(s16 racerID, const TVec3F & position, s16 index){

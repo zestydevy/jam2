@@ -209,7 +209,7 @@ void TLogoScene::init()
     for (int i = 0; i < 4; i++){
         mPlayers[i]->setScale(TVec3F{0.4f, 0.4f, 0.4f});
         mPlayers[i]->init();
-        mPlayers[i]->setShadowMesh(car_Cube1_mesh_shadow);
+        mPlayers[i]->setShadowMesh(car_Cube1_mesh_shadow, mat_car_shadow_f3d, car_Cube1_mesh_shadow_lod);
         mPlayers[i]->setRelativeLightSource({500.0f, 1000.0f, 1000.0f});
         mPlayers[i]->initParticles(mEmitterList);
     }
@@ -316,8 +316,12 @@ void TLogoScene::draw()
 
     gSPDisplayList(mDynList->pushDL(), grass_Track1_001_mesh);
 
+    gSPDisplayList(mDynList->pushDL(), mat_car_shadow_f3d);
+
     for (int i = 0; i < 4; i++)
         mPlayers[i]->drawShadow();
+
+    gSPDisplayList(mDynList->pushDL(), mat_car_shadow_f3d_revert);
 
     for (int i = 0; i < mEmitterList.capacity(); ++i) {
         mEmitterList[i]->draw();

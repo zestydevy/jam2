@@ -15,6 +15,17 @@ Vtx car_Cube1_mesh_vtx_cull[8] = {
 	{{{69, 111, -116},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
 };
 
+Vtx car_Cube1_mesh_vtx_lod[8] = {
+	{{{-65, -1, -90},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+	{{{-65, -1, 90},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+	{{{-65, 50, 90},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+	{{{-65, 80, -110},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+	{{{65, -1, -90},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+	{{{65, -1, 90},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+	{{{65, 50, 90},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+	{{{65, 80, -110},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+};
+
 Vtx car_Cube1_mesh_vtx_0[1904] = {
 	{{{-52, 6, 27},0, {-16, 1008},{0x3A, 0xAB, 0xB6, 0xFF}}},
 	{{{-52, 15, 20},0, {1008, 1008},{0x5B, 0xDC, 0xAE, 0xFF}}},
@@ -2514,28 +2525,51 @@ Gfx car_Cube1_mesh[] = {
 	gsSPEndDisplayList(),
 };
 
+//#define	RM_SHADOW(clk)					\
+//	AA_EN | Z_CMP | IM_RD | CVG_DST_WRAP | CLR_ON_CVG |	\
+//	FORCE_BL | ZMODE_DEC |					\
+//	GBL_c##clk(G_BL_CLR_IN, G_BL_A_IN, G_BL_0, G_BL_1MA)
+
 Gfx mat_car_shadow_f3d[] = {
 	gsDPPipeSync(),
+	gsDPSetRenderMode(RM_AA_ZB_OPA_DECAL, RM_AA_ZB_OPA_DECAL2),
     gsDPSetPrimColor(0, 0, 0, 0, 0, 255),
+	//gsDPSetAlphaCompare(G_AC_DITHER),
+	//gsDPSetAlphaDither(G_AD_PATTERN),
     gsDPSetCombineLERP(0, 0, 0, 0, 0, 0, 0, PRIMITIVE, 0, 0, 0, 0, 0, 0, 0, PRIMITIVE),
     gsSPTexture(65535, 65535, 0, 0, 1),
+	gsSPClearGeometryMode(G_LIGHTING),
     gsSPEndDisplayList(),
 };
 
-Gfx car_Cube1_mesh_shadow[] = {
-	gsDPSetRenderMode(G_RM_AA_ZB_OPA_DECAL, G_RM_AA_ZB_OPA_DECAL2),
-	gsSPClearGeometryMode(G_LIGHTING),
-	gsSPVertex(car_Cube1_mesh_vtx_cull + 0, 8, 0),
-	gsSPSetGeometryMode(G_LIGHTING),
-	gsSPCullDisplayList(0, 7),
-	gsSPDisplayList(mat_car_shadow_f3d),
-	gsSPDisplayList(car_Cube1_mesh_tri_0),
+Gfx mat_car_shadow_f3d_revert[] = {
 	gsDPPipeSync(),
 	gsDPSetRenderMode(G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2),
 	gsDPSetPrimColor(0, 0, 255, 255, 255, 255),
 	gsSPSetGeometryMode(G_LIGHTING),
 	gsSPClearGeometryMode(G_TEXTURE_GEN),
+	gsDPSetAlphaCompare(G_AC_NONE),
+	gsDPSetEnvColor(255, 255, 255, 255),
 	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
 	gsSPTexture(65535, 65535, 0, 0, 0),
+	gsSPEndDisplayList(),
+};
+
+Gfx car_Cube1_mesh_shadow[] = {
+	gsSPVertex(car_Cube1_mesh_vtx_cull + 0, 8, 0),
+	gsSPCullDisplayList(0, 7),
+	gsSPDisplayList(car_Cube1_mesh_tri_0),
+	gsSPEndDisplayList(),
+};
+
+Gfx car_Cube1_mesh_shadow_lod[] = {
+	gsSPVertex(car_Cube1_mesh_vtx_cull + 0, 8, 0),
+	gsSPCullDisplayList(0, 7),
+	gsSPVertex(car_Cube1_mesh_vtx_lod + 0, 8, 0),
+	gsSP2Triangles(0, 2, 3, 0, 0, 1, 2, 0),	//L
+	gsSP2Triangles(7, 0, 3, 0, 0, 7, 4, 0),	//B
+	gsSP2Triangles(6, 3, 2, 0, 7, 3, 6, 0),	//T
+	gsSP2Triangles(6, 4, 7, 0, 5, 4, 6, 0),	//R
+	gsSP2Triangles(1, 6, 2, 0, 6, 1, 5, 0),	//F
 	gsSPEndDisplayList(),
 };
