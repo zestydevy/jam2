@@ -62,6 +62,8 @@ enum EObjType : s16
     LAMP,
     CAR,
     CHECKPOINT,
+    DYNLIGHT,
+    POKESTOP,
     INVALID
 };
 
@@ -124,9 +126,9 @@ class TObject
     
     TMtx44 mRotMtx{};
 
-    // 1 matrix push call per object. 2 when the object is being carried.
+    // 1 matrix push call per object.
     Mtx mFMtx{};
-    Mtx mFRotMtx{}; //Only used for storing rotation matrix when carrying an object
+    Mtx mFRotMtx{}; //used by shadows and can be used for other math
     
     Gfx * mInitializer{nullptr};
     Gfx * mMesh{nullptr};

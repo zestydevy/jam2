@@ -75,7 +75,7 @@ void TPlayer::init()
     mShadow->setPosition({0.0f,0.0f,0.0f});
     mShadow->setScale(mScale);
 
-    initCollider(TAG_PLAYER, TAG_PLAYER, TAG_PLAYER, 1);
+    initCollider(TAG_PLAYER, TAG_PLAYER | TAG_POKESTOP | TAG_PROJECTILE, TAG_PLAYER | TAG_PROJECTILE, 1);
     setCollideRadius(CAR_LENGTH);
     setCollideCenter(mPosition);
 

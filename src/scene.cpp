@@ -19,6 +19,7 @@
 #include "exception.hpp"
 #include "hashmap.hpp"
 #include "checkpoint.hpp"
+#include "items.hpp"
 
 #include "../scene/object_info.h"
 #include "../models/ovl/sprites/sp_logo1.h"
@@ -105,6 +106,7 @@ void TScene::loadObjects(TSceneEntry const list[])
         }
 
         TObject * obj = nullptr;
+        TDynLight * light = nullptr;
         auto type = (EObjType)list[i].id;
 
         switch(list[i].id) {
@@ -118,9 +120,20 @@ void TScene::loadObjects(TSceneEntry const list[])
             case EObjType::CHECKPOINT:
                 gCurrentRace->loadCheckpoint(list[i]);
                 break;
+            case EObjType::POKESTOP:
+                obj = new TPokeStop(mDynList);
+                ((TPokeStop*)obj)->setRadius(list[i].data[0]);
+                break;
             case EObjType::DEBUG_CUBE:
                 obj = new TObject(mDynList);
                 obj->setMesh(TObject::getMeshGfx(type));
+                break;
+            case EObjType::DYNLIGHT:
+                light = new TDynLight();
+                light->setPosition({list[i].positionX, list[i].positionY, list[i].positionZ});
+                light->setColor(list[i].data[0], list[i].data[1], list[i].data[2]);
+                light->setRadius((f32)list[i].data[3]);
+                mLightList.push(light);
                 break;
             default: 
                 break;
@@ -277,10 +290,23 @@ void TLogoScene::update()
 
     sSceneTime += kInterval;
 
+    for (int i = 0; i < mObjList.capacity(); i++){
+        mObjList[i]->update();
+    }
+
     for (int i = 0; i < 4; i++){
+        TDynLightInfo envLight = TDynLightInfo();
+        envLight.point = {500.0f, 1000.0f, 1000.0f};
+        envLight.color[0] = 255;
+        envLight.color[1] = 255;
+        envLight.color[2] = 255;
+
+        for (int j = 0; j < mLightList.capacity(); ++j){
+            if (mLightList[j]->lerpBetween(envLight, mPlayers[i]->getPosition(), &envLight)){
+            }
+        }
         mPlayers[i]->update();
-        //mPlayers[i]->setRelativeLightSource({TSine::scos(TSine::fromDeg(10.0f * sSceneTime)) * 1000.0f, TSine::ssin(TSine::fromDeg(10.0f * sSceneTime)) * 1000.0f, 300.0f});
-        //mPlayers[i]->setRelativeLightSource(TVec3F(225.0f, 500.0f, 225.0f) - mPlayers[i]->getPosition());
+        mPlayers[i]->setRelativeLightSource(envLight.point);
     }
     gCurrentRace->updateRankings();
 
@@ -311,8 +337,13 @@ void TLogoScene::draw()
     sSkyObj->draw();
 	sLogoObj->draw();
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < mObjList.capacity(); i++){
+        mObjList[i]->draw();
+    }
+
+    for (int i = 0; i < 4; i++){
         mPlayers[i]->draw();
+    }
 
     gSPDisplayList(mDynList->pushDL(), grass_Track1_001_mesh);
 
