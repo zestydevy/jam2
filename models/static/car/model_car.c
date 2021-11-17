@@ -2525,11 +2525,6 @@ Gfx car_Cube1_mesh[] = {
 	gsSPEndDisplayList(),
 };
 
-//#define	RM_SHADOW(clk)					\
-//	AA_EN | Z_CMP | IM_RD | CVG_DST_WRAP | CLR_ON_CVG |	\
-//	FORCE_BL | ZMODE_DEC |					\
-//	GBL_c##clk(G_BL_CLR_IN, G_BL_A_IN, G_BL_0, G_BL_1MA)
-
 Gfx mat_car_shadow_f3d[] = {
 	gsDPPipeSync(),
 	gsDPSetRenderMode(G_RM_AA_ZB_OPA_DECAL, G_RM_AA_ZB_OPA_DECAL2),

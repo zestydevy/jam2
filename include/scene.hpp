@@ -13,6 +13,7 @@
 #include "staticobj.hpp"
 #include "player.hpp"
 #include "checkpoint.hpp"
+#include "dynlight.hpp"
 
 // -------------------------------------------------------------------------- //
 
@@ -56,6 +57,7 @@ class TScene
 
     char const * mName{nullptr};
     TArray<TObject *> mObjList{};
+    TArray<TDynLight *> mLightList{};
 };
 
 // -------------------------------------------------------------------------- //
