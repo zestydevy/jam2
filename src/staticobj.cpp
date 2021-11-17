@@ -208,7 +208,7 @@ void TShadow::draw() {
         return;
     }
 
-    bool lod = mLODMesh != nullptr && !TCamera::checkDistance(mPosition, mLODDistanceSquared);
+    mShadowUsingLOD = mLODMesh != nullptr && !TCamera::checkDistance(mPosition, mLODDistanceSquared);
 
     gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFMtx),
 	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);
@@ -226,7 +226,7 @@ void TShadow::draw() {
 	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
         
     if (mMesh != nullptr) {
-        if (lod){
+        if (mShadowUsingLOD){
             gSPDisplayList(mDynList->pushDL(), mLODMesh);
         }
         else{
@@ -246,7 +246,7 @@ void TShadow::drawChild(TKartObject * child) {
         return;
     }
 
-    if (mLODMesh != nullptr && !TCamera::checkDistance(mPosition, mLODDistanceSquared)){
+    if (mShadowUsingLOD){
         return;
     }
 

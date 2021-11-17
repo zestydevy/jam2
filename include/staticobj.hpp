@@ -170,6 +170,7 @@ class TShadow : public TObject
     protected:
     bool mShadowNeedsUpdate {false};
     bool mShadowVisible {false};
+    bool mShadowUsingLOD {false};
     TVec3F mRelativeLightSource;
 
     Mtx mFScaleMtx1{};
