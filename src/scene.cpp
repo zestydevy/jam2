@@ -290,7 +290,7 @@ void TLogoScene::update()
         mObjList[i]->update();
     }
 
-    for (int i = 0; i < 4; i++){
+    for (int i = 0; i < 2; i++){
         TDynLightInfo envLight = TDynLightInfo();
         envLight.point = {500.0f, 1000.0f, 1000.0f};
         envLight.color[0] = 255;
@@ -337,7 +337,7 @@ void TLogoScene::draw()
         mObjList[i]->draw();
     }
 
-    for (int i = 0; i < 4; i++){
+    for (int i = 0; i < 2; i++){
         mPlayers[i]->draw();
     }
 
