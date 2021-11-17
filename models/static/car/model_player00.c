@@ -394,7 +394,7 @@ Gfx player00_Cube1_008_mesh_tri_1[] = {
 Gfx mat_player00_default_RREYETEST_png_RREYETEST2_png_f3d[] = {
 	gsDPPipeSync(),
 	gsDPSetRenderMode(G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2),
-	gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0),
+	gsDPSetCombineLERP(TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0),
 	gsSPClearGeometryMode(G_CULL_BACK),
 	gsSPTexture(65535, 65535, 0, 0, 1),
 	gsDPTileSync(),
@@ -406,7 +406,7 @@ Gfx mat_player00_default_RREYETEST_png_RREYETEST2_png_f3d[] = {
 	gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_8b, 4, 0, 0, 0, G_TX_CLAMP | G_TX_NOMIRROR, 5, 0, G_TX_CLAMP | G_TX_NOMIRROR, 5, 0),
 	gsDPSetTileSize(0, 0, 0, 124, 124),
 	gsDPSetPrimColor(0, 0, 254, 254, 254, 255),
-	gsSPSetLights1(player00_default_RREYETEST_png_RREYETEST2_png_f3d_lights),
+	//gsSPSetLights1(player00_default_RREYETEST_png_RREYETEST2_png_f3d_lights),
 	gsSPEndDisplayList(),
 };
 
