@@ -4,6 +4,8 @@
 #include "camera.hpp"
 #include "math.hpp"
 
+#include "kartobject.hpp"
+
 // -------------------------------------------------------------------------- //
 
 static Gfx * gObjMeshList[] =
@@ -230,6 +232,45 @@ void TShadow::draw() {
         else{
             gSPDisplayList(mDynList->pushDL(), mMesh);
         }
+    }
+
+    gSPPopMatrix(mDynList->pushDL(), G_MTX_MODELVIEW);
+}
+
+void TShadow::drawChild(TKartObject * child) {
+    if (!mInCamera){
+        return;
+    }
+
+    if (!mShadowVisible){
+        return;
+    }
+
+    if (mLODMesh != nullptr && !TCamera::checkDistance(mPosition, mLODDistanceSquared)){
+        return;
+    }
+
+    gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFMtx),
+	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);
+    gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFRotMtx),
+            G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
+    gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFScaleMtx2),
+	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
+    gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFAngleMtx),
+	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
+    if (mParent != nullptr){
+        gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mParent->getRotMtx()),
+            G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
+    }
+    gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFScaleMtx1),
+	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
+    gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&child->getTransformationMtx()),
+	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
+    gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&child->getRotMtx()),
+	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
+        
+    if (mMesh != nullptr) {
+        gSPDisplayList(mDynList->pushDL(), child->getShadowMesh());
     }
 
     gSPPopMatrix(mDynList->pushDL(), G_MTX_MODELVIEW);

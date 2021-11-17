@@ -465,3 +465,8 @@ Gfx player00_Cube1_008_mesh[] = {
 	gsSPEndDisplayList(),
 };
 
+Gfx player00_shadow_008_mesh[] = {
+	gsSPDisplayList(player00_Cube1_008_mesh_tri_1),
+	gsSPEndDisplayList(),
+};
+

@@ -144,6 +144,8 @@ class TObject
 
 // -------------------------------------------------------------------------- //
 
+class TKartObject;
+
 class TShadow : public TObject
 {
     public:
@@ -160,6 +162,7 @@ class TShadow : public TObject
     virtual void init() override;
     virtual void update() override;
     virtual void draw() override;
+    virtual void drawChild(TKartObject * child);
 
     void setParent(TObject * obj) {mParent = obj;}
     void setRelativeLightSource(TVec3F const & pos){ mRelativeLightSource = pos; mShadowNeedsUpdate = true; }

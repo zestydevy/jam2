@@ -13,3 +13,4 @@ extern Gfx mat_revert_player00_default_RREYETEST_png_RREYETEST2_png_f3d[];
 extern Gfx mat_player00_default_BIRBYCOLORS_png_f3d[];
 extern Gfx mat_revert_player00_default_BIRBYCOLORS_png_f3d[];
 extern Gfx player00_Cube1_008_mesh[];
+extern Gfx player00_shadow_008_mesh[];

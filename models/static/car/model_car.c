@@ -2533,7 +2533,7 @@ Gfx mat_car_shadow_f3d[] = {
 	//gsDPSetAlphaDither(G_AD_PATTERN),
     gsDPSetCombineLERP(0, 0, 0, 0, 0, 0, 0, PRIMITIVE, 0, 0, 0, 0, 0, 0, 0, PRIMITIVE),
     gsSPTexture(65535, 65535, 0, 0, 1),
-	gsSPClearGeometryMode(G_LIGHTING),
+	gsSPClearGeometryMode(G_LIGHTING | G_SHADE | G_SHADING_SMOOTH),
     gsSPEndDisplayList(),
 };
 
@@ -2541,7 +2541,7 @@ Gfx mat_car_shadow_f3d_revert[] = {
 	gsDPPipeSync(),
 	gsDPSetRenderMode(G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2),
 	gsDPSetPrimColor(0, 0, 255, 255, 255, 255),
-	gsSPSetGeometryMode(G_LIGHTING),
+	gsSPSetGeometryMode(G_LIGHTING | G_SHADE | G_SHADING_SMOOTH),
 	gsSPClearGeometryMode(G_TEXTURE_GEN),
 	gsDPSetAlphaCompare(G_AC_NONE),
 	gsDPSetEnvColor(255, 255, 255, 255),

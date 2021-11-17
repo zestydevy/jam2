@@ -33,7 +33,12 @@ class TKartObject : public TObject
     void setDirectionLerp(s16 const direction, f32 const multiplier){mTurnDirection = TMath<s16>::lerp(mTurnDirection, direction, multiplier);}
     void setLeanAngle(s16 const angle, f32 const multiplier){mLeanAngle = TMath<s16>::lerp(mLeanAngle, angle, multiplier);}
 
+    Mtx const & getTransformationMtx() { return mFMtx; }
+    Gfx * getShadowMesh(){return mShadowMesh;}
+    void setShadowMesh(Gfx * mesh) {mShadowMesh = mesh;}
+
     protected:
+    Gfx * mShadowMesh;
 
     s16 mLeanAngle{0};
     s16 mTurnDirection{0};

@@ -12,6 +12,7 @@
 #include "pad.hpp"
 #include "staticobj.hpp"
 #include "emitter.hpp"
+#include "trail.hpp"
 
 #include "carstats.hpp"
 
@@ -115,6 +116,7 @@ class TPlayer :
     virtual void init() override;
     virtual void update() override;
     virtual void draw() override;
+    virtual void drawTransparent();
     virtual void drawShadow();
 
     void resetCamera();
@@ -172,6 +174,7 @@ class TPlayer :
     s16 mLastCheckpoint;
 
     /* Stats */
+    TTireConfig mTireConfig; 
     TCarStats mCarStats{TCarStats()};
 
     /* Particles */
@@ -182,6 +185,10 @@ class TPlayer :
     /* Children */
     TKartObject * mPlayerMesh{nullptr};
     TKartObject * mWheels[4];
+    
+    /* Tread marks */
+    TVec3F mTireLocations[4];
+    TTrail mTireTreads[4];
 
     /* Collision */
     bool mOnGround {false};

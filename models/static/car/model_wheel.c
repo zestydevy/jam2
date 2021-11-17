@@ -325,3 +325,9 @@ Gfx wheel_Cube1_sep23_mesh[] = {
 	gsSPEndDisplayList(),
 };
 
+Gfx wheel_shadow_sep23_mesh[] = {
+	gsSPDisplayList(wheel_Cube1_sep23_mesh_tri_0),
+	gsSPDisplayList(wheel_Cube1_sep23_mesh_tri_1),
+	gsSPEndDisplayList(),
+};
+

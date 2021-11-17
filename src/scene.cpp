@@ -190,7 +190,7 @@ void TLogoScene::init()
     mRacist.clearCheckpoints();
     gCurrentRace = &mRacist;
 
-    for (int i = 0; i < 2; i++){
+    for (int i = 0; i < 4; i++){
         mPlayers[i] = new TPlayer(mDynList);
         mPlayers[i]->setMesh(car_body_Cube3_mesh);
         mPlayers[i]->setCharacter(ECharacter::CHAR_PARROT);
@@ -220,11 +220,11 @@ void TLogoScene::init()
     mTestCamera = new TCamera(mDynList);
     mTestCamera->setPad(mTestPad);
 
-    for (int i = 0; i < 2; i++){
+    for (int i = 0; i < 4; i++){
         mPlayers[i]->setScale(TVec3F{0.4f, 0.4f, 0.4f});
         mPlayers[i]->init();
-        mPlayers[i]->setShadowMesh(car_Cube1_mesh_shadow, mat_car_shadow_f3d, car_Cube1_mesh_shadow_lod);
-        mPlayers[i]->setRelativeLightSource({500.0f, 1000.0f, 1000.0f});
+        mPlayers[i]->setShadowMesh(car_body_shadow_mesh, mat_car_shadow_f3d, car_Cube1_mesh_shadow_lod);
+        mPlayers[i]->setRelativeLightSource({100.0f, 1000.0f, 100.0f});
         mPlayers[i]->initParticles(mEmitterList);
         mPlayers[i]->initWheels();
     }
@@ -290,9 +290,9 @@ void TLogoScene::update()
         mObjList[i]->update();
     }
 
-    for (int i = 0; i < 2; i++){
+    for (int i = 0; i < 4; i++){
         TDynLightInfo envLight = TDynLightInfo();
-        envLight.point = {500.0f, 1000.0f, 1000.0f};
+        envLight.point = {100.0f, 1000.0f, 100.0f};
         envLight.color[0] = 255;
         envLight.color[1] = 255;
         envLight.color[2] = 255;
@@ -337,7 +337,7 @@ void TLogoScene::draw()
         mObjList[i]->draw();
     }
 
-    for (int i = 0; i < 2; i++){
+    for (int i = 0; i < 4; i++){
         mPlayers[i]->draw();
     }
 
@@ -345,10 +345,14 @@ void TLogoScene::draw()
 
     gSPDisplayList(mDynList->pushDL(), mat_car_shadow_f3d);
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 4; i++)
         mPlayers[i]->drawShadow();
 
     gSPDisplayList(mDynList->pushDL(), mat_car_shadow_f3d_revert);
+
+    for (int i = 0; i < 4; i++){
+        mPlayers[i]->drawTransparent();
+    }
 
     for (int i = 0; i < mEmitterList.capacity(); ++i) {
         mEmitterList[i]->draw();

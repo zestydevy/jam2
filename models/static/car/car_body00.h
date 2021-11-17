@@ -31,3 +31,4 @@ extern Gfx mat_car_body_default2_f3d[];
 extern Gfx mat_car_body_default4_f3d[];
 extern Gfx mat_car_body_default9_f3d[];
 extern Gfx car_body_Cube3_mesh[];
+extern Gfx car_body_shadow_mesh[];

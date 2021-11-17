@@ -585,6 +585,7 @@ Gfx car_body_Cube3_mesh[] = {
 	gsSPVertex(car_body_Cube3_mesh_vtx_cull + 0, 8, 0),
 	gsSPSetGeometryMode(G_LIGHTING),
 	gsSPCullDisplayList(0, 7),
+	gsSPSetGeometryMode(G_CULL_BACK),
 	gsSPDisplayList(mat_car_body_default_BIRBYCOLORS_png_f3d),
 	gsSPDisplayList(car_body_Cube3_mesh_tri_0),
 	gsSPDisplayList(mat_revert_car_body_default_BIRBYCOLORS_png_f3d),
@@ -608,3 +609,14 @@ Gfx car_body_Cube3_mesh[] = {
 	gsSPEndDisplayList(),
 };
 
+
+Gfx car_body_shadow_mesh[] = {
+	gsSPDisplayList(car_body_Cube3_mesh_tri_0),
+	gsSPDisplayList(car_body_Cube3_mesh_tri_1),
+	gsSPDisplayList(car_body_Cube3_mesh_tri_2),
+	gsSPDisplayList(car_body_Cube3_mesh_tri_3),
+	gsSPDisplayList(car_body_Cube3_mesh_tri_4),
+	gsSPDisplayList(car_body_Cube3_mesh_tri_5),
+	gsSPDisplayList(car_body_Cube3_mesh_tri_6),
+	gsSPEndDisplayList(),
+};

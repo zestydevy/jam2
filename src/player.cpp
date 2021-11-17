@@ -11,6 +11,7 @@
 #include "audio.hpp"
 #include "collision.h"
 #include "checkpoint.hpp"
+#include "trail.hpp"
 
 #include "../models/static/car/model_car.h"
 #include "../data/ptcl_test.h"
@@ -57,6 +58,17 @@ const float CAR_RECOVERY_FB_ENERGYLOSS_ROAD = 0.002f;
 
 TPlayer * gPlayers[4] { nullptr, nullptr, nullptr, nullptr };
 
+Gfx _mat_tire_tread_align_[] = {gsSPEndDisplayList()};
+Gfx mat_tire_tread[] = {
+	gsDPPipeSync(),
+	gsDPSetRenderMode(G_RM_AA_ZB_XLU_DECAL, G_RM_AA_ZB_XLU_DECAL2),
+    gsDPSetCombineLERP(0, 0, 0, 0, 0, 0, 0, SHADE, 0, 0, 0, 0, 0, 0, 0, SHADE),
+    gsSPTexture(65535, 65535, 0, 0, 1),
+	gsSPClearGeometryMode(G_LIGHTING | G_SHADING_SMOOTH | G_CULL_BOTH),
+    gsSPSetGeometryMode(G_SHADE),
+    gsSPEndDisplayList(),
+};
+
 // -------------------------------------------------------------------------- //
 
 void TPlayer::init()
@@ -86,6 +98,12 @@ void TPlayer::init()
 
     mCameraTarget = mPosition;
 
+    // initialize treads
+    for (int i = 0; i < 4; i++){
+        mTireTreads[i].init(mDynList, 16);
+        mTireTreads[i].setTexture(mat_tire_tread);
+    }
+
     //Car stats
     mCarStats.importStats(sTestCar);
 
@@ -97,6 +115,8 @@ void TPlayer::init()
 
     mRacerID = gCurrentRace->registerRacer();
 
+    mTireConfig = reinterpret_cast<TTireConfig const &>(sTireConfig00);
+
     startDriving();
 }
 
@@ -107,17 +127,20 @@ void TPlayer::setCharacter(ECharacter const character)
 {
     TKartObject * charObj = new TKartObject(mDynList);
     charObj->init();
-    charObj->setScale(TVec3F{0.4f,0.4f,0.4f});
+    charObj->setPosition({0.0f, 0.0f, 0.0f});
+    charObj->setScale(TVec3F{1.0f,1.0f,1.0f});
     mPlayerMesh = charObj;
 
     switch(character)
     {
         case ECharacter::CHAR_PARROT:
             charObj->setMesh(player00_Cube1_008_mesh);
+            charObj->setShadowMesh(player00_shadow_008_mesh);
             break;
         default:
             // just default to the parrot
             charObj->setMesh(player00_Cube1_008_mesh);
+            charObj->setShadowMesh(player00_shadow_008_mesh);
             break;
     }
 }
@@ -129,13 +152,13 @@ void TPlayer::initWheels()
         mWheels[i]->init();
         mWheels[i]->setParent(this);
         mWheels[i]->setMesh(wheel_Cube1_sep23_mesh);
+        mWheels[i]->setShadowMesh(wheel_shadow_sep23_mesh);
     }
     
     mWheels[3]->setRotation(TVec3F{0.0f, TSine::toDeg(580.0f), 0.0f});
     mWheels[2]->setRotation(TVec3F{0.0f, TSine::toDeg(580.0f), 0.0f});
     
-    auto & config = reinterpret_cast<TTireConfig const &>(sTireConfig00);
-    TTireConfig::loadConfig(mWheels, const_cast<TTireConfig &>(config));
+    TTireConfig::loadConfig(mWheels, const_cast<TTireConfig &>(mTireConfig));
 }
 
 void TPlayer::startDriving(){
@@ -348,13 +371,18 @@ void TPlayer::update()
     float aiCheatModifier = 1.0f;
 
     mVelocity += mCollideEnergy;
+
     TVec3F velNrm = mVelocity;
     velNrm.y() = 0.0f;
     velNrm.normalize();
+
+    TVec3F fwdXZ = mForward;
+    fwdXZ.y() = 0.0f;
+    fwdXZ.normalize();
+
     mCollideEnergy = {0.0f, 0.0f, 0.0f};
 
     if (mPlayerMesh != nullptr) {
-        mPlayerMesh->setPosition(mPosition);
         mPlayerMesh->update();
     }
 
@@ -378,7 +406,10 @@ void TPlayer::update()
     //Recover from being out of control if you are facing towards your velocity
     if (mOutOfControl){
         if (TMath<s16>::abs(mTurnRate) < TSine::fromDeg(CAR_RECOVERY_TURNTHRESHOLD)){
-            if (mForward.dot(velNrm) >= CAR_RECOVERY_DIRECTIONTHRESHOLD){
+            
+            fwdXZ.normalize();
+
+            if (fwdXZ.dot(velNrm) >= CAR_RECOVERY_DIRECTIONTHRESHOLD){
                 mOutOfControl = false;
             }
         }
@@ -388,7 +419,7 @@ void TPlayer::update()
     else{
         /* go out of control if you are moving left or right too much */
         float oocSpeed = mVelocity.getLength();
-        mOutOfControl = mVelocity.getLength() >= CAR_RECOVERY_SPEEDTHRESHOLD && mForward.dot(velNrm) < CAR_RECOVERY_DIRECTIONTHRESHOLD;
+        mOutOfControl = mVelocity.getLength() >= CAR_RECOVERY_SPEEDTHRESHOLD && fwdXZ.dot(velNrm) < CAR_RECOVERY_DIRECTIONTHRESHOLD;
     }
     mOutOfControl |= (bButton && aButton);
 
@@ -433,18 +464,20 @@ void TPlayer::update()
         mOnGround = false;
     }
 
+    bool inGrass = mGroundFace->surf == SURFACE_GRASS;
+
     switch (mState){
         // idle. c'mon let's get a move on...
         case playerstate_t::PLAYERSTATE_DRIVING:{
             float turn = steer;
 
             if (mOnGround){
-                if (mGroundFace->surf == SURFACE_GRASS && !mOutOfControl){        //Grass slowdown
+                if (inGrass && !mOutOfControl){        //Grass slowdown
                     mSpeed -= mSpeed * CAR_GRASS_ENERGYLOSS;
                 }
                 
                 if (mOutOfControl){    
-                    if (mGroundFace->surf == SURFACE_GRASS){
+                    if (inGrass){
                         //Slip on grass
                         mVelocity -= mForward * mVelocity.dot(mForward) * CAR_RECOVERY_FB_ENERGYLOSS_GRASS;
                         mVelocity -= mRight * mVelocity.dot(mRight) * CAR_RECOVERY_LR_ENERGYLOSS_GRASS;
@@ -562,11 +595,9 @@ void TPlayer::update()
         mShadow->setRotation(TVec3<s16>((s16)TSine::atan2(mGroundFace->nrm.z(), mGroundFace->nrm.y()), (s16)0, (s16)-TSine::atan2(mGroundFace->nrm.x(), mGroundFace->nrm.y())));
 
         if (mPlayerMesh != nullptr) {
-            mPlayerMesh->setDirection(mDriveDirection);
             mPlayerMesh->setLeanAngle(steer * 5000.0f, kInterval * 4.0f);
             mWheels[1]->setDirectionLerp(-steer * 9000.0f, kInterval * 1.5f);
             mWheels[3]->setDirectionLerp(-steer * 9000.0f, kInterval * 1.5f);
-            mPlayerMesh->setRotation(getRotation());
         }
     }
 
@@ -606,6 +637,35 @@ void TPlayer::update()
 
     // update tires
     updateWheels();
+
+    //update tire tread
+    for (int i = 0; i < 4; i++){
+        mTireTreads[i].update();
+        if (!mOutOfControl){
+            mTireTreads[i].Interval = mSpeed / 5.0f;
+        }
+
+        if (inGrass){
+            mTireTreads[i].Color[0] = 90;
+            mTireTreads[i].Color[1] = 55;
+            mTireTreads[i].Color[2] = 44;
+        }
+        else{
+            mTireTreads[i].Color[0] = 0;
+            mTireTreads[i].Color[1] = 0;
+            mTireTreads[i].Color[2] = 0;
+        }
+    }
+
+    mTireTreads[0].Color[3] = mOutOfControl ? 128 : 0;
+    mTireTreads[1].Color[3] = mOutOfControl ? 128 : 0;
+    mTireTreads[2].Color[3] = mOutOfControl || bButton ? 128 : 0;
+    mTireTreads[3].Color[3] = mOutOfControl || bButton ? 128 : 0;
+
+    mTireTreads[0].extend(mPosition + (mRight * mTireConfig.position[0].x() * 100.0f * mScale.x()) + (mForward * mTireConfig.position[0].z() * 100.0f * mScale.x()), mUp);
+    mTireTreads[1].extend(mPosition + (mRight * mTireConfig.position[1].x() * 100.0f * mScale.x()) + (mForward * mTireConfig.position[1].z() * 100.0f * mScale.x()), mUp);
+    mTireTreads[2].extend(mPosition + (mRight * mTireConfig.position[2].x() * 100.0f * mScale.x()) + (mForward * mTireConfig.position[2].z() * 100.0f * mScale.x()), mUp);
+    mTireTreads[3].extend(mPosition + (mRight * mTireConfig.position[3].x() * 100.0f * mScale.x()) + (mForward * mTireConfig.position[3].z() * 100.0f * mScale.x()), mUp);
 }
 
 void TPlayer::calculateForwardDirection(){
@@ -644,9 +704,6 @@ void TPlayer::updateMtx()
 
 void TPlayer::draw()
 {
-    //mAnim->draw();
-    mPlayerMesh->draw();
-
     updateMtx();
     
     if (!mInCamera)
@@ -669,6 +726,8 @@ void TPlayer::draw()
         }
     }
 
+    mPlayerMesh->draw();
+
     for (s32 i = 0; i < 4; ++i) {
         mWheels[i]->draw();
     }
@@ -680,6 +739,17 @@ void TPlayer::drawShadow()
 {
     if (mGroundFace != nullptr) {
         mShadow->draw();
+        mShadow->drawChild(mPlayerMesh);
+        for (int i = 0; i < 4; i++){
+            mShadow->drawChild(mWheels[i]);
+        }
+    }
+}
+
+void TPlayer::drawTransparent()
+{
+    for (int i = 0; i < 4; i++){
+        mTireTreads[i].draw();
     }
 }
 
@@ -700,12 +770,9 @@ void TPlayer::initParticles(TArray<TEmitter *> & emitList){
     for (int i = 0; i < 4; i++){
         mTireEmitters[i] = new TEmitter(mPosition, reinterpret_cast<TEmitConfig const &>(sPtclTire), mDynList);
         mTireEmitters[i]->setEnable(false);
+        mTireEmitters[i]->attach(this, mTireConfig.position[i] * mScale.x());
         emitList.push(mTireEmitters[i]);
     }
-    mTireEmitters[0]->attach(this, {-(CAR_WIDTH - 5.0f), 0.0f, -(CAR_LENGTH - 20.0f)});
-    mTireEmitters[1]->attach(this, { (CAR_WIDTH - 5.0f), 0.0f, -(CAR_LENGTH - 20.0f)});
-    mTireEmitters[2]->attach(this, {-(CAR_WIDTH - 5.0f), 0.0f,  (CAR_LENGTH - 10.0f)});
-    mTireEmitters[3]->attach(this, { (CAR_WIDTH - 5.0f), 0.0f,  (CAR_LENGTH - 10.0f)});
 
     mCollisionEmitter = new TEmitter(mPosition, reinterpret_cast<TEmitConfig const &>(sPtclSmoke), mDynList);
     mCollisionEmitter->setEnable(false);

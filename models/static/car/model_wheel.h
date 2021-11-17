@@ -8,3 +8,4 @@ extern Gfx wheel_Cube1_sep23_mesh_tri_1[];
 extern Gfx mat_wheel_default3_f3d[];
 extern Gfx mat_wheel_default4_f3d[];
 extern Gfx wheel_Cube1_sep23_mesh[];
+extern Gfx wheel_shadow_sep23_mesh[];
