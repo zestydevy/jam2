@@ -2532,7 +2532,7 @@ Gfx car_Cube1_mesh[] = {
 
 Gfx mat_car_shadow_f3d[] = {
 	gsDPPipeSync(),
-	gsDPSetRenderMode(RM_AA_ZB_OPA_DECAL, RM_AA_ZB_OPA_DECAL2),
+	gsDPSetRenderMode(G_RM_AA_ZB_OPA_DECAL, G_RM_AA_ZB_OPA_DECAL2),
     gsDPSetPrimColor(0, 0, 0, 0, 0, 255),
 	//gsDPSetAlphaCompare(G_AC_DITHER),
 	//gsDPSetAlphaDither(G_AD_PATTERN),

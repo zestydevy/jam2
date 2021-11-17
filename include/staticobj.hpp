@@ -86,6 +86,7 @@ class TObject
     void setRotation(TVec3<f32> const & rot);
     void setScale(TVec3<f32> const & scale);
     inline void setMesh(Gfx * mesh, Gfx * initializer = nullptr, Gfx * lod = nullptr) { mMesh = mesh; mInitializer = initializer; mLODMesh = lod; }
+    void setParent(TObject * obj) {mParent = obj;}
     const Gfx * getGraphicsInitializer(){ return mInitializer; };
 
     TVec3<f32> const & getPosition() {return mPosition;}
@@ -135,6 +136,8 @@ class TObject
 
     float mLODDistanceSquared{1000000.0f};
     float mDrawDistanceSquared{100000000.0f};
+
+    TObject * mParent {nullptr};
 };
 
 // -------------------------------------------------------------------------- //

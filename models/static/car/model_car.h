@@ -1,3 +1,7 @@
+#include "car_body00.h"
+#include "model_player00.h"
+#include "model_wheel.h"
+
 extern Lights1 car_default_f3d_lights;
 extern Vtx car_Cube1_mesh_vtx_cull[8];
 extern Vtx car_Cube1_mesh_vtx_0[1904];

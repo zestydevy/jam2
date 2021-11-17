@@ -83,6 +83,7 @@ SECTIONS
       build/codesegment.o(.rodata*);
       build/obj/ptcl_test.o(.rodata*);
       build/obj/anim_test.o(.rodata*);
+      build/obj/tire.o(.rodata*);
    }
    END_SEG(code)
 

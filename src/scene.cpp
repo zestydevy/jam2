@@ -177,9 +177,10 @@ void TLogoScene::init()
     mRacist.clearCheckpoints();
     gCurrentRace = &mRacist;
 
-    for (int i = 0; i < 4; i++){
+    for (int i = 0; i < 2; i++){
         mPlayers[i] = new TPlayer(mDynList);
-        mPlayers[i]->setMesh(car_Cube1_mesh);
+        mPlayers[i]->setMesh(car_body_Cube3_mesh);
+        mPlayers[i]->setCharacter(ECharacter::CHAR_PARROT);
         gPlayers[i] = mPlayers[i];
     }
 
@@ -206,12 +207,13 @@ void TLogoScene::init()
     mTestCamera = new TCamera(mDynList);
     mTestCamera->setPad(mTestPad);
 
-    for (int i = 0; i < 4; i++){
+    for (int i = 0; i < 2; i++){
         mPlayers[i]->setScale(TVec3F{0.4f, 0.4f, 0.4f});
         mPlayers[i]->init();
         mPlayers[i]->setShadowMesh(car_Cube1_mesh_shadow, mat_car_shadow_f3d, car_Cube1_mesh_shadow_lod);
         mPlayers[i]->setRelativeLightSource({500.0f, 1000.0f, 1000.0f});
         mPlayers[i]->initParticles(mEmitterList);
+        mPlayers[i]->initWheels();
     }
 
     //Player 1
@@ -220,12 +222,6 @@ void TLogoScene::init()
 
     //Player 2
     mPlayers[1]->setAIType(AI_BAD);
-
-    //Player 3
-    mPlayers[2]->setAIType(AI_RANDOM);
-
-    //Player 4
-    mPlayers[3]->setAIType(AI_GOOD);
 
     sLogoObj = new TObject(mDynList);
     sLogoObj->setMesh(n64_n64_N_mesh_mesh_mesh);
@@ -277,7 +273,7 @@ void TLogoScene::update()
 
     sSceneTime += kInterval;
 
-    for (int i = 0; i < 4; i++){
+    for (int i = 0; i < 2; i++){
         mPlayers[i]->update();
         //mPlayers[i]->setRelativeLightSource({TSine::scos(TSine::fromDeg(10.0f * sSceneTime)) * 1000.0f, TSine::ssin(TSine::fromDeg(10.0f * sSceneTime)) * 1000.0f, 300.0f});
         //mPlayers[i]->setRelativeLightSource(TVec3F(225.0f, 500.0f, 225.0f) - mPlayers[i]->getPosition());
@@ -311,14 +307,14 @@ void TLogoScene::draw()
     sSkyObj->draw();
 	sLogoObj->draw();
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 2; i++)
         mPlayers[i]->draw();
 
     gSPDisplayList(mDynList->pushDL(), grass_Track1_001_mesh);
 
     gSPDisplayList(mDynList->pushDL(), mat_car_shadow_f3d);
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 2; i++)
         mPlayers[i]->drawShadow();
 
     gSPDisplayList(mDynList->pushDL(), mat_car_shadow_f3d_revert);

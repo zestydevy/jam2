@@ -2,11 +2,20 @@
 
 #include <nusys.h>
 #include "util.hpp"
+#include "kartobject.hpp"
 
 #define NUM_GEARS 4
 #define NUM_STATS 5
 
 typedef f32 t_carstatdata[NUM_GEARS * (1 + NUM_STATS)];
+
+struct TTireConfig
+{
+    TVec3F position[4];
+    f32 size;
+
+    static void loadConfig(TKartObject * kart[], TTireConfig & config);
+};
 
 class TCarStats {
     public:

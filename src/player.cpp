@@ -1,6 +1,7 @@
 #include <nusys.h>
 
 #include "player.hpp"
+#include "kartobject.hpp"
 #include "math.hpp"
 #include "animator.hpp"
 #include "util.hpp"
@@ -11,8 +12,12 @@
 #include "collision.h"
 #include "checkpoint.hpp"
 
+#include "../models/static/car/model_car.h"
 #include "../data/ptcl_test.h"
+#include "../data/tire.h"
 #include "../models/static/shadow/shadow.h"
+
+constexpr s32 kMaxWheels = 4;
 
 const bool PLAYER_DOUBLESIDEDCOL = true;
 const int PLAYER_COLLISIONCHECK_COUNT = 8;
@@ -96,6 +101,41 @@ void TPlayer::init()
 }
 
 void TPlayer::setAnimation(int length, playeranim_t anim, bool loop, float timescale){
+}
+
+void TPlayer::setCharacter(ECharacter const character)
+{
+    TKartObject * charObj = new TKartObject(mDynList);
+    charObj->init();
+    charObj->setScale(TVec3F{0.4f,0.4f,0.4f});
+    mPlayerMesh = charObj;
+
+    switch(character)
+    {
+        case ECharacter::CHAR_PARROT:
+            charObj->setMesh(player00_Cube1_008_mesh);
+            break;
+        default:
+            // just default to the parrot
+            charObj->setMesh(player00_Cube1_008_mesh);
+            break;
+    }
+}
+
+void TPlayer::initWheels()
+{
+    for (s32 i = 0; i < 4; ++i) {
+        mWheels[i] = new TKartObject(mDynList);
+        mWheels[i]->init();
+        mWheels[i]->setParent(this);
+        mWheels[i]->setMesh(wheel_Cube1_sep23_mesh);
+    }
+    
+    mWheels[3]->setRotation(TVec3F{0.0f, TSine::toDeg(580.0f), 0.0f});
+    mWheels[2]->setRotation(TVec3F{0.0f, TSine::toDeg(580.0f), 0.0f});
+    
+    auto & config = reinterpret_cast<TTireConfig const &>(sTireConfig00);
+    TTireConfig::loadConfig(mWheels, const_cast<TTireConfig &>(config));
 }
 
 void TPlayer::startDriving(){
@@ -295,6 +335,12 @@ void TPlayer::aiCalcNextTarget(){
     }
 }
 
+void TPlayer::updateWheels() {
+    for (s32 i = 0; i < 4; ++i) {
+        mWheels[i]->update();
+    }
+}
+
 void TPlayer::update()
 {
     TObject::update();
@@ -306,6 +352,11 @@ void TPlayer::update()
     velNrm.y() = 0.0f;
     velNrm.normalize();
     mCollideEnergy = {0.0f, 0.0f, 0.0f};
+
+    if (mPlayerMesh != nullptr) {
+        mPlayerMesh->setPosition(mPosition);
+        mPlayerMesh->update();
+    }
 
     /* Get controller/ai inputs */
     bool aButton = false;
@@ -509,6 +560,14 @@ void TPlayer::update()
         pt.y() = mGroundFace->calcYAt(pt.xz());
         mShadow->setPosition(pt);
         mShadow->setRotation(TVec3<s16>((s16)TSine::atan2(mGroundFace->nrm.z(), mGroundFace->nrm.y()), (s16)0, (s16)-TSine::atan2(mGroundFace->nrm.x(), mGroundFace->nrm.y())));
+
+        if (mPlayerMesh != nullptr) {
+            mPlayerMesh->setDirection(mDriveDirection);
+            mPlayerMesh->setLeanAngle(steer * 5000.0f, kInterval * 4.0f);
+            mWheels[1]->setDirectionLerp(-steer * 9000.0f, kInterval * 1.5f);
+            mWheels[3]->setDirectionLerp(-steer * 9000.0f, kInterval * 1.5f);
+            mPlayerMesh->setRotation(getRotation());
+        }
     }
 
     mCameraTarget = mPosition + (mUp * PLAYER_CAMERA_TARGET_HEIGHT);
@@ -544,6 +603,9 @@ void TPlayer::update()
             mTireEmitters[3]->setRateScale(tireRate);
         }
     }
+
+    // update tires
+    updateWheels();
 }
 
 void TPlayer::calculateForwardDirection(){
@@ -583,9 +645,35 @@ void TPlayer::updateMtx()
 void TPlayer::draw()
 {
     //mAnim->draw();
+    mPlayerMesh->draw();
 
     updateMtx();
-    TObject::draw();
+    
+    if (!mInCamera)
+        return;
+
+    if (mMtxNeedsUpdate)
+        updateMtx();
+
+    bool lod = mLODMesh != nullptr && !TCamera::checkDistance(mPosition, mLODDistanceSquared);
+
+    gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFMtx),
+	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);
+        
+    if (mMesh != nullptr) {
+        if (lod){
+            gSPDisplayList(mDynList->pushDL(), mLODMesh);
+        }
+        else{
+            gSPDisplayList(mDynList->pushDL(), mMesh);
+        }
+    }
+
+    for (s32 i = 0; i < 4; ++i) {
+        mWheels[i]->draw();
+    }
+
+    gSPPopMatrix(mDynList->pushDL(), G_MTX_MODELVIEW);
 }
 
 void TPlayer::drawShadow()
@@ -606,7 +694,7 @@ void TPlayer::addCollision(
 
 void TPlayer::initParticles(TArray<TEmitter *> & emitList){
     mSmokeEmitter = new TEmitter(mPosition, reinterpret_cast<TEmitConfig const &>(sPtclSmoke), mDynList);
-    mSmokeEmitter->attach(this, {-CAR_WIDTH / 2.0f, 6.0f, -CAR_LENGTH + 25.0f});
+    mSmokeEmitter->attach(this, {-CAR_WIDTH / 2.0f, 6.0f, -CAR_LENGTH + 5.0f});
     mSmokeEmitter->setEnable(true);
     emitList.push(mSmokeEmitter);
     for (int i = 0; i < 4; i++){

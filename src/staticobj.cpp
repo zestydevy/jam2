@@ -91,6 +91,11 @@ void TObject::draw()
 	//      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
     //gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFScaleMtx),
 	//      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
+
+    if (mParent != nullptr){
+        gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mParent->getRotMtx()),
+            G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
+    }
         
     if (mMesh != nullptr) {
         if (lod){

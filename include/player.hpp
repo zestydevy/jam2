@@ -3,6 +3,7 @@
 #include <nusys.h>
 
 #include "animator.hpp"
+#include "kartobject.hpp"
 #include "camera.hpp"
 #include "collider.hpp"
 #include "collision.hpp"
@@ -44,6 +45,10 @@ enum playeraitype_t : u16 {
     AI_BAD,
     AI_RANDOM,
     AI_GOOD
+};
+
+enum ECharacter : u16 {
+    CHAR_PARROT,
 };
 
 // -------------------------------------------------------------------------- //
@@ -117,13 +122,18 @@ class TPlayer :
     void aiUpdate(bool& aButton, bool& bButton, f32& steer, const TVec3F & velNrm);
     void aiCalcNextTarget();
 
+    void updateWheels();
+
     void addCollision(const TVec3F& energy, float torque);
 
     void setAnimation(int length, playeranim_t anim, bool loop = true, float timescale = 0.25f);
 
+    void setCharacter(ECharacter const character);
+
     inline void setShadowMesh(Gfx * mesh, Gfx * initializer = nullptr, Gfx * lod = nullptr) { mShadow->setMesh(mesh, initializer, lod); }
 
     void initParticles(TArray<TEmitter *> &);
+    void initWheels();
 
     protected:
     void startDriving();
@@ -168,6 +178,10 @@ class TPlayer :
     TEmitter * mSmokeEmitter;
     TEmitter * mTireEmitters[4];
     TEmitter * mCollisionEmitter;
+
+    /* Children */
+    TKartObject * mPlayerMesh{nullptr};
+    TKartObject * mWheels[4];
 
     /* Collision */
     bool mOnGround {false};

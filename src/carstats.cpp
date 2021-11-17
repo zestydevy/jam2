@@ -1,6 +1,14 @@
 #include "math.hpp"
 #include "carstats.hpp"
 
+void TTireConfig::loadConfig(TKartObject * kart[], TTireConfig & config)
+{
+    for (s32 i = 0; i < 4; ++i) {
+        kart[i]->setPosition(config.position[i] * 100.0f);
+        kart[i]->setScale(TVec3F{config.size, config.size, config.size});
+    }
+}
+
 int TCarStats::calcGear(f32 speed, f32* speeds){
     for (int i = 0; i < 4; i++){
         if (speed < speeds[i])
