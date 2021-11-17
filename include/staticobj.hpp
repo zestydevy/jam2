@@ -95,6 +95,7 @@ class TObject
     TVec3<s16> const & getRotation() {return mRotation;}
     TVec3<f32> const & getScale() {return mScale;}
     bool getInCamera() {return mInCamera;}
+    bool getUsingDistantModel() {return mUsingLOD;}
 
     const Mtx & getDrawMtx() { return mFMtx; }
     const Mtx & getRotMtx() { return mFRotMtx; }
@@ -120,6 +121,7 @@ class TObject
     protected:
     bool mInCamera{false};
     bool mMtxNeedsUpdate{true};
+    bool mUsingLOD {false};
 
     TVec3<f32> mPosition{};
     TVec3<s16> mRotation{};

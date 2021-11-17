@@ -16,7 +16,7 @@ class TTrail
     void setTexture(Gfx * initializer){mInitializer = initializer;};
 
     void update();
-    void extend(TVec3F const & position, TVec3F const & up);
+    void extend(TVec3F const & position, TVec3F const & up, bool lod = false);
     void clear();
 
     void draw();

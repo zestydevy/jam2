@@ -280,7 +280,8 @@ void TPlayer::aiUpdate(bool& aButton, bool& bButton, f32& steer, const TVec3F & 
 
     TVec2F forward = mForward.xz();
     forward.normalize();
-    TVec2F right = TVec2F(TSine::ssin(mDriveDirection + TSine::fromDeg(90)), TSine::scos(mDriveDirection + TSine::fromDeg(90)));
+    TVec2F right = mRight.xz();
+    right.normalize();
 
     TVec2F diff = mCurrentAITarget.xz() - mPosition.xz();
     diff.normalize();
@@ -340,10 +341,6 @@ void TPlayer::aiUpdate(bool& aButton, bool& bButton, f32& steer, const TVec3F & 
 }
 
 void TPlayer::aiCalcNextTarget(){
-    if (mOutOfControl){
-        mCurrentAITarget = gCurrentRace->getClosestCheckpointPosition(mPosition, gCurrentRace->getNextCheckpoint(mLastCheckpoint));
-        return;
-    }
     switch (mAIType){
         case AI_BAD:
             mCurrentAITarget = gCurrentRace->getClosestCheckpointPosition(mPosition, gCurrentRace->getNextCheckpoint(mLastCheckpoint), 0);
@@ -359,6 +356,10 @@ void TPlayer::aiCalcNextTarget(){
 }
 
 void TPlayer::updateWheels() {
+    if (mUsingLOD){
+        return;
+    }
+
     for (s32 i = 0; i < 4; ++i) {
         mWheels[i]->update();
     }
@@ -382,7 +383,7 @@ void TPlayer::update()
 
     mCollideEnergy = {0.0f, 0.0f, 0.0f};
 
-    if (mPlayerMesh != nullptr) {
+    if (mPlayerMesh != nullptr && !mUsingLOD) {
         mPlayerMesh->update();
     }
 
@@ -642,7 +643,7 @@ void TPlayer::update()
     for (int i = 0; i < 4; i++){
         mTireTreads[i].update();
         if (!mOutOfControl){
-            mTireTreads[i].Interval = mSpeed / 5.0f;
+            mTireTreads[i].Interval = TMath<f32>::max(mSpeed / 5.0f, 25.0f);
         }
 
         if (inGrass){
@@ -657,15 +658,17 @@ void TPlayer::update()
         }
     }
 
-    mTireTreads[0].Color[3] = mOutOfControl ? 128 : 0;
-    mTireTreads[1].Color[3] = mOutOfControl ? 128 : 0;
-    mTireTreads[2].Color[3] = mOutOfControl || bButton ? 128 : 0;
-    mTireTreads[3].Color[3] = mOutOfControl || bButton ? 128 : 0;
+    mTireTreads[0].Color[3] = mInCamera && mOutOfControl ? 128 : 0;
+    mTireTreads[1].Color[3] = mInCamera && mOutOfControl ? 128 : 0;
+    mTireTreads[2].Color[3] = mInCamera && mOutOfControl || bButton ? 128 : 0;
+    mTireTreads[3].Color[3] = mInCamera && mOutOfControl || bButton ? 128 : 0;
 
-    mTireTreads[0].extend(mPosition + (mRight * mTireConfig.position[0].x() * 100.0f * mScale.x()) + (mForward * mTireConfig.position[0].z() * 100.0f * mScale.x()), mUp);
-    mTireTreads[1].extend(mPosition + (mRight * mTireConfig.position[1].x() * 100.0f * mScale.x()) + (mForward * mTireConfig.position[1].z() * 100.0f * mScale.x()), mUp);
-    mTireTreads[2].extend(mPosition + (mRight * mTireConfig.position[2].x() * 100.0f * mScale.x()) + (mForward * mTireConfig.position[2].z() * 100.0f * mScale.x()), mUp);
-    mTireTreads[3].extend(mPosition + (mRight * mTireConfig.position[3].x() * 100.0f * mScale.x()) + (mForward * mTireConfig.position[3].z() * 100.0f * mScale.x()), mUp);
+    if ( mInCamera ){
+        mTireTreads[0].extend(mPosition + (mRight * mTireConfig.position[0].x() * 100.0f * mScale.x()) + (mForward * mTireConfig.position[0].z() * 100.0f * mScale.x()), mUp, mUsingLOD);
+        mTireTreads[1].extend(mPosition + (mRight * mTireConfig.position[1].x() * 100.0f * mScale.x()) + (mForward * mTireConfig.position[1].z() * 100.0f * mScale.x()), mUp, mUsingLOD);
+        mTireTreads[2].extend(mPosition + (mRight * mTireConfig.position[2].x() * 100.0f * mScale.x()) + (mForward * mTireConfig.position[2].z() * 100.0f * mScale.x()), mUp, mUsingLOD);
+        mTireTreads[3].extend(mPosition + (mRight * mTireConfig.position[3].x() * 100.0f * mScale.x()) + (mForward * mTireConfig.position[3].z() * 100.0f * mScale.x()), mUp, mUsingLOD);
+    }
 }
 
 void TPlayer::calculateForwardDirection(){
@@ -673,9 +676,8 @@ void TPlayer::calculateForwardDirection(){
     TVec3F proj = forward.dot(mUp) * mUp;
     mForward = forward - proj;
 
-    TMtx44 rot;
-    rot.rotateAxis(mUp, TSine::fromDeg(90));
-    mRight = rot.mul(mForward);
+    mRight = mForward.cross(mUp) * -1.0f;
+    mRight.normalize();
 }
 
 void TPlayer::updateMtx()

@@ -39,7 +39,7 @@ void TTrail::init(TDynList2 * list, int capacity){
     }
 }
 
-void TTrail::extend(TVec3F const & position, TVec3F const & up){
+void TTrail::extend(TVec3F const & position, TVec3F const & up, bool lod){
     TVec3F dif = (position - mLastPosition);
     if (mEnd == 0){
         mLastPosition = position;
@@ -47,15 +47,23 @@ void TTrail::extend(TVec3F const & position, TVec3F const & up){
     else if (dif.getSqrLength() > (Interval * Interval)){
         mLastPosition = position;
         mEnd++;
-        if (mEnd - mStart >= mCapacity){
+        if (mEnd - mStart >= mCapacity - 1){
             mStart++;
         }
     }
 
-    dif.normalize();
-    TVec3F right = dif.cross(up);
-    TVec3F pL = position - (right * Width);
-    TVec3F pR = position + (right * Width);
+    TVec3F pL;
+    TVec3F pR;
+
+    if (!lod){
+        dif.normalize();
+        TVec3F right = dif.cross(up);
+        pL = position - (right * Width);
+        pR = position + (right * Width);
+    }
+    else{
+        pL = pR = position;
+    }
 
     //Left vertex
     int idx = (mEnd * 2) % 32;
@@ -87,19 +95,10 @@ void TTrail::update(){
         return;
     }
 
-    for (int i = mStart; i < mEnd; ++i){
-        int l1 = i % mCapacity;
-        int l2 = (i + 1) % mCapacity;
-        int idx1 = l1 * 2;
-        int idx2 = l2 * 2;
-
-        if (mVertices[idx1].v.cn[3] != 0){
-            mVertices[idx1].v.cn[3] -= 1;
-            mVertices[idx1 + 1].v.cn[3] -= 1;
-        }
-        if (mVertices[idx2].v.cn[3] != 0){
-            mVertices[idx2].v.cn[3] -= 1;
-            mVertices[idx2 + 1].v.cn[3] -= 1;
+    for (int i = 0; i < 32; i += 2){
+        if (mVertices[i].v.cn[3] != 0){
+            mVertices[i].v.cn[3]--;
+            mVertices[i + 1].v.cn[3]--;
         }
     }
 }

@@ -1,49 +1,43 @@
 #include "kartobject.hpp"
 
-static Mtx sRootMtx;
-
 void TKartObject::init() {
     TObject::init();
-
-    TMtx44 rootMtxF;
-    rootMtxF.identity();
-    TMtx44::floatToFixed(rootMtxF, sRootMtx);
 }
 
-void TKartObject::update() {
-    TObject::update();
-}
+void TKartObject::update() { }
 
 void TKartObject::updateMtx()
 {
-    TMtx44 temp1, temp2, temp3, temp4, mPosMtx, mScaleMtx;
-    
-    mPosMtx.translate(mPosition);
-    temp1.rotateAxisX(mRotation.x());
-    temp2.rotateAxisY(mRotation.y());
-    temp3.rotateAxisZ(mRotation.z());
-    TMtx44::concat(temp2, temp1, mRotMtx);
-    TMtx44::concat(mRotMtx, temp3, mRotMtx);
-    temp2.rotateAxisY(mTurnDirection);
-    temp4.rotateAxis(TVec3F{0.0f, 0.0f, 1.0f}, mLeanAngle);
-    TMtx44::concat(mRotMtx, temp2, mRotMtx);
-    TMtx44::concat(mRotMtx, temp4, mRotMtx);
-    mScaleMtx.scale(mScale);
+    if (mMtxNeedsUpdate){
+        TMtx44 temp1, temp2, temp3, temp4, mPosMtx, mScaleMtx;
+        
+        mPosMtx.translate(mPosition);
+        temp1.rotateAxisX(mRotation.x());
+        temp2.rotateAxisY(mRotation.y());
+        temp3.rotateAxisZ(mRotation.z());
+        TMtx44::concat(temp2, temp1, mRotMtx);
+        TMtx44::concat(mRotMtx, temp3, mRotMtx);
+        temp2.rotateAxisY(mTurnDirection);
+        temp4.rotateAxis(TVec3F{0.0f, 0.0f, 1.0f}, mLeanAngle);
+        TMtx44::concat(mRotMtx, temp2, mRotMtx);
+        TMtx44::concat(mRotMtx, temp4, mRotMtx);
+        mScaleMtx.scale(mScale);
 
-    //Combine mtx
-    TMtx44::concat(mPosMtx, mRotMtx, temp1);
-    TMtx44::concat(temp1, mScaleMtx, temp2);
+        //Combine mtx
+        TMtx44::concat(mPosMtx, mRotMtx, temp1);
+        TMtx44::concat(temp1, mScaleMtx, temp2);
 
-    TMtx44::floatToFixed(temp2, mFMtx);
-    TMtx44::floatToFixed(mRotMtx, mFRotMtx);
+        TMtx44::floatToFixed(temp2, mFMtx);
+        TMtx44::floatToFixed(mRotMtx, mFRotMtx);
 
-    mMtxNeedsUpdate = false;
+        mMtxNeedsUpdate = false;
+    }
 }
 
 void TKartObject::draw()
 {
-    //if (!mInCamera)
-    //    return;
+    if (!mInCamera)
+        return;
 
     updateMtx();
 

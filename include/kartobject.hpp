@@ -29,9 +29,9 @@ class TKartObject : public TObject
     virtual void update() override;
     virtual void draw() override;
 
-    void setDirection(s16 const direction){mTurnDirection = direction;}
-    void setDirectionLerp(s16 const direction, f32 const multiplier){mTurnDirection = TMath<s16>::lerp(mTurnDirection, direction, multiplier);}
-    void setLeanAngle(s16 const angle, f32 const multiplier){mLeanAngle = TMath<s16>::lerp(mLeanAngle, angle, multiplier);}
+    void setDirection(s16 const direction){mTurnDirection = direction; mMtxNeedsUpdate = true; }
+    void setDirectionLerp(s16 const direction, f32 const multiplier){mTurnDirection = TMath<s16>::lerp(mTurnDirection, direction, multiplier); mMtxNeedsUpdate = true; }
+    void setLeanAngle(s16 const angle, f32 const multiplier){ mLeanAngle = TMath<s16>::lerp(mLeanAngle, angle, multiplier); mMtxNeedsUpdate = true; }
 
     Mtx const & getTransformationMtx() { return mFMtx; }
     Gfx * getShadowMesh(){return mShadowMesh;}

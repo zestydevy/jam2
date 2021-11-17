@@ -68,13 +68,12 @@ void TObject::updateMtx()
     TMtx44::floatToFixed(temp2, mFMtx);
     TMtx44::floatToFixed(mRotMtx, mFRotMtx);
 
-
     mMtxNeedsUpdate = false;
 }
 
 void TObject::update() {
     mInCamera = mAlwaysDraw || TCamera::checkVisible(mPosition, mDrawDistanceSquared);
-    //mInCamera = true;
+    mUsingLOD = !mInCamera || !TCamera::checkDistance(mPosition, mLODDistanceSquared);
 }
 
 void TObject::draw()
@@ -85,14 +84,8 @@ void TObject::draw()
     if (mMtxNeedsUpdate)
         updateMtx();
 
-    bool lod = mLODMesh != nullptr && !TCamera::checkDistance(mPosition, mLODDistanceSquared);
-
     gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFMtx),
 	      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);
-    //gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFRotMtx),
-	//      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
-    //gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFScaleMtx),
-	//      G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
 
     if (mParent != nullptr){
         gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mParent->getRotMtx()),
@@ -100,7 +93,7 @@ void TObject::draw()
     }
         
     if (mMesh != nullptr) {
-        if (lod){
+        if (mUsingLOD && mLODMesh != nullptr){
             gSPDisplayList(mDynList->pushDL(), mLODMesh);
         }
         else{
@@ -247,6 +240,10 @@ void TShadow::drawChild(TKartObject * child) {
     }
 
     if (mShadowUsingLOD){
+        return;
+    }
+
+    if (child->getShadowMesh() == nullptr){
         return;
     }
 

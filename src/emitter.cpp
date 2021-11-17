@@ -24,9 +24,15 @@ TEmitter::TEmitter(TVec3<f32> const & position, TEmitConfig const & config, TDyn
 
 void TEmitter::emit()
 {
+    
     TMtx44 rotMtx;
     rotMtx.identity();
     if (mParent != nullptr) {
+        if (!mAlwaysDraw && mParent->getUsingDistantModel()){
+            mInCamera = false;
+            return;
+        }
+
         rotMtx = mParent->getRotationMatrix();
         mPosition = mParent->getPosition() + rotMtx.mul(mParentOffset);
     }
