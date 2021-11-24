@@ -24,6 +24,8 @@
 #include "../scene/object_info.h"
 #include "../models/ovl/sprites/sp_logo1.h"
 #include "../models/ovl/sprites/sp_logo2.h"
+#include "../models/static/sprites/sprite_minimap.h"
+#include "../models/static/sprites/sprite_dot.h"
 #include "../models/static/floor/model_floor.h"
 #include "../models/static/ptcl00/sprite_ptcl00.h"
 #include "../models/static/yoshi/model_dino.h"
@@ -49,10 +51,11 @@ TObject * sLogoObj;
 TObject * sSkyObj;
 f32 sLogoRot = 0.0f;
 TSprite * sFadeSpr;
-TSprite * sP1;
-TSprite * sP2;
-TSprite * sP3;
-TSprite * sP4;
+TSprite * sMiniMap;
+TSprite * sMapDot;
+TSprite * sMapDot2;
+TSprite * sMapDot3;
+TSprite * sMapDot4;
 u8 sFadeAlpha = 255;
 
 TCollision::TFace* sFaces;
@@ -214,6 +217,11 @@ void TLogoScene::init()
 
     mLogoSpr = new TSprite;
     mLogoNinSpr = new TSprite;
+    sMiniMap = new TSprite();
+    sMapDot = new TSprite();
+    sMapDot2 = new TSprite();
+    sMapDot3 = new TSprite();
+    sMapDot4 = new TSprite();
 
     mEmitterList.setHeap(THeap::getCurrentHeap());
 
@@ -250,15 +258,6 @@ void TLogoScene::init()
 
     sFadeSpr = new TSprite();
     sFadeSpr->load(black_sprite);
-    
-    sP1 = new TSprite();
-    sP1->load(p1_sprite);
-    sP2 = new TSprite();
-    sP2->load(p2_sprite);
-    sP3 = new TSprite();
-    sP3->load(p3_sprite);
-    sP4 = new TSprite();
-    sP4->load(p4_sprite);
 
     sYoshiJoint = new TJoint(32);
     sYoshiJoint->registerAnimation(reinterpret_cast<TJointAnimData const &>(dino_anim_ArmatureAction));
@@ -395,6 +394,45 @@ void TLogoScene::draw2D()
     sFadeSpr->setColor(TColor{255,255,255, sFadeAlpha});
     sFadeSpr->setAttributes(SP_FRACPOS | SP_TRANSPARENT);
     sFadeSpr->draw();
+
+    sMiniMap->load(minimap_sprite);
+    sMiniMap->setPosition(TVec2S{260, 150});
+    sMiniMap->setScale(TVec2F{0.5f, 0.5f});
+    sMiniMap->setColor(TColor{255,255,255,200});
+    sMiniMap->setAttributes(SP_FRACPOS | SP_TRANSPARENT);
+    sMiniMap->draw();
+
+    sMapDot->load(dot_sprite);
+    auto mapPos = (gPlayers[0]->getPosition().zx() / 175.0f) + TVec2F{-273.0f, 186.0f};
+    sMapDot->setPosition(TVec2S{(s16)-mapPos.x(), (s16)mapPos.y()});
+    sMapDot->setScale(TVec2F{0.5f, 0.5f});
+    sMapDot->setColor(TColor{255,255,255,180});
+    sMapDot->setAttributes(SP_FRACPOS | SP_TRANSPARENT);
+    sMapDot->draw();
+
+    sMapDot2->load(dot_sprite);
+    mapPos = (gPlayers[1]->getPosition().zx() / 175.0f) + TVec2F{-273.0f, 186.0f};
+    sMapDot2->setPosition(TVec2S{(s16)-mapPos.x(), (s16)mapPos.y()});
+    sMapDot2->setScale(TVec2F{0.5f, 0.5f});
+    sMapDot2->setColor(TColor{255,0,0,100});
+    sMapDot2->setAttributes(SP_FRACPOS | SP_TRANSPARENT);
+    sMapDot2->draw();
+
+    sMapDot3->load(dot_sprite);
+    mapPos = (gPlayers[2]->getPosition().zx() / 175.0f) + TVec2F{-273.0f, 186.0f};
+    sMapDot3->setPosition(TVec2S{(s16)-mapPos.x(), (s16)mapPos.y()});
+    sMapDot3->setScale(TVec2F{0.5f, 0.5f});
+    sMapDot3->setColor(TColor{255,0,0,100});
+    sMapDot3->setAttributes(SP_FRACPOS | SP_TRANSPARENT);
+    sMapDot3->draw();
+
+    sMapDot4->load(dot_sprite);
+    mapPos = (gPlayers[3]->getPosition().zx() / 175.0f) + TVec2F{-273.0f, 186.0f};
+    sMapDot4->setPosition(TVec2S{(s16)-mapPos.x(), (s16)mapPos.y()});
+    sMapDot4->setScale(TVec2F{0.5f, 0.5f});
+    sMapDot4->setColor(TColor{255,0,0,100});
+    sMapDot4->setAttributes(SP_FRACPOS | SP_TRANSPARENT);
+    sMapDot4->draw();
 
     /*
     sP1->setPosition(TVec2S{16, 16});

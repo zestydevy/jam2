@@ -61,7 +61,7 @@ void TEmitter::emit()
 
         ptcl->setPosition(mPosition);
         ptcl->setScale(mConfig->scale);
-        ptcl->setDirection(mConfig->velocity);
+        ptcl->setDirection(direction);
 
         mPtclList.push(ptcl);
         mRateTimer.start(mConfig->lifeSpan * mConfig->rate / rate);
