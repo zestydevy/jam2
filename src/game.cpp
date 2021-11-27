@@ -1,5 +1,6 @@
 #include <nusys.h>
 
+#include "select.hpp"
 #include "app.hpp"
 #include "sprite.hpp"
 #include "pad.hpp"
@@ -91,7 +92,7 @@ void TGame::init()
     for (s32 i = 0; i < 4; ++i) mCoarseList[i] = 0;
 
     mBlockHeap = (TBlockHeap *)THeap::getCurrentHeap();
-    mScene = new TLogoScene("logo", mDynList);
+    mScene = new TSelectKartScene("the fucking race menu", mDynList);
     mBlockHeap->setGroupID(69);
 
     //initAudio();

@@ -1,8 +1,13 @@
 #include "math.hpp"
 #include "carstats.hpp"
+#include "exception.hpp"
 
 void TTireConfig::loadConfig(TKartObject * kart[], TTireConfig & config)
 {
+    if (kart == nullptr) {
+        TException::fault("KARTS FOR TIRE CONFIG ARE NULL");
+    }
+    
     for (s32 i = 0; i < 4; ++i) {
         kart[i]->setPosition(config.position[i] * 100.0f);
         kart[i]->setScale(TVec3F{config.size, config.size, config.size});

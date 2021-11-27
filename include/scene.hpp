@@ -41,6 +41,8 @@ class TScene
     virtual void draw2D() = 0;
     virtual TScene * exit() = 0;
 
+    void beginDraw();
+
     void loadObjects(TSceneEntry const list[]);
     void loadCollision(const s16 collision[], TCollFace * dest, int offset);
 

@@ -95,6 +95,13 @@ bool TScene::isInitialized()
 
 // -------------------------------------------------------------------------- //
 
+void TScene::beginDraw()
+{
+    gSPDisplayList(mDynList->pushDL(), letters_setup_dl);
+}
+
+// -------------------------------------------------------------------------- //
+
 void TScene::loadObjects(TSceneEntry const list[])
 {
     s32 size = list[0].id;
