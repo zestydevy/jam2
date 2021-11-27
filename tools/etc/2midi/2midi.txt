@@ -1,0 +1,107 @@
+2MIDI 1.3.2
+Copyright (c) 1998-2015 Ian Luck. All rights reserved.
+
+Files that you should have found in the 2MIDI package
+=====================================================
+2MIDI.EXE     The executable
+BASS.DLL      MOD & sample playback module
+2MIDI.TXT     This file
+2MIDI.CHM     2MIDI documentation
+DEFAULT.CFG   Default 2MIDI configuration
+PLAYMID.EXE   Software MIDI player
+EXAMPLE\      Small example conversion...
+  JT_RISE.XM    The source file
+  JT_RISE.CFG   Config used to produce the following MIDI file
+  JT_RISE.MID   The conversion
+  JT_RISE.SF2   Samples (SF2 format)
+  JT_RISE.DLS   Samples (DLS format)
+
+NOTE: You may need to "Unblock" the 2MIDI.CHM file in its "Properties" to
+      view it on Windows 7. The documentation can also be viewed online at
+      the 2MIDI website.
+
+
+What's the point?
+=================
+2MIDI is a balls-on accurate MOD to MIDI file converter, it doesn't
+just stick the notes into a MIDI file. It also converts the effects
+and instrument info (volume/pan envelopes etc...) to make an exact
+MIDI copy of the MOD (assuming there are enough MIDI channels). 2MIDI
+supports the MOD/MTM/S3M/XM/IT file formats.
+
+
+Main Features
+=============
+* Balls-on accurate
+  makes exact MIDI copies of MODs
+
+* Effects conversion
+  converts all MOD effects into MIDI
+
+* Instrument conversion
+  switchable vol/pan envelope & vibrato handling for each sample
+
+* MOD channel and sample based MIDI channel assignment
+  mix'n'match channel and sample based assignment for max flexibility
+
+* Prioritization
+  4 different prioritization methods are used
+
+* WAV/IFF/PAT/XI/SF2/DLS samples
+  export samples/instruments in any of these formats
+
+* Optimizations
+  silent note removal, note length trimming, channel sharing
+
+* Volume/pan/pitch resolution
+  reduces the MIDI file size with minimal loss in quality
+
+* Drum channel
+  use the drum channel for conversion of notes with no FX applied
+
+* Effect translation
+  translate MOD effects into MIDI controllers/meta-events
+
+* Custom keyboard shortcuts
+  assign any key to any button or switch
+
+Registered version only
+-----------------------
+SF2/DLS samples, channel sharing, resolution options, drum channel
+conversions and effect translating are only available in the
+registered versions. See the "Registering 2MIDI" section in the
+documentation for details.
+
+
+Latest Version
+==============
+The latest version of 2MIDI can always be found at the 2MIDI website:
+
+    www.un4seen.com
+
+
+Licence
+=======
+2MIDI is not free, it is SHAREWARE. You are allowed 21 days to evaluate
+it and decide if it's of any use to you. If you want to continue using
+it after this period you must register. See the "Registering 2MIDI"
+section of the documentation for details
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, 2MIDI IS PROVIDED
+"AS IS", WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY
+AND/OR FITNESS FOR A PARTICULAR PURPOSE. THE AUTHORS SHALL NOT BE HELD
+LIABLE FOR ANY DAMAGE THAT MAY RESULT FROM THE USE OF 2MIDI. YOU USE
+2MIDI ENTIRELY AT YOUR OWN RISK.
+
+Usage of 2MIDI indicates that you agree to the above conditions.
+
+All trademarks and other registered names contained in the 2MIDI
+package are the property of their respective owners.
+
+
+Bug Reports, Suggestions, Coments, etc...
+=========================================
+If you have any of the aforementioned you can email:
+
+        2midi@un4seen.com
