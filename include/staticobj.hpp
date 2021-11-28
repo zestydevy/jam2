@@ -102,6 +102,10 @@ class TObject
 
     const TMtx44 & getRotationMatrix() { return mRotMtx; }
 
+    void rotateX(s16 rate){mRotation.x() += rate; mMtxNeedsUpdate = true;}
+    void rotateY(s16 rate){mRotation.y() += rate; mMtxNeedsUpdate = true;}
+    void rotateZ(s16 rate){mRotation.z() += rate; mMtxNeedsUpdate = true;}
+
     virtual void updateMtx();
 
     virtual void init();

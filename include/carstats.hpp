@@ -15,6 +15,7 @@ struct TTireConfig
     f32 size;
 
     static void loadConfig(TKartObject * kart[], TTireConfig & config);
+    static void loadConfig(TKartObject * kart[], TTireConfig & config, f32 scale);
 };
 
 class TCarStats {

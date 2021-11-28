@@ -16,3 +16,5 @@
 #include "sp_minimap.h"
 #include "sp_minimap.h"
 #include "sp_dot.h"
+#include "sp_choose.h"
+#include "sp_choose.h"

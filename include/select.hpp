@@ -33,7 +33,13 @@ class TSelectKartScene final
     TCamera * mCamera{nullptr};
 
     TSprite mChPlayerSpr;
+    TSprite mArrowL;
+    TSprite mArrowR;
+    s16 mChooseSin{50};
+    TTimer mChooseTimer{};
 
     TVec3F mViewOrigin{};
+
+    f32 mTimer{0};
 };
 

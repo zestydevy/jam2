@@ -41,6 +41,11 @@ void TKartObject::draw()
 
     updateMtx();
 
+    if (mSuperParent != nullptr) {
+        gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mSuperParent->getDrawMtx()),
+            G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);
+    }
+    
     // kart object matrix
     gSPMatrix(mDynList->pushDL(), OS_K0_TO_PHYSICAL(&mFMtx),
         G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);
@@ -56,5 +61,6 @@ void TKartObject::draw()
         }
     }
 
+    if (mSuperParent != nullptr) gSPPopMatrix(mDynList->pushDL(), G_MTX_MODELVIEW);
     gSPPopMatrix(mDynList->pushDL(), G_MTX_MODELVIEW);
 }

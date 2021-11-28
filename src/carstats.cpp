@@ -14,6 +14,18 @@ void TTireConfig::loadConfig(TKartObject * kart[], TTireConfig & config)
     }
 }
 
+void TTireConfig::loadConfig(TKartObject * kart[], TTireConfig & config, f32 scale)
+{
+    if (kart == nullptr) {
+        TException::fault("KARTS FOR TIRE CONFIG ARE NULL");
+    }
+    
+    for (s32 i = 0; i < 4; ++i) {
+        kart[i]->setPosition(config.position[i] * 100.0f * scale);
+        kart[i]->setScale(TVec3F{scale, scale, scale});
+    }
+}
+
 int TCarStats::calcGear(f32 speed, f32* speeds){
     for (int i = 0; i < 4; i++){
         if (speed < speeds[i])
