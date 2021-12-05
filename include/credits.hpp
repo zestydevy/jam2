@@ -28,6 +28,7 @@ class TCreditsScene final
     virtual void update() override;
     virtual void draw() override;
     virtual void draw2D() override;
+    virtual void draw2DBG() override;
     virtual TScene * exit() override;
 
     private:

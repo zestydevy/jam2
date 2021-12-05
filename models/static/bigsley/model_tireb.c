@@ -1,0 +1,167 @@
+#include <ultra64.h>
+
+Lights1 bigsley_default3_f3d_lights = gdSPDefLights1(
+	0x2C, 0x2C, 0x2C,
+	0x58, 0x58, 0x58, 0x28, 0x28, 0x28);
+
+Lights1 bigsley_default4_f3d_lights = gdSPDefLights1(
+	0x6F, 0x6F, 0x6F,
+	0xDE, 0xDE, 0xDE, 0x28, 0x28, 0x28);
+
+Vtx bigsley_b_tire_mesh_vtx_cull[8] = {
+	{{{-13, 1, -39},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+	{{{-13, 1, 39},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+	{{{-13, 78, 39},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+	{{{-13, 78, -39},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+	{{{15, 1, -39},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+	{{{15, 1, 39},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+	{{{15, 78, 39},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+	{{{15, 78, -39},0, {-16, -16},{0x0, 0x0, 0x0, 0x0}}},
+};
+
+Vtx bigsley_b_tire_mesh_vtx_0[50] = {
+	{{{15, 10, -29},0, {-16, 778},{0x3E, 0xB1, 0xB2, 0xFF}}},
+	{{{15, 1, 0},0, {-16, 778},{0x6B, 0xBC, 0x0, 0xFF}}},
+	{{{-6, 1, 0},0, {-16, 778},{0x0, 0x81, 0x0, 0xFF}}},
+	{{{15, 39, -39},0, {-16, 778},{0x6B, 0x0, 0xBC, 0xFF}}},
+	{{{-6, 39, -39},0, {-16, 778},{0x0, 0x0, 0x81, 0xFF}}},
+	{{{-6, 10, -29},0, {-16, 778},{0x0, 0xA5, 0xA7, 0xFF}}},
+	{{{-13, 10, -29},0, {-16, 778},{0xA1, 0xC4, 0xC5, 0xFF}}},
+	{{{-13, 1, 0},0, {-16, 778},{0xA4, 0xA8, 0x0, 0xFF}}},
+	{{{-6, 10, 30},0, {-16, 778},{0x0, 0xA6, 0x5A, 0xFF}}},
+	{{{15, 10, 30},0, {-16, 778},{0x3E, 0xB2, 0x4F, 0xFF}}},
+	{{{15, 40, 39},0, {-16, 778},{0x6B, 0x0, 0x44, 0xFF}}},
+	{{{15, 78, 0},0, {-16, 778},{0x6B, 0x44, 0xFF, 0xFF}}},
+	{{{15, 68, -29},0, {-16, 778},{0x3E, 0x4E, 0xB1, 0xFF}}},
+	{{{-6, 68, -29},0, {-16, 778},{0x0, 0x59, 0xA5, 0xFF}}},
+	{{{-13, 68, -29},0, {-16, 778},{0xA1, 0x3C, 0xC4, 0xFF}}},
+	{{{-13, 39, -39},0, {-16, 778},{0xA4, 0x0, 0xA8, 0xFF}}},
+	{{{-13, 39, -14},0, {-16, 778},{0xA4, 0x0, 0x58, 0xFF}}},
+	{{{-13, 28, -11},0, {-16, 778},{0xA1, 0x3C, 0x3B, 0xFF}}},
+	{{{-13, 25, 0},0, {-16, 778},{0xA4, 0x58, 0x0, 0xFF}}},
+	{{{-13, 10, 30},0, {-16, 778},{0xA1, 0xC4, 0x3C, 0xFF}}},
+	{{{-6, 40, 39},0, {-16, 778},{0x0, 0x0, 0x7F, 0xFF}}},
+	{{{15, 69, 30},0, {-16, 778},{0x3E, 0x4F, 0x4D, 0xFF}}},
+	{{{-6, 78, 0},0, {-16, 778},{0x0, 0x7F, 0xFE, 0xFF}}},
+	{{{-13, 78, 0},0, {-16, 778},{0xA4, 0x58, 0xFF, 0xFF}}},
+	{{{-13, 54, 1},0, {-16, 778},{0xA4, 0xA8, 0x1, 0xFF}}},
+	{{{-13, 50, -11},0, {-16, 778},{0xA1, 0xC4, 0x3C, 0xFF}}},
+	{{{-4, 50, -11},0, {-16, 778},{0xC2, 0xB2, 0x4F, 0xFF}}},
+	{{{-4, 39, -14},0, {-16, 778},{0xC5, 0x0, 0x71, 0xFF}}},
+	{{{-4, 28, -11},0, {-16, 778},{0xC2, 0x4F, 0x4E, 0xFF}}},
+	{{{-4, 25, 0},0, {-16, 778},{0xC5, 0x71, 0x0, 0xFF}}},
+	{{{-13, 28, 12},0, {-16, 778},{0xA1, 0x3C, 0xC4, 0xFF}}},
+	{{{-13, 40, 39},0, {-16, 778},{0xA4, 0x0, 0x58, 0xFF}}},
+	{{{-13, 40, 39},0, {-16, 778},{0xA4, 0x0, 0x58, 0xFF}}},
+	{{{-6, 40, 39},0, {-16, 778},{0x0, 0x0, 0x7F, 0xFF}}},
+	{{{-6, 69, 30},0, {-16, 778},{0x0, 0x5B, 0x59, 0xFF}}},
+	{{{15, 69, 30},0, {-16, 778},{0x3E, 0x4F, 0x4D, 0xFF}}},
+	{{{-6, 78, 0},0, {-16, 778},{0x0, 0x7F, 0xFE, 0xFF}}},
+	{{{-13, 69, 30},0, {-16, 778},{0xA1, 0x3C, 0x3B, 0xFF}}},
+	{{{-13, 78, 0},0, {-16, 778},{0xA4, 0x58, 0xFF, 0xFF}}},
+	{{{-13, 51, 12},0, {-16, 778},{0xA1, 0xC4, 0xC5, 0xFF}}},
+	{{{-13, 54, 1},0, {-16, 778},{0xA4, 0xA8, 0x1, 0xFF}}},
+	{{{-4, 51, 12},0, {-16, 778},{0xC2, 0xB1, 0xB3, 0xFF}}},
+	{{{-4, 54, 1},0, {-16, 778},{0xC5, 0x8F, 0x2, 0xFF}}},
+	{{{-13, 50, -11},0, {-16, 778},{0xA1, 0xC4, 0x3C, 0xFF}}},
+	{{{-4, 50, -11},0, {-16, 778},{0xC2, 0xB2, 0x4F, 0xFF}}},
+	{{{-4, 40, 15},0, {-16, 778},{0xC5, 0x0, 0x8F, 0xFF}}},
+	{{{-13, 40, 15},0, {-16, 778},{0xA4, 0x0, 0xA8, 0xFF}}},
+	{{{-4, 28, 12},0, {-16, 778},{0xC2, 0x4E, 0xB1, 0xFF}}},
+	{{{-13, 28, 12},0, {-16, 778},{0xA1, 0x3C, 0xC4, 0xFF}}},
+	{{{-4, 25, 0},0, {-16, 778},{0xC5, 0x71, 0x0, 0xFF}}},
+};
+
+Gfx bigsley_b_tire_mesh_tri_0[] = {
+	gsSPVertex(bigsley_b_tire_mesh_vtx_0 + 0, 32, 0),
+	gsSP2Triangles(0, 1, 2, 0, 3, 1, 0, 0),
+	gsSP2Triangles(0, 4, 3, 0, 0, 5, 4, 0),
+	gsSP2Triangles(0, 2, 5, 0, 6, 5, 2, 0),
+	gsSP2Triangles(6, 2, 7, 0, 7, 2, 8, 0),
+	gsSP2Triangles(9, 8, 2, 0, 9, 2, 1, 0),
+	gsSP2Triangles(1, 10, 9, 0, 1, 11, 10, 0),
+	gsSP2Triangles(1, 3, 11, 0, 11, 3, 12, 0),
+	gsSP2Triangles(12, 3, 4, 0, 12, 4, 13, 0),
+	gsSP2Triangles(14, 13, 4, 0, 14, 4, 15, 0),
+	gsSP2Triangles(15, 4, 5, 0, 15, 5, 6, 0),
+	gsSP2Triangles(6, 16, 15, 0, 6, 17, 16, 0),
+	gsSP2Triangles(7, 17, 6, 0, 7, 18, 17, 0),
+	gsSP2Triangles(19, 18, 7, 0, 7, 8, 19, 0),
+	gsSP2Triangles(19, 8, 20, 0, 9, 20, 8, 0),
+	gsSP2Triangles(9, 10, 20, 0, 21, 20, 10, 0),
+	gsSP2Triangles(10, 11, 21, 0, 21, 11, 22, 0),
+	gsSP2Triangles(12, 22, 11, 0, 12, 13, 22, 0),
+	gsSP2Triangles(23, 22, 13, 0, 23, 13, 14, 0),
+	gsSP2Triangles(14, 24, 23, 0, 14, 25, 24, 0),
+	gsSP2Triangles(15, 25, 14, 0, 15, 16, 25, 0),
+	gsSP2Triangles(16, 26, 25, 0, 16, 27, 26, 0),
+	gsSP2Triangles(17, 27, 16, 0, 17, 28, 27, 0),
+	gsSP2Triangles(18, 28, 17, 0, 18, 29, 28, 0),
+	gsSP2Triangles(30, 29, 18, 0, 19, 30, 18, 0),
+	gsSP2Triangles(31, 30, 19, 0, 19, 20, 31, 0),
+	gsSPVertex(bigsley_b_tire_mesh_vtx_0 + 32, 18, 0),
+	gsSP2Triangles(0, 1, 2, 0, 3, 2, 1, 0),
+	gsSP2Triangles(3, 4, 2, 0, 5, 2, 4, 0),
+	gsSP2Triangles(5, 4, 6, 0, 6, 7, 5, 0),
+	gsSP2Triangles(6, 8, 7, 0, 8, 9, 7, 0),
+	gsSP2Triangles(8, 10, 9, 0, 11, 10, 8, 0),
+	gsSP2Triangles(11, 12, 10, 0, 7, 9, 13, 0),
+	gsSP2Triangles(7, 13, 14, 0, 14, 13, 15, 0),
+	gsSP2Triangles(14, 15, 16, 0, 16, 15, 17, 0),
+	gsSP2Triangles(0, 14, 16, 0, 5, 14, 0, 0),
+	gsSP2Triangles(0, 2, 5, 0, 5, 7, 14, 0),
+	gsSPEndDisplayList(),
+};
+
+Vtx bigsley_b_tire_mesh_vtx_1[8] = {
+	{{{-4, 25, 0},0, {-16, 778},{0xC5, 0x71, 0x0, 0xFF}}},
+	{{{-4, 28, 12},0, {-16, 778},{0xC2, 0x4E, 0xB1, 0xFF}}},
+	{{{-4, 40, 15},0, {-16, 778},{0xC5, 0x0, 0x8F, 0xFF}}},
+	{{{-4, 54, 1},0, {-16, 778},{0xC5, 0x8F, 0x2, 0xFF}}},
+	{{{-4, 51, 12},0, {-16, 778},{0xC2, 0xB1, 0xB3, 0xFF}}},
+	{{{-4, 39, -14},0, {-16, 778},{0xC5, 0x0, 0x71, 0xFF}}},
+	{{{-4, 50, -11},0, {-16, 778},{0xC2, 0xB2, 0x4F, 0xFF}}},
+	{{{-4, 28, -11},0, {-16, 778},{0xC2, 0x4F, 0x4E, 0xFF}}},
+};
+
+Gfx bigsley_b_tire_mesh_tri_1[] = {
+	gsSPVertex(bigsley_b_tire_mesh_vtx_1 + 0, 8, 0),
+	gsSP2Triangles(0, 1, 2, 0, 0, 2, 3, 0),
+	gsSP2Triangles(2, 4, 3, 0, 3, 5, 0, 0),
+	gsSP2Triangles(3, 6, 5, 0, 5, 7, 0, 0),
+	gsSPEndDisplayList(),
+};
+
+Gfx mat_bigsley_default3_f3d[] = {
+	gsDPPipeSync(),
+	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
+	gsSPTexture(65535, 65535, 0, 0, 1),
+	gsSPSetLights1(bigsley_default3_f3d_lights),
+	gsSPEndDisplayList(),
+};
+
+Gfx mat_bigsley_default4_f3d[] = {
+	gsDPPipeSync(),
+	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
+	gsSPTexture(65535, 65535, 0, 0, 1),
+	gsSPSetLights1(bigsley_default4_f3d_lights),
+	gsSPEndDisplayList(),
+};
+
+Gfx bigsley_b_tire_mesh[] = {
+	gsSPClearGeometryMode(G_LIGHTING),
+	gsSPVertex(bigsley_b_tire_mesh_vtx_cull + 0, 8, 0),
+	gsSPSetGeometryMode(G_LIGHTING),
+	gsSPCullDisplayList(0, 7),
+	gsSPDisplayList(mat_bigsley_default3_f3d),
+	gsSPDisplayList(bigsley_b_tire_mesh_tri_0),
+	gsSPDisplayList(mat_bigsley_default4_f3d),
+	gsSPDisplayList(bigsley_b_tire_mesh_tri_1),
+	gsDPPipeSync(),
+	gsSPSetGeometryMode(G_LIGHTING),
+	gsSPClearGeometryMode(G_TEXTURE_GEN),
+	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
+	gsSPTexture(65535, 65535, 0, 0, 0),
+	gsSPEndDisplayList(),
+};
+

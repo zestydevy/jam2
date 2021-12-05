@@ -39,6 +39,7 @@ class TScene
     virtual void update() = 0;
     virtual void draw() = 0;
     virtual void draw2D() = 0;
+    virtual void draw2DBG() = 0;
     virtual TScene * exit() = 0;
 
     void beginDraw();
@@ -78,6 +79,7 @@ class TLogoScene final
     virtual void update() override;
     virtual void draw() override;
     virtual void draw2D() override;
+    virtual void draw2DBG() override;
     virtual TScene * exit() override;
 
     private:
@@ -121,6 +123,7 @@ class TTestScene final
     virtual void update() override;
     virtual void draw() override;
     virtual void draw2D() override;
+    virtual void draw2DBG() override;
     virtual TScene * exit() override;
     //virtual TPlayer * getPlayer() override;
 

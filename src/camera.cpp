@@ -13,12 +13,12 @@
 TCamera * TCamera::sCamera { nullptr };
 
 static Vp sPlayer1Viewp = {
-	SCREEN_WD * 1, SCREEN_HT * 1, G_MAXZ / 2, 0,
-	SCREEN_WD * 1, SCREEN_HT * 1, G_MAXZ / 2, 0,
+	SCREEN_WD * 3, SCREEN_HT * 1, G_MAXZ / 2, 0,
+	SCREEN_WD * 2, SCREEN_HT * 1, G_MAXZ / 2, 0,
 };
 static Vp sPlayer2Viewp = {
-	SCREEN_WD * 1, SCREEN_HT * 1, G_MAXZ / 2, 0,
-	SCREEN_WD * 3, SCREEN_HT * 1, G_MAXZ / 2, 0,
+	SCREEN_WD * 4, SCREEN_HT * 1, G_MAXZ / 2, 0,
+	SCREEN_WD * 1, SCREEN_HT * 3, G_MAXZ / 2, 0,
 };
 static Vp sPlayer3Viewp = {
 	SCREEN_WD * 1, SCREEN_HT * 1, G_MAXZ / 2, 0,
@@ -32,13 +32,13 @@ static Vp sPlayer4Viewp = {
 static Gfx const sPlayer1CameraDl[] = {
     gsSPViewport(&sPlayer1Viewp),
     gsDPSetScissor(G_SC_NON_INTERLACE, 
-	0, 0, SCREEN_WD / 2, SCREEN_HT / 2),
+	0, 0, SCREEN_WD, SCREEN_HT / 2),
     gsSPEndDisplayList(),
 };
 static Gfx const sPlayer2CameraDl[] = {
     gsSPViewport(&sPlayer2Viewp),
     gsDPSetScissor(G_SC_NON_INTERLACE, 
-	SCREEN_WD / 2, 0, SCREEN_WD, SCREEN_HT / 2),
+	0, SCREEN_HT / 2, SCREEN_WD, SCREEN_HT / 2),
     gsSPEndDisplayList(),
 };
 static Gfx const sPlayer3CameraDl[] = {
@@ -201,7 +201,7 @@ void TCamera::render()
         mDistance = 600.0f;
 
     guPerspective(&mProjectionMtx, &mPersp,
-		      mFov, 320.0/240.0, 5, 8000, 1.0);
+		      mFov, 320.0/(240.0), 5, 8000, 1.0);
     guLookAtReflect(&mFViewMtx, mLookAtMtx,
 		       50, 0, 400,
 		       0, 0, 0,

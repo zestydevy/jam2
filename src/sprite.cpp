@@ -157,6 +157,13 @@ void TSprite::setExplosion(TVec2S const & exp)
 
 // -------------------------------------------------------------------------- //
 
+void TSprite::setZ(s32 z)
+{
+    mDepth = z;
+}
+
+// -------------------------------------------------------------------------- //
+
 void TSprite::draw() {
     if (mScale.x() <= 0.001F || mScale.y() <= 0.001F) {
         return;
@@ -171,6 +178,7 @@ void TSprite::draw() {
     spScale(&mSpriteData, mScale.x(), mScale.y());
     spColor(&mSpriteData, mColor.r, mColor.g, mColor.b, mColor.a);
     spSetAttribute(&mSpriteData, mAttributes);
+    spSetZ(&mSpriteData, mDepth);
     gSPDisplayList(sDynList->pushDL(), spDraw(&mSpriteData));
 }
 

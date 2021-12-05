@@ -1,0 +1,10 @@
+extern Lights1 bigsley_default3_f3d_lights;
+extern Lights1 bigsley_default4_f3d_lights;
+extern Vtx bigsley_b_tire_mesh_vtx_cull[8];
+extern Vtx bigsley_b_tire_mesh_vtx_0[50];
+extern Gfx bigsley_b_tire_mesh_tri_0[];
+extern Vtx bigsley_b_tire_mesh_vtx_1[8];
+extern Gfx bigsley_b_tire_mesh_tri_1[];
+extern Gfx mat_bigsley_default3_f3d[];
+extern Gfx mat_bigsley_default4_f3d[];
+extern Gfx bigsley_b_tire_mesh[];

@@ -49,6 +49,8 @@ class TCamera
     float mFov{45.0f};
     TDynList2 * mDynList{nullptr};
 
+    static void setGlbCamera(TCamera * camera) {sCamera = camera;}
+
     static bool checkVisible(const TVec3F & pos, float drawDistanceSqr);
     static bool checkClipping(const TVec3F & pos, float radius, bool ignoreBehind = false);
     static bool checkDistance(const TVec3F & pos, float drawDistanceSqr);

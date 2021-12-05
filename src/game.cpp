@@ -1,5 +1,6 @@
 #include <nusys.h>
 
+#include "scene.hpp"
 #include "select.hpp"
 #include "app.hpp"
 #include "sprite.hpp"
@@ -92,7 +93,7 @@ void TGame::init()
     for (s32 i = 0; i < 4; ++i) mCoarseList[i] = 0;
 
     mBlockHeap = (TBlockHeap *)THeap::getCurrentHeap();
-    mScene = new TSelectKartScene("the fucking race menu", mDynList);
+    mScene = new TSelectKartScene("t", mDynList);
     mBlockHeap->setGroupID(69);
 
     //initAudio();
@@ -123,6 +124,18 @@ void TGame::update()
     //gDPSetScissor(mDynList->pushDL(), G_SC_NON_INTERLACE, -80, -80, kResWidth + 80, kResHeight + 80);
 
     auto scene = getCurrentScene();
+
+    // draw 2D background sprites (appears behind 3D objects)
+    gSPDisplayList(mDynList->pushDL(), rdpinit_spr_dl);
+    TSprite::init(mDynList);
+
+    // check for null scene or scene that has not yet been initialized
+    if (scene != nullptr && scene->isInitialized()) {
+        scene->draw2DBG();
+    }
+
+    gSPDisplayList(mDynList->pushDL(), rdpinit_dl);
+	gSPDisplayList(mDynList->pushDL(), rspinit_dl);
 
     // check for null scene or scene that has not yet been initialized
     if (scene != nullptr && scene->isInitialized()) {

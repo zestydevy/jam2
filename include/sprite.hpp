@@ -53,6 +53,8 @@ class TSprite {
     void setOffAttributes(u32);
 
     void setExplosion(TVec2S const & exp);
+    
+    void setZ(s32 z);
 
     void draw();
 
@@ -67,6 +69,7 @@ class TSprite {
     TVec2S mPosition { 0, 0 };
     TVec2F mScale { 1.0F, 1.0F };
     TColor mColor { 255, 255, 255, 255};
+    s32 mDepth{0};
     u32 mAttributes { SP_FASTCOPY };
     Sprite mSpriteData;
     Gfx * mSpriteDL { nullptr };

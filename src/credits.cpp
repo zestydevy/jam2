@@ -26,11 +26,6 @@ void TCreditsScene::init()
     }
 
     // load logo into memory
-        TUtil::toMemory(
-            reinterpret_cast<void *>(_codeSegmentBssEnd), 
-            _crash_ovlSegmentRomStart, 
-            _crash_ovlSegmentRomEnd-_crash_ovlSegmentRomStart
-        );
     
     mCreditsBg = new TSprite;
 }
@@ -53,23 +48,14 @@ void TCreditsScene::draw()
 
 void TCreditsScene::draw2D()
 {   
-    if (mIsCredits)
-    {
-        mCreditsBg->load(credits_sprite);
-        mCreditsBg->setPosition(TVec2S{0, 0});
-        mCreditsBg->setScale(TVec2F{1.0f, 1.0f});
-        mCreditsBg->setColor({255,255,255,255});
-        mCreditsBg->setAttributes(SP_Z | SP_OVERLAP | SP_TRANSPARENT);
-        mCreditsBg->draw();
-    } else
-    {
-        mCreditsBg->load(crash_sprite);
-        mCreditsBg->setPosition(TVec2S{0, 0});
-        mCreditsBg->setScale(TVec2F{1.0f, 1.0f});
-        mCreditsBg->setColor({255,255,255,255});
-        mCreditsBg->setAttributes(SP_Z | SP_OVERLAP | SP_TRANSPARENT);
-        mCreditsBg->draw();
-    }
+}
+
+// -------------------------------------------------------------------------- //
+
+// -------------------------------------------------------------------------- //
+
+void TCreditsScene::draw2DBG()
+{   
 }
 
 // -------------------------------------------------------------------------- //

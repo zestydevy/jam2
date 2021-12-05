@@ -172,13 +172,6 @@ void TLogoScene::init()
     // turn on screen
     //nuGfxDisplayOn();
 
-    // load logo into memory
-    TUtil::toMemory(
-        reinterpret_cast<void *>(_codeSegmentBssEnd), 
-        _logo_ovlSegmentRomStart, 
-        _logo_ovlSegmentRomEnd-_logo_ovlSegmentRomStart
-    );
-
     if (!TCollider::startup(nullptr, test00_block_count, test00_block_size))
         TException::fault("COLDR START ERROR");
 
@@ -234,6 +227,8 @@ void TLogoScene::init()
 
     mTestCamera = new TCamera(mDynList);
     mTestCamera->setPad(mTestPad);
+    mTestCamera2 = new TCamera(mDynList);
+    mTestCamera2->setPad(mTestPad);
 
     for (int i = 0; i < 4; i++){
         mPlayers[i]->setScale(TVec3F{0.4f, 0.4f, 0.4f});
@@ -249,6 +244,7 @@ void TLogoScene::init()
     mPlayers[0]->setPad(mTestPad);
 
     //Player 2
+    mPlayers[1]->setCamera(mTestCamera2);
     mPlayers[1]->setAIType(AI_BAD);
 
     sLogoObj = new TObject(mDynList);
@@ -262,6 +258,7 @@ void TLogoScene::init()
     sSkyObj->setScale(TVec3F{4.5f, 4.5f, 4.5f});
 
     mTestCamera->jumpToTarget();
+    mTestCamera2->jumpToTarget();
 
     sFadeSpr = new TSprite();
     sFadeSpr->load(black_sprite);
@@ -313,6 +310,7 @@ void TLogoScene::update()
     gCurrentRace->updateRankings();
 
     mTestCamera->update();
+    mTestCamera2->update();
     sYoshiJoint->updateAnimation();
     sLogoObj->update();
     sSkyObj->mAlwaysDraw = true;
@@ -334,7 +332,7 @@ void TLogoScene::draw()
     //gSPDisplayList(mDynList->pushDL(), rdpinit_dl);
     //gSPDisplayList(mDynList->pushDL(), rspinit_dl);
 
-    //gSPDisplayList(mDynList->pushDL(), TCamera::getPlayer1View());
+    gSPDisplayList(mDynList->pushDL(), TCamera::getPlayer1View());
     mTestCamera->render();
     sSkyObj->draw();
 	sLogoObj->draw();
@@ -364,14 +362,40 @@ void TLogoScene::draw()
         mEmitterList[i]->draw();
     }
 
-    /*
+    
     gSPDisplayList(mDynList->pushDL(), letters_setup_dl);
     gSPDisplayList(mDynList->pushDL(), TCamera::getPlayer2View());
     mTestCamera2->render();
+	
+    sSkyObj->draw();
 	sLogoObj->draw();
+
+    for (int i = 0; i < mObjList.capacity(); i++){
+        mObjList[i]->draw();
+    }
+
+    for (int i = 0; i < 4; i++){
+        mPlayers[i]->draw();
+    }
+
+    gSPDisplayList(mDynList->pushDL(), grass_Track1_001_mesh);
+
+    gSPDisplayList(mDynList->pushDL(), mat_car_shadow_f3d);
+
+    for (int i = 0; i < 4; i++)
+        mPlayers[i]->drawShadow();
+
+    gSPDisplayList(mDynList->pushDL(), mat_car_shadow_f3d_revert);
+
+    for (int i = 0; i < 4; i++){
+        mPlayers[i]->drawTransparent();
+    }
+
     for (int i = 0; i < mEmitterList.capacity(); ++i) {
         mEmitterList[i]->draw();
     }
+
+    /*
 
     gSPDisplayList(mDynList->pushDL(), letters_setup_dl);
     gSPDisplayList(mDynList->pushDL(), TCamera::getPlayer3View());
@@ -483,6 +507,14 @@ void TLogoScene::draw2D()
 */
 
 }
+
+// -------------------------------------------------------------------------- //
+
+void TLogoScene::draw2DBG()
+{   
+}
+
+// -------------------------------------------------------------------------- //
 
 TScene * TLogoScene::exit()
 {
