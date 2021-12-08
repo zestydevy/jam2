@@ -369,7 +369,8 @@ void TPlayer::update()
 {
     TObject::update();
 
-    float aiCheatModifier = 1.0f;
+    float aiCheatSpeedModifier = 1.0f;
+    float aiCheatSteerModifier = 1.0f;
 
     mVelocity += mCollideEnergy;
 
@@ -401,7 +402,8 @@ void TPlayer::update()
     else{
         //AI
         aiUpdate(aButton, bButton, steer, velNrm);
-        aiCheatModifier += (gCurrentRace->getDistFromFront(mRacerID) * 0.05f) + 0.05f;
+        aiCheatSpeedModifier += (gCurrentRace->getDistFromFront(mRacerID) * 0.05f) + 0.05f;
+        aiCheatSteerModifier += (gCurrentRace->getDistFromFront(mRacerID) * 0.1f) + 0.1f;
     }
 
     //Recover from being out of control if you are facing towards your velocity
@@ -518,7 +520,7 @@ void TPlayer::update()
             //acceleration and deceleration
             if (mOnGround){
                 if (aButton) {
-                    mSpeed += mCarStats.getAcceleration(mSpeed) * kInterval * (bButton ? 0.333f : 1.0f) * aiCheatModifier;
+                    mSpeed += mCarStats.getAcceleration(mSpeed) * kInterval * (bButton ? 0.333f : 1.0f) * aiCheatSpeedModifier;
                 }
                 if (bButton && !mOutOfControl) {
                     if (mSpeed >= PLAYER_BRAKE_MIN_SPEED)
@@ -539,7 +541,7 @@ void TPlayer::update()
                     mDriveDirection -= (s16)(mTurnRate * kInterval);
                 }
                 else if (turn != 0.0f) {
-                    mTurnRate = (s16)(turn * mSpeed * mCarStats.getTurn(mSpeed) * aiCheatModifier / kInterval);
+                    mTurnRate = (s16)(turn * mSpeed * mCarStats.getTurn(mSpeed) * aiCheatSteerModifier / kInterval);
                     mDriveDirection -= mTurnRate * kInterval;
 
                     f32 amtTurn = TMath<f32>::abs(turn);
