@@ -12,9 +12,9 @@
 #include "../models/static/sprites/sprite_choose.h"
 #include "../models/static/sprites/sprite_arrow.h"
 #include "../models/static/sprites/sprite_arrowl.h"
-#include "../models/static/sprites/sprite_maraca.h"
-#include "../models/static/sprites/sprite_bigsley.h"
-#include "../models/static/sprites/sprite_ollie.h"
+#include "../models/ovl/sprites/sprite_maraca.h"
+#include "../models/ovl/sprites/sprite_bigsley.h"
+#include "../models/ovl/sprites/sprite_ollie.h"
 #include "../data/tire.h"
 
 // -------------------------------------------------------------------------- //
@@ -189,6 +189,7 @@ void TSelectKartScene::update()
     mTimers1[0].update();
     mTimers2[0].update();
     mArrowTimers[0].update();
+    mArrowTimers[1].update();
 
     for (s32 i = 0; i < mPlayerCount; ++i)
     {
@@ -212,7 +213,7 @@ void TSelectKartScene::update()
 
             y = Lagrange<s16>(90, 70, 290, mTimers1[0].get());
             mArrowR.setPosition(TVec2S{Lagrange<s16>(140, 160, 140, mArrowTimers[0].get()), y});
-            mArrowL.setPosition(TVec2S{(s16)(20), y});
+            mArrowL.setPosition(TVec2S{Lagrange<s16>(140/5, 140/5-20, 140/5, mArrowTimers[1].get()), y});
 
             for (s32 i = 0; i < 3; ++i) {
                 mStats[i].setScale(TVec2F{Sinerp<f32>(sStatsTest[sTestIndex][i], 0.01f, mTimers2[0].get()), 0.3f});
@@ -231,6 +232,7 @@ void TSelectKartScene::update()
             mAva1.setPosition(TVec2S{Coserp<s16>(200, 350, mTimers2[0].get()), (s16)70});
             mAva1.setColor(TColor{255, 255, 255, Lagrange<u8>(255, 0, 0, mTimers2[0].get())});
 
+            // brain damage
             for (s32 i = 0; i < 1; ++i) {
                 if (mPads[i]->isPressed(EButton::RIGHT)) {
                     mTimers2[i].start(1.0f);
@@ -245,6 +247,20 @@ void TSelectKartScene::update()
                         mWheels[i][j]->setMesh(sSelectModels[sTestIndex].tire);
                     }
                     mArrowTimers[i].start(1.0f);
+                }
+                if (mPads[i]->isPressed(EButton::LEFT)) {
+                    mTimers2[i].start(1.0f);
+                    --sTestIndex;
+                    if (sTestIndex < 0) sTestIndex = 2;
+                    mAva1.load(*sSelectSprites[sTestIndex]);
+                    mAva1.setPosition(TVec2S{320,320});
+                    mFloors[i]->setScale(TVec3F{0.4f, 0.0f, 0.4f});
+                    mPlayers[i]->setMesh(sSelectModels[sTestIndex].head);
+                    mKarts[i]->setMesh(sSelectModels[sTestIndex].body);
+                    for (s32 j = 0; j < 4; ++j) {
+                        mWheels[i][j]->setMesh(sSelectModels[sTestIndex].tire);
+                    }
+                    mArrowTimers[i+1].start(1.0f);
                 }
             }
         

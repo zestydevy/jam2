@@ -93,6 +93,10 @@ SECTIONS
       build/codesegment.o(.scommon*);
       build/codesegment.o(.bss*);
       build/obj/sprite_menubg.o(.bss*);
+      build/obj/sprite_bigsley.o(.bss*);
+      build/obj/sprite_maraca.o(.bss*);
+      build/obj/sprite_ollie.o(.bss*);
+      build/obj/sprite_minimap.o(.bss*);
       . = ALIGN(0x8);
    }
    END_NOLOAD(code)
@@ -100,6 +104,10 @@ SECTIONS
    BEGIN_SEG(menu_ovl, _codeSegmentBssEnd)
    {
       build/obj/sprite_menubg.o(.data*);
+      build/obj/sprite_bigsley.o(.data*);
+      build/obj/sprite_maraca.o(.data*);
+      build/obj/sprite_ollie.o(.data*);
+      build/obj/sprite_minimap.o(.data*);
       . = ALIGN(2);
    }
    END_SEG(menu_ovl)

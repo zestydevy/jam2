@@ -24,7 +24,7 @@
 #include "../scene/object_info.h"
 #include "../models/ovl/sprites/sp_logo1.h"
 #include "../models/ovl/sprites/sp_logo2.h"
-#include "../models/static/sprites/sprite_minimap.h"
+#include "../models/ovl/sprites/sprite_minimap.h"
 #include "../models/static/sprites/sprite_dot.h"
 #include "../models/static/floor/model_floor.h"
 #include "../models/static/ptcl00/sprite_ptcl00.h"
